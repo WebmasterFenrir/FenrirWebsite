@@ -1,0 +1,133 @@
+    @import url('https://fonts.googleapis.com/css2?family=Cal+Sans&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+    
+    .hero {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 80vh;
+        color: white;
+        text-align: center;
+        padding: 0 1rem;
+        background: linear-gradient(rgba(93,63,211,0.6), rgba(119,119,119,0.6)), url('../public/hero.jpg') center/cover no-repeat;
+    }
+    body {
+  font-family: "Cal Sans", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+        /* Kleuren Fenrir: paars, geel, grijs */
+        :root {
+            --paars: #5d3fd3;
+            --geel: #f7d716;
+            --grijs: #777;
+        }
+
+        /* Navigatie */
+        nav {
+            background-color: var(--paars);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--geel);
+        }
+
+        /* Hero sectie
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 80vh;
+            background: linear-gradient(to bottom right, var(--paars), var(--grijs));
+            color: white;
+            text-align: center;
+            padding: 0 1rem;
+        } */
+
+        main h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        main p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .cta-button {
+            background-color: var(--geel);
+            color: var(--paars);
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .cta-button:hover {
+            transform: scale(1.05);
+            background-color: #e6c900;
+        }
+
+        /* Waarom sectie */
+        .why {
+            padding: 4rem 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .why h2 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: var(--paars);
+        }
+
+        .why ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            text-align: left;
+        }
+
+        .why li {
+            background-color: #2a2a2a;
+            padding: 1rem 1.5rem;
+            border-left: 6px solid var(--paars);
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .why li strong {
+            color: var(--paars);
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--grijs);
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        footer a {
+            color: var(--geel);
+            text-decoration: none;
+            font-weight: bold;
+        }
