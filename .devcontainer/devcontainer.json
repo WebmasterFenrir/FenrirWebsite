@@ -1,0 +1,13 @@
+{
+  "name": "Debian with Latest Java, Node.js & TypeScript",
+
+  "image": "mcr.microsoft.com/devcontainers/base:debian",
+
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {},
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/devcontainers-community/npm-features/typescript:1": {}
+  },
+
+  "postCreateCommand": "java -version && node -v && tsc -v"
+}
