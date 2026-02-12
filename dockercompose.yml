@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy:alpine
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - certs:/etc/nginx/certs
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    restart: unless-stopped
+
+  letsencrypt:
+    image: nginxproxy/acme-companion
+    depends_on:
+      - nginx-proxy
+    environment:
+      DEFAULT_EMAIL: webmaster@fenrirclub.be
+    volumes:
+      - certs:/etc/nginx/certs
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+
+  site:
+    image: nginx:stable
+    volumes:
+      - ./html:/usr/share/nginx/html:ro
+    environment:
+      VIRTUAL_HOST: fenrirclub.be,www.fenrirclub.be
+      LETSENCRYPT_HOST: fenrirclub.be,www.fenrirclub.be
+      LETSENCRYPT_EMAIL: webmaster@fenrirclub.be
+      HTTPS_METHOD: redirect
+    restart: unless-stopped
+
+volumes:
+  certs:
+  vhost:
+  html:
