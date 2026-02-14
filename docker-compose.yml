@@ -8,37 +8,50 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - certs:/etc/nginx/certs
+      - certs:/etc/nginx/certs:ro
       - vhost:/etc/nginx/vhost.d
       - html:/usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - proxy-net
     restart: unless-stopped
 
   letsencrypt:
     image: nginxproxy/acme-companion
+    container_name: letsencrypt-companion
     depends_on:
       - nginx-proxy
     environment:
-      DEFAULT_EMAIL: webmaster@fenrirclub.be
+      - DEFAULT_EMAIL=webmaster@fenrirclub.be
+      - NGINX_PROXY_CONTAINER=nginx-proxy
     volumes:
-      - certs:/etc/nginx/certs
+      - certs:/etc/nginx/certs:rw
       - vhost:/etc/nginx/vhost.d
       - html:/usr/share/nginx/html
+      - acme:/etc/acme.sh
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - proxy-net
     restart: unless-stopped
 
   site:
-    image: nginx:stable
-    volumes:
-      - ./html:/usr/share/nginx/html:ro
+    build: .
+    container_name: fenrir-site
+    expose:
+      - "80"
     environment:
-      VIRTUAL_HOST: fenrirclub.be,www.fenrirclub.be
-      LETSENCRYPT_HOST: fenrirclub.be,www.fenrirclub.be
-      LETSENCRYPT_EMAIL: webmaster@fenrirclub.be
-      HTTPS_METHOD: redirect
+      - VIRTUAL_HOST=fenrirclub.be,www.fenrirclub.be
+      - LETSENCRYPT_HOST=fenrirclub.be,www.fenrirclub.be
+      - LETSENCRYPT_EMAIL=webmaster@fenrirclub.be
+    networks:
+      - proxy-net
     restart: unless-stopped
+
+networks:
+  proxy-net:
 
 volumes:
   certs:
   vhost:
   html:
+  acme:
