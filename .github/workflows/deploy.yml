@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     # Define your variables here
     env:
-      PROJECT_PATH: "/var/www/my-awesome-app" 
+      PROJECT_PATH: "/root/FenrirWebsite" 
       
     steps:
       - name: Execute remote commands via SSH
