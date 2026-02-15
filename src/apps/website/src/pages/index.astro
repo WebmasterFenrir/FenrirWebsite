@@ -1,26 +1,32 @@
 ---
 import '../styles/global.css';
 // Component Imports
-import Button from '../components/Button.astro';
+import { Button } from '../components/ui/button';
+import MainLayout from '@/layouts/main.astro';
 
 // Full Astro Component Syntax:
 // https://docs.astro.build/basics/astro-components/
 ---
-
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro + TailwindCSS</title>
-	</head>
-
-	<body>
-		<div class="grid place-items-center h-screen content-center">
-			<Button>Tailwind Button in Astro!</Button>
-			<a href="/markdown-page" class="p-4 underline">Markdown is also supported...</a>
+<style>
+	.hero{
+		background: linear-gradient(rgba(93,63,211,0.6), rgb(12, 10, 9)), url('../../public/images/hero.jpg') center/cover no-repeat;
+	}
+</style>
+<MainLayout title="Fenrir Antwerpen">
+		<div class="grid place-items-center h-screen content-center hero">
+			<h1 class="text-8xl text-white font-bold">Fenrir Antwerpen</h1>
+			<h2 class="text-4xl mt-5 text-white font-medium">De vriendelijkste club van Antwerpen!</h2>
+			<span class="flex gap-4 mt-4">
+				<Button variant="default" className='mt-2 p-8 text-4xl'>Word lid!</Button>
+				<Button className='mt-2 p-8 text-4xl' variant="secondary">Lees meer</Button>
+			</span>
 		</div>
-	</body>
-</html>
+		<div>
+			<p class="text-accent">dasdsad</p>
+			<p>dasdsad</p>
+			<p>dasdsad</p>
+			<p>dasdsad</p>
+			<p>dasdsad</p>
+			<p>dasdsad</p>
+		</div>
+</MainLayout>
