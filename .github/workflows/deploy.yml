@@ -1,0 +1,30 @@
+name: Remote Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Define your variables here
+    env:
+      PROJECT_PATH: "/var/www/my-awesome-app" 
+      
+    steps:
+      - name: Execute remote commands via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          # We pass the env variable into the SSH script scope
+          envs: PROJECT_PATH
+          script: |
+            echo "Deploying to $PROJECT_PATH"
+            cd $PROJECT_PATH || { echo "Directory not found"; exit 1; }
+            
+            sudo docker compose down
+            git pull origin main
+            sudo docker compose up -d --build
