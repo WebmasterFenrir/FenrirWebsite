@@ -1,11 +1,8 @@
 ---
 import '../styles/global.css';
-// Component Imports
 import { Button } from '../components/ui/button';
 import MainLayout from '@/layouts/main.astro';
-
-// Full Astro Component Syntax:
-// https://docs.astro.build/basics/astro-components/
+import ContextLayout from '@/layouts/context.astro'
 ---
 <style>
 	.hero{
@@ -21,16 +18,19 @@ import MainLayout from '@/layouts/main.astro';
 				<Button className='mt-2 p-8 text-4xl' variant="secondary">Lees meer</Button>
 			</span>
 		</div>
-		<div class="flex gap-4 content-center w-1/2" id="welcomesectiom">
-			<img src="../../images/schild.png">
-			<div>
-				<h1 class="font-bold text-4xl mb-4 text-accent">Bij Fenrir zit je goed!</h1>	
-				<h2 class="font-medium text-2xl">De studentenclub waar vriendschap en gezelligheid voorop staan. Klein van omvang, maar groot in sfeer en saamhorigheid.</h2>
-				<p>Wij zijn studentenvereninging Fenrir, een toffe gezellige vereniging verbonden aan Karel de Grote hogeschool. We nemen je mee in het Antwerps studentleven. Ontmoet vrienden voor het leven, maak de gekste avonturen mee, ontdek Antwerpen en geniet van het studentenleven. </p>
-				<p>Wekelijks organiseren we verschillende activiteiten zoals onder andere feestjes, cultuuractiviteiten en sport</p>
-				<p>Kom erbij en geniet van je studentenleven! Dansen, lachen, brullen, gieren,… dat beleef je met Fenir!</p>
+		<ContextLayout>
+			<div class="flex gap-4 content-center" id="welcomesectiom">
+				<img src="../../images/schild.png">
+				<div>
+					<h1 class="font-bold text-4xl mb-4 text-accent">Bij Fenrir zit je goed!</h1>	
+					<h2 class="font-medium text-2xl mb-4">De studentenclub waar vriendschap en gezelligheid voorop staan. Klein van omvang, maar groot in sfeer en saamhorigheid.</h2>
+					<p class="mb-4">Wij zijn studentenvereninging Fenrir, een toffe gezellige vereniging verbonden aan Karel de Grote hogeschool. We nemen je mee in het Antwerps studentleven. Ontmoet vrienden voor het leven, maak de gekste avonturen mee, ontdek Antwerpen en geniet van het studentenleven. </p>
+					<p class="mb-4">Wekelijks organiseren we verschillende activiteiten zoals onder andere feestjes, cultuuractiviteiten en sport</p>
+					<p class="mb-4">Kom erbij en geniet van je studentenleven! Dansen, lachen, brullen, gieren,… dat beleef je met Fenir!</p>
+				</div>
 			</div>
-			
-
-		</div>
+			<div>
+				
+			</div>
+		</ContextLayout>
 </MainLayout>
