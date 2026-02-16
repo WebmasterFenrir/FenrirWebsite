@@ -1,12 +1,12 @@
 # Stage 1: Prune the monorepo
-FROM oven/bun:stable AS pruner
+FROM oven/bun:latest AS pruner
 WORKDIR /app
 COPY . .
 # This generates a sparse /app/out directory with only what's needed for 'website'
 RUN bunx turbo prune website --docker
 
 # Stage 2: Build the project
-FROM oven/bun:stable AS builder
+FROM oven/bun:latest AS builder
 WORKDIR /app
 
 # Copy pruned lockfiles and package.json
