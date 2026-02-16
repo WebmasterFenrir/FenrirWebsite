@@ -6,14 +6,15 @@ website fenrir
 This project uses Docker Compose to orchestrate multiple services:
 
 - **nginx-proxy**: Reverse proxy with automatic SSL/TLS certificate generation
-- **PocketBase**: Backend service and admin dashboard
+- **PocketBase**: Backend service with admin dashboard
 - **Site**: Main Fenrir website
 
 ## PocketBase Admin Dashboard
 
 The PocketBase admin dashboard is accessible at:
-- Production: `https://pocketbase.fenrirclub.be/admin`
-- The dashboard was previously at `/_/` but has been moved to `/admin` for better accessibility
+- Production: `https://admin.fenrirclub.be/`
+
+**Note:** The API endpoints are NOT exposed to the outside. They are only accessible internally within the Docker network.
 
 ### Configuration
 
@@ -23,11 +24,6 @@ PocketBase is configured via environment variables in a `.env` file (not committ
 PB_ADMIN_EMAIL=your-email@example.com
 PB_ADMIN_PASSWORD=your-secure-password
 ```
-
-### API Access
-
-The PocketBase API is available at:
-- `https://pocketbase.fenrirclub.be/api/`
 
 ## Deployment
 

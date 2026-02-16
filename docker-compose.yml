@@ -10,7 +10,7 @@ services:
       - vhost:/etc/nginx/vhost.d
       - html:/usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
-      - ./nginx-config/pocketbase.fenrirclub.be:/etc/nginx/vhost.d/pocketbase.fenrirclub.be:ro
+      - ./nginx-config/admin.fenrirclub.be:/etc/nginx/vhost.d/admin.fenrirclub.be:ro
     networks:
       - proxy-net
     restart: unless-stopped
@@ -54,8 +54,8 @@ services:
       PB_ADMIN_EMAIL: ${PB_ADMIN_EMAIL}
       PB_ADMIN_PASSWORD: ${PB_ADMIN_PASSWORD}
       TZ: Europe/Berlin
-      VIRTUAL_HOST: pocketbase.fenrirclub.be
-      LETSENCRYPT_HOST: pocketbase.fenrirclub.be
+      VIRTUAL_HOST: admin.fenrirclub.be
+      LETSENCRYPT_HOST: admin.fenrirclub.be
       LETSENCRYPT_EMAIL: webmaster@fenrirclub.be
     expose:
       - "3000"
