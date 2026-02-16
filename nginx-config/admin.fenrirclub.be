@@ -5,7 +5,8 @@
 # Proxy root path to PocketBase admin dashboard
 location / {
     # Rewrite / to /_/ and preserve the rest of the path
-    rewrite ^(.*)$ /_/$1 break;
+    # This ensures / → /_/ and /settings → /_/settings (not /_//settings)
+    rewrite ^/(.*)$ /_/$1 break;
     
     # Proxy to PocketBase container
     proxy_pass http://pocketbase:3000;
