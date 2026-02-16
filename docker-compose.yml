@@ -9,7 +9,6 @@ services:
       - certs:/etc/nginx/certs:ro
       - vhost:/etc/nginx/vhost.d
       - html:/usr/share/nginx/html
-      - ./nginx-custom.conf:/etc/nginx/conf.d/custom.conf:ro  # Custom config
       - /var/run/docker.sock:/tmp/docker.sock:ro
     networks:
       - proxy-net
@@ -50,17 +49,15 @@ services:
     image: ghcr.io/muchobien/pocketbase:latest
     container_name: pocketbase
     environment:
-      - PB_PORT=3000
-      - PB_ADMIN_EMAIL=${PB_ADMIN_EMAIL}
-      - PB_ADMIN_PASSWORD=${PB_ADMIN_PASSWORD}
-      - TZ=Europe/Berlin
-      # Removed VIRTUAL_HOST and LETSENCRYPT_HOST - not exposed directly
+      PB_PORT: 3000
+      PB_ADMIN_EMAIL: ${PB_ADMIN_EMAIL}
+      PB_ADMIN_PASSWORD: ${PB_ADMIN_PASSWORD}
+      TZ: Europe/Berlin
+    ports:
+      - "3000:3000"
     volumes:
       - ./pb_data:/pb_data
     restart: unless-stopped
-    networks:
-      - proxy-net
-    # No ports exposed to host, only internal network
 
 networks:
   proxy-net:
