@@ -1,26 +1,36 @@
 ---
 import '../styles/global.css';
-// Component Imports
-import Button from '../components/Button.astro';
-
-// Full Astro Component Syntax:
-// https://docs.astro.build/basics/astro-components/
+import { Button } from '../components/ui/button';
+import MainLayout from '@/layouts/main.astro';
+import ContextLayout from '@/layouts/context.astro'
 ---
-
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro + TailwindCSS</title>
-	</head>
-
-	<body>
-		<div class="grid place-items-center h-screen content-center">
-			<Button>Tailwind Button in Astro!</Button>
-			<a href="/markdown-page" class="p-4 underline">Markdown is also supported...</a>
+<style>
+	.hero{
+		background: linear-gradient(rgba(93,63,211,0.6), rgb(12, 10, 9)), url('../../images/hero.jpg') center/cover no-repeat;
+	}
+</style>
+<MainLayout title="Fenrir Antwerpen">
+		<div class="grid place-items-center h-screen content-center hero">
+			<h1 class="text-8xl text-white font-bold">Fenrir Antwerpen</h1>
+			<h2 class="text-4xl mt-5 text-white font-medium">De vriendelijkste club van Antwerpen!</h2>
+			<span class="flex gap-4 mt-4">
+				<Button variant="default" className='mt-2 p-8 text-4xl'>Word lid!</Button>
+				<Button className='mt-2 p-8 text-4xl' variant="secondary">Lees meer</Button>
+			</span>
 		</div>
-	</body>
-</html>
+		<ContextLayout>
+			<div class="flex gap-4 content-center" id="welcomesectiom">
+				<img src="../../images/schild.png">
+				<div>
+					<h1 class="font-bold text-4xl mb-4 text-accent">Bij Fenrir zit je goed!</h1>	
+					<h2 class="font-medium text-2xl mb-4">De studentenclub waar vriendschap en gezelligheid voorop staan. Klein van omvang, maar groot in sfeer en saamhorigheid.</h2>
+					<p class="mb-4">Wij zijn studentenvereninging Fenrir, een toffe gezellige vereniging verbonden aan Karel de Grote hogeschool. We nemen je mee in het Antwerps studentleven. Ontmoet vrienden voor het leven, maak de gekste avonturen mee, ontdek Antwerpen en geniet van het studentenleven. </p>
+					<p class="mb-4">Wekelijks organiseren we verschillende activiteiten zoals onder andere feestjes, cultuuractiviteiten en sport</p>
+					<p class="mb-4">Kom erbij en geniet van je studentenleven! Dansen, lachen, brullen, gieren,… dat beleef je met Fenir!</p>
+				</div>
+			</div>
+			<div>
+				
+			</div>
+		</ContextLayout>
+</MainLayout>

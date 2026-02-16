@@ -1,15 +1,18 @@
 ---
 import '../styles/global.css';
-const { content } = Astro.props;
+const { title } = Astro.props;
 ---
 
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<title>{content.title}</title>
+		<link rel="icon" type="image" href="/icon.png" />
+		<!-- <link rel="icon" href="/favicon.ico" /> -->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@400..900&display=swap" rel="stylesheet">
+		<title>{title}</title>
 	</head>
 	<body>
 		<slot />
