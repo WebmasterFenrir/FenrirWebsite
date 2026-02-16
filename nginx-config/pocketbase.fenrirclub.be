@@ -16,7 +16,8 @@ location /api/ {
 }
 
 # Proxy admin dashboard from /admin to /_/
-location /admin {
+# This regex handles both /admin and /admin/... paths
+location ~ ^/admin(/.*)?$ {
     # Rewrite /admin to /_/ and preserve the rest of the path
     rewrite ^/admin(.*)$ /_/$1 break;
     
@@ -33,17 +34,3 @@ location /admin {
     proxy_set_header Connection "upgrade";
 }
 
-# Also proxy /admin/ (with trailing slash)
-location /admin/ {
-    rewrite ^/admin/(.*)$ /_/$1 break;
-    
-    proxy_pass http://pocketbase:3000;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-    
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "upgrade";
-}
