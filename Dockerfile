@@ -1,29 +1,23 @@
-# Stage 1: Prune the monorepo
-FROM oven/bun:latest AS pruner
-WORKDIR /app
-
-# Copy the contents of your 'src' folder into the root of /app
-COPY ./src .
-
-# Now turbo will find package.json exactly where it expects it
-RUN bunx turbo prune website --docker
-
-# Stage 2: Build the project
+# Stage 1: Build
 FROM oven/bun:latest AS builder
 WORKDIR /app
 
-COPY --from=pruner /app/out/json/ .
+# 1. Copy the entire 'src' folder (contains package.json, turbo.json, and all apps/packages)
+COPY ./src .
+
+# 2. Install all dependencies
 RUN bun install
 
-COPY --from=pruner /app/out/full/ .
-# Note: In your repo, 'website' is under 'apps/website'
+# 3. Build the website
+# This will now find all relative files (like that types folder)
 RUN bun run build --filter=website
 
-# Stage 3: Serve with Nginx
+# Stage 2: Serve
 FROM nginx:alpine
 RUN rm -rf /usr/share/nginx/html/*
 
-# Based on your repo structure, the build output will be here:
+# Copy from the builder stage
+# Path: /app (WORKDIR) + apps/website/dist
 COPY --from=builder /app/apps/website/dist /usr/share/nginx/html
 
 EXPOSE 80
