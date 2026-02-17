@@ -3,19 +3,45 @@ import '../styles/global.css';
 import { Button } from '../components/ui/button';
 import MainLayout from '@/layouts/main.astro';
 import ContextLayout from '@/layouts/context.astro'
+import SponsorList from '@/components/SponsorList';
+import type { Sponsors } from '../../../types';
+import SectionHeader from '@/components/ui/sectionHeader';
+
+const data : Sponsors[] = [
+	{
+		startYear : 2025,
+		endYear : 2026, 
+		list : [
+			{name : "BDO", 
+			content : ["BDO is een internationale organisatie in accountancy en advies. Met diensten zoals audit, belastingadvies en consultancy ondersteunen zij ondernemers bij duurzame groei.",
+				"BDO investeert daarnaast sterk in jongeren via stages, traineeships en opleidingsprogramma’s, en biedt jong talent alle kansen om zich professioneel te ontwikkelen.",
+				"Wij zijn trots dat BDO dit jaar onze jaarsponsor is!"
+			], 
+			image : "bdo.png"
+			},
+			{name : "AH Peeters Govers", 
+			content : ["AH Peeters-Govers is een trotse Albert Heijn-franchisepartner met meerdere winkels in de regio. Dagelijks zetten zij zich in om klanten te voorzien van verse producten, kwaliteit en uitstekende service.", "Met hun betrokkenheid bij de lokale gemeenschap en steun aan verenigingen en initiatieven maken zij echt het verschil. Wij zijn dan ook erg dankbaar voor hun steun als jaarsponsor!"], 
+			image : "ah.png"
+			}
+		]
+	}
+]
 ---
 <style>
 	.hero{
 		background: linear-gradient(rgba(93,63,211,0.6), rgb(12, 10, 9)), url('../../images/hero.jpg') center/cover no-repeat;
 	}
+	@media screen and (width : 500px) {
+		
+	}
 </style>
 <MainLayout title="Fenrir Antwerpen">
 		<div class="grid place-items-center h-screen content-center hero">
-			<h1 class="text-8xl text-white font-bold">Fenrir Antwerpen</h1>
-			<h2 class="text-4xl mt-5 text-white font-medium">De vriendelijkste club van Antwerpen!</h2>
-			<span class="flex gap-4 mt-4">
-				<Button variant="default" className='mt-2 p-8 text-4xl'>Word lid!</Button>
-				<Button className='mt-2 p-8 text-4xl' variant="secondary">Lees meer</Button>
+			<h1 class="text-4xl sm:text-6xl lg:text-8xl text-white font-bold">Fenrir Antwerpen</h1>
+			<h2 class="text-lg sm:text-2xl lg:text-4xl mt-5 text-white font-medium">De vriendelijkste club van Antwerpen!</h2>
+			<span class="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-4">
+				<a href="https://docs.google.com/forms/d/e/1FAIpQLSdaEL-QgBllK1SMC0Ckwrr98dDxFbch5TijesD71YsS8t5g4g/viewform?usp=sharing&ouid=100528290258116040611"><Button variant="default" className='w-full sm:w-auto p-4 sm:p-6 lg:p-8 text-xl sm:text-2xl lg:text-4xl'>Word lid!</Button></a>
+				<a href="https://youtu.be/Aq5WXmQQooo?si=HJOFOyO3RdDx8iW1" target="_blank"><Button className='w-full sm:w-auto p-4 sm:p-6 lg:p-8 text-xl sm:text-2xl lg:text-4xl' variant="secondary">Lees meer</Button></a>
 			</span>
 		</div>
 		<ContextLayout>
@@ -34,7 +60,7 @@ import ContextLayout from '@/layouts/context.astro'
             "
         >
 
-        <div class="max-w-2xl text-center md:text-left">
+       			<div class="max-w-2xl text-center md:text-left">
 					<h1 class="font-bold text-4xl mb-4 text-accent">Bij Fenrir zit je goed!</h1>	
 					<h2 class="font-medium text-2xl mb-4">De studentenclub waar vriendschap en gezelligheid voorop staan. Klein van omvang, maar groot in sfeer en saamhorigheid.</h2>
 					<p class="mb-4">Wij zijn studentenvereninging Fenrir, een toffe gezellige vereniging verbonden aan Karel de Grote hogeschool. We nemen je mee in het Antwerps studentleven. Ontmoet vrienden voor het leven, maak de gekste avonturen mee, ontdek Antwerpen en geniet van het studentenleven. </p>
@@ -42,8 +68,12 @@ import ContextLayout from '@/layouts/context.astro'
 					<p class="mb-4">Kom erbij en geniet van je studentenleven! Dansen, lachen, brullen, gieren,… dat beleef je met Fenir!</p>
 				</div>
 			</div>
-			<div>
-				
-			</div>
+				<div class="mb-20 md:mb-30"></div>
+	<section class="mt-20 md:mt-32 px-4 max-w-6xl mx-auto">
+    <SectionHeader label='sponsor' title='Onze Sponsors' description='Dankzij deze partners kunnen we onze werking verder uitbouwen en onze studenten blijven ondersteunen.'/>
+    <div class="w-full">
+        <SponsorList data={data}/>
+    </div>
+</section>
 		</ContextLayout>
 </MainLayout>
