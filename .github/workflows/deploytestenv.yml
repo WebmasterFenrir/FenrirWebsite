@@ -1,0 +1,36 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ test-env ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Connect runner to Tailscale
+      - name: Tailscale
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+          version: latest
+
+      # Deploy to server
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Deploy
+        run: |
+          sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TS_USER }}@${{ secrets.TS_HOST }} "
+          cd /home/${{ secrets.TS_USER }}/FenrirWebsite/
+          git pull
+          docker build -t fenrirwebsite_dev .
+          docker stop fenrirwebsite_dev || true
+          docker rm fenrirwebsite_dev || true
+          docker run -d --name fenrirwebsite_dev -p 3460:80 fenrirwebsite_dev:latest
+          "
