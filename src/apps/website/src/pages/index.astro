@@ -4,28 +4,10 @@ import { Button } from '../components/ui/button';
 import MainLayout from '@/layouts/main.astro';
 import ContextLayout from '@/layouts/context.astro'
 import SponsorList from '@/components/SponsorList';
-import type { Sponsors } from '../../../types';
+import { SponsorData } from '../../../data';
 import SectionHeader from '@/components/ui/sectionHeader';
-
-const data : Sponsors[] = [
-	{
-		startYear : 2025,
-		endYear : 2026, 
-		list : [
-			{name : "BDO", 
-			content : ["BDO is een internationale organisatie in accountancy en advies. Met diensten zoals audit, belastingadvies en consultancy ondersteunen zij ondernemers bij duurzame groei.",
-				"BDO investeert daarnaast sterk in jongeren via stages, traineeships en opleidingsprogramma’s, en biedt jong talent alle kansen om zich professioneel te ontwikkelen.",
-				"Wij zijn trots dat BDO dit jaar onze jaarsponsor is!"
-			], 
-			image : "bdo.png"
-			},
-			{name : "AH Peeters Govers", 
-			content : ["AH Peeters-Govers is een trotse Albert Heijn-franchisepartner met meerdere winkels in de regio. Dagelijks zetten zij zich in om klanten te voorzien van verse producten, kwaliteit en uitstekende service.", "Met hun betrokkenheid bij de lokale gemeenschap en steun aan verenigingen en initiatieven maken zij echt het verschil. Wij zijn dan ook erg dankbaar voor hun steun als jaarsponsor!"], 
-			image : "ah.png"
-			}
-		]
-	}
-]
+import PreasidiumLidPrevieuw from '@/components/PreasidiumLidComponent';
+import PreasidiumPrevieuwHomePage from '@/components/PreasidiumPrevieuwHomePage';
 ---
 <style>
 	.hero{
@@ -45,7 +27,7 @@ const data : Sponsors[] = [
 			</span>
 		</div>
 		<ContextLayout>
-<div class="max-w-5xl mx-auto px-6 sm:px-8 py-10">
+<div class="mx-auto px-6 sm:px-8 py-10">
     <div class="flex flex-col md:flex-row md:items-stretch gap-6" id="welcomesectiom">
 
         <img
@@ -60,7 +42,8 @@ const data : Sponsors[] = [
             "
         >
 
-       			<div class="max-w-2xl text-center md:text-left">
+			<div class="flex content-center place-items-center">
+       			<div class="text-center md:text-left">
 					<h1 class="font-bold text-4xl mb-4 text-accent">Bij Fenrir zit je goed!</h1>	
 					<h2 class="font-medium text-2xl mb-4">De studentenclub waar vriendschap en gezelligheid voorop staan. Klein van omvang, maar groot in sfeer en saamhorigheid.</h2>
 					<p class="mb-4">Wij zijn studentenvereninging Fenrir, een toffe gezellige vereniging verbonden aan Karel de Grote hogeschool. We nemen je mee in het Antwerps studentleven. Ontmoet vrienden voor het leven, maak de gekste avonturen mee, ontdek Antwerpen en geniet van het studentenleven. </p>
@@ -68,12 +51,17 @@ const data : Sponsors[] = [
 					<p class="mb-4">Kom erbij en geniet van je studentenleven! Dansen, lachen, brullen, gieren,… dat beleef je met Fenir!</p>
 				</div>
 			</div>
+			</div>
 				<div class="mb-20 md:mb-30"></div>
-	<section class="mt-20 md:mt-32 px-4 max-w-6xl mx-auto">
-    <SectionHeader label='sponsor' title='Onze Sponsors' description='Dankzij deze partners kunnen we onze werking verder uitbouwen en onze studenten blijven ondersteunen.'/>
+	<section class="mt-20 md:mt-32 px-4 mx-auto">
+    <SectionHeader title='Onze Sponsors' description='Dankzij deze partners kunnen we onze werking verder uitbouwen en onze studenten blijven ondersteunen.'/>
     <div class="w-full">
-        <SponsorList data={data}/>
+        <SponsorList data={SponsorData}/>
     </div>
+	<SectionHeader title='Huidig Preasidium' description='Het preasidium is het kloppend hart van fenrir dat elk evenemt zijn best doet om er weer een geweldige tijd van te maken.'/>
+	<div>
+		<PreasidiumPrevieuwHomePage/>
+	</div>
 </section>
 		</ContextLayout>
 </MainLayout>

@@ -1,10 +1,9 @@
 interface SectionHeaderProps {
-  label: string;       // e.g., "Partners"
   title: string;       // e.g., "Onze Sponsors"
   description: string; // The supporting text
 }
 
-export default function SectionHeader({ label, title, description }: SectionHeaderProps) {
+export default function SectionHeader({ title, description }: SectionHeaderProps) {
   const words = title.split(" ");
   const hasMultipleWords = words.length > 1;
   
@@ -30,7 +29,7 @@ export default function SectionHeader({ label, title, description }: SectionHead
         </div>
         
         {/* Description - Removed the border on mobile to save horizontal space */}
-        <div className="max-w-md">
+        <div className="w-1/2">
           <p className="text-zinc-400 text-sm md:text-lg leading-relaxed border-l-2 md:border-zinc-800 pl-4 md:pl-6 py-1">
             {description}
           </p>

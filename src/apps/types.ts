@@ -19,21 +19,23 @@ export interface PreasidiumLid {
     lastName : string
     birthdate : string
     description : string
-    yearId : YearId[]
+    yearIds : YearId[]
     preasidiumRols : PreasidiumRolInWhatYear[]
 }
 
 export interface PreasidiumYear {
-    startDate : Date
-    endDate : Date
+    id : number
+    startDate : string
+    endDate : string
     PreasidiumLeden : PreasidiumLid[]
+    PreasidiumLedenIds : number[]
 }
 
 interface PreasidiumRolInWhatYear {
     role : PreasidiumRol
-    year : number
+    year : StartandEndYear
 }
 
-export interface PreasidiumRol {
-    role : string
-}
+type StartandEndYear = `${number} - ${number}`;
+
+type PreasidiumRol = string
