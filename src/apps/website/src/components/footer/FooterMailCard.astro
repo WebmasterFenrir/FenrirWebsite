@@ -1,0 +1,15 @@
+---
+import FooterLinkCard from "@/components/footer/FooterLinkCard.astro";
+
+interface Props {
+  email: string;
+  label?: string;
+  title?: string;
+  hint?: string;
+}
+
+const { email, label = "Contact", title = "Webmaster", hint = email } = Astro.props as Props;
+const mailHref = `mailto:${email}`;
+---
+
+<FooterLinkCard label={label} title={title} hint={hint} href={mailHref} />

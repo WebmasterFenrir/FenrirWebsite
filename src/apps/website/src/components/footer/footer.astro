@@ -1,7 +1,26 @@
 ---
 import GitHubContributors from "@/components/footer/ContributorList.astro";
+import FooterBottomBar from "@/components/footer/FooterBottomBar.astro";
+import FooterSectionTitle from "@/components/footer/FooterSectionTitle.astro";
+import FooterSocialLinks from "@/components/footer/FooterSocialLinks.astro";
+import FooterMailCard from "@/components/footer/FooterMailCard.astro";
 
 const year = new Date().getFullYear();
+
+const socialLinks = [
+  {
+    label: "Social",
+    title: "Facebook",
+    hint: "Follow us",
+    href: "https://www.facebook.com/fenrir.antwerpen",
+  },
+  {
+    label: "Social",
+    title: "Instagram",
+    hint: "Follow us",
+    href: "https://www.instagram.com/fenrirclub",
+  }
+];
 ---
 
 <footer class="relative mt-1 text-zinc-300">
@@ -10,88 +29,16 @@ const year = new Date().getFullYear();
     aria-hidden="true"
   />
   <div class="relative mx-auto flex max-w-6xl flex-col gap-12 px-6 py-16 lg:flex-row lg:items-start lg:justify-between">
-    <div class="max-w-sm space-y-5">
-      <p class="text-[10px] font-black uppercase tracking-[0.4em] text-yellow-400">Fenrir Club</p>
-      <h2 class="text-3xl font-semibold tracking-tight text-white">Stay in the loop</h2>
-      <p class="text-sm text-zinc-400">
-        Follow us online for announcements, events, and stories from our members.
-      </p>
-    </div>
-    <nav class="grid max-w-md gap-4 text-sm font-semibold text-white sm:grid-cols-2">
-      <a
-        class="group relative overflow-hidden rounded-2xl border border-transparent bg-zinc-900/40 text-white shadow-lg transition-all duration-300 hover:border-purple-400/30 hover:shadow-purple-500/20"
-        href="https://www.facebook.com/fenrirclub"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_60%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-        <div class="relative flex flex-col gap-2 px-5 py-6">
-          <p class="text-[10px] font-black uppercase tracking-[0.4em] text-yellow-400">Social</p>
-          <span class="text-xl font-semibold tracking-tight">Facebook</span>
-          <span class="text-xs uppercase tracking-[0.2em] text-zinc-400">Follow us</span>
-        </div>
-      </a>
-      <a
-        class="group relative overflow-hidden rounded-2xl border border-transparent bg-zinc-900/40 text-white shadow-lg transition-all duration-300 hover:border-purple-400/30 hover:shadow-purple-500/20"
-        href="https://www.instagram.com/fenrirclub"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_60%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-        <div class="relative flex flex-col gap-2 px-5 py-6">
-          <p class="text-[10px] font-black uppercase tracking-[0.4em] text-yellow-400">Social</p>
-          <span class="text-xl font-semibold tracking-tight">Instagram</span>
-          <span class="text-xs uppercase tracking-[0.2em] text-zinc-400">Follow us</span>
-        </div>
-      </a>
-      <a
-        class="group relative overflow-hidden rounded-2xl border border-transparent bg-zinc-900/40 text-white shadow-lg transition-all duration-300 hover:border-purple-400/30 hover:shadow-purple-500/20"
-        href="https://www.linkedin.com/company/fenrirclub"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_60%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-        <div class="relative flex flex-col gap-2 px-5 py-6">
-          <p class="text-[10px] font-black uppercase tracking-[0.4em] text-yellow-400">Social</p>
-          <span class="text-xl font-semibold tracking-tight">LinkedIn</span>
-          <span class="text-xs uppercase tracking-[0.2em] text-zinc-400">Connect</span>
-        </div>
-      </a>
-      <a
-        class="group relative overflow-hidden rounded-2xl border border-transparent bg-zinc-900/40 text-white shadow-lg transition-all duration-300 hover:border-purple-400/30 hover:shadow-purple-500/20"
-        href="https://www.youtube.com/@fenrirclub"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_60%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-        <div class="relative flex flex-col gap-2 px-5 py-6">
-          <p class="text-[10px] font-black uppercase tracking-[0.4em] text-yellow-400">Social</p>
-          <span class="text-xl font-semibold tracking-tight">YouTube</span>
-          <span class="text-xs uppercase tracking-[0.2em] text-zinc-400">Watch</span>
-        </div>
-      </a>
-    </nav>
+    <FooterSectionTitle
+      label="Fenrir Club"
+      title="Stay in the loop"
+      description="Follow us online for announcements, events, and stories from our members."
+    />
+    <FooterSocialLinks links={socialLinks} />
     <div class="flex max-w-sm flex-col gap-6">
-      <a
-        class="group relative overflow-hidden rounded-2xl border border-transparent bg-zinc-900/40 text-white shadow-lg transition-all duration-300 hover:border-purple-400/30 hover:shadow-purple-500/20"
-        href="mailto:webmaster@fenrirclub.be"
-      >
-        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_60%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-        <div class="relative flex flex-col gap-2 px-5 py-6">
-          <p class="text-[10px] font-black uppercase tracking-[0.4em] text-yellow-400">Contact</p>
-          <span class="text-xl font-semibold tracking-tight">Webmaster</span>
-          <span class="text-xs uppercase tracking-[0.2em] text-zinc-400">webmaster@fenrirclub.be</span>
-        </div>
-      </a>
+      <FooterMailCard email="webmaster@fenrirclub.be" />
       <GitHubContributors owner="WebmasterFenrir" repo="FenrirWebsite" />
     </div>
   </div>
-  <div class="relative border-t border-purple-500/10 px-6 py-6 text-xs text-zinc-500">
-    <div class="mx-auto flex max-w-6xl flex-col gap-2 text-center uppercase tracking-[0.3em] sm:flex-row sm:items-center sm:justify-between sm:text-left">
-      <span>&copy; {year} Fenrir Club. All rights reserved.</span>
-      <span class="text-zinc-600">
-        Built by the Fenrir Web Team.
-      </span>
-    </div>
-  </div>
+  <FooterBottomBar year={year} />
 </footer>

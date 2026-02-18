@@ -1,0 +1,15 @@
+---
+interface Props {
+  year: number;
+  secondaryText?: string;
+}
+
+const { year, secondaryText = "Built by the Fenrir Web Team." } = Astro.props as Props;
+---
+
+<div class="relative border-t border-purple-500/10 px-6 py-6 text-xs text-zinc-500">
+  <div class="mx-auto flex max-w-6xl flex-col gap-2 text-center uppercase tracking-[0.3em] sm:flex-row sm:items-center sm:justify-between sm:text-left">
+    <span>&copy; {year} Fenrir Club. All rights reserved.</span>
+    <span class="text-zinc-600">{secondaryText}</span>
+  </div>
+</div>
