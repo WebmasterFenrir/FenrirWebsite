@@ -5,11 +5,12 @@ interface SponSorInterface {
     name: string;
     image: string;
     content: string[];
+    url : string;
   };
   variant?: "default" | "reverse";
 }
 
-export default function SponsorComponent({ data, variant = "default" }: SponSorInterface) {
+export default function SponsorComponent({ data,variant = "default" }: SponSorInterface) {
   const isReverse = variant !== "default";
   
   const words = data.name.split(" ");
@@ -31,7 +32,7 @@ export default function SponsorComponent({ data, variant = "default" }: SponSorI
 ];
 
   return (
-    /* We use margin-bottom: 80px (mb-20) to ensure the cards themselves are separated */
+    <a href={data.url} target="_null">
     <Card className="border border-transparent text-white shadow-lg transition-all duration-300 hover:border-purple-400/30 hover:shadow-purple-500/20 overflow-hidden mb-20">
       <CardContent className="p-0">
         <div className={`flex flex-col ${isReverse ? "md:flex-row-reverse" : "md:flex-row"} items-stretch`}>
@@ -76,5 +77,6 @@ export default function SponsorComponent({ data, variant = "default" }: SponSorI
         </div>
       </CardContent>
     </Card>
+    </a>
   );
 }
