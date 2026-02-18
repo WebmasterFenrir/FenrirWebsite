@@ -8,13 +8,11 @@ import { SponsorData } from '../../../data';
 import SectionHeader from '@/components/ui/sectionHeader';
 import PreasidiumLidPrevieuw from '@/components/PreasidiumLidComponent';
 import PreasidiumPrevieuwHomePage from '@/components/PreasidiumPrevieuwHomePage';
+import Spacer from '@/components/ui/spacer';
 ---
 <style>
 	.hero{
 		background: linear-gradient(rgba(93,63,211,0.6), rgb(12, 10, 9)), url('../../images/hero.jpg') center/cover no-repeat;
-	}
-	@media screen and (width : 500px) {
-		
 	}
 </style>
 <MainLayout title="Fenrir Antwerpen">
@@ -28,7 +26,7 @@ import PreasidiumPrevieuwHomePage from '@/components/PreasidiumPrevieuwHomePage'
 		</div>
 		<ContextLayout>
 <div class="mx-auto px-6 sm:px-8 py-10">
-    <div class="flex flex-col md:flex-row md:items-stretch gap-6" id="welcomesectiom">
+    <div class="flex flex-col md:flex-row md:items-stretch gap-6" id="welcomesection">
 
         <img
             src="../../images/schild.png"
@@ -52,16 +50,16 @@ import PreasidiumPrevieuwHomePage from '@/components/PreasidiumPrevieuwHomePage'
 				</div>
 			</div>
 			</div>
-				<div class="mb-20 md:mb-30"></div>
-	<section class="mt-20 md:mt-32 px-4 mx-auto">
-    <SectionHeader title='Onze Sponsors' description='Dankzij deze partners kunnen we onze werking verder uitbouwen en onze studenten blijven ondersteunen.'/>
-    <div class="w-full">
-        <SponsorList data={SponsorData}/>
-    </div>
+	<Spacer/>
 	<SectionHeader title='Huidig Preasidium' description='Het preasidium is het kloppend hart van fenrir dat elk evenemt zijn best doet om er weer een geweldige tijd van te maken.'/>
 	<div>
 		<PreasidiumPrevieuwHomePage/>
 	</div>
-</section>
+	<Spacer/>
+    <SectionHeader title='Onze Sponsors' description='Dankzij deze partners kunnen we onze werking verder uitbouwen en onze studenten blijven ondersteunen.'/>
+    <div class="w-full">
+        <SponsorList data={SponsorData}/>
+    </div>
+
 		</ContextLayout>
 </MainLayout>

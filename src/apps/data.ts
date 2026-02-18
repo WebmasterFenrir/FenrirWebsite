@@ -33,14 +33,14 @@ export const PreasidiumYearsData : PreasidiumYear[] = [
                 birthdate : "12-11-2005",
                 description : "vice-Preases",
                 yearIds : [1],
-                preasidiumRols : [{
-                    role : "vice-preases",
-                    year : "2024 - 2025"
-                },
-            {
+                preasidiumRols : [            {
                     role : "vice-preases",
                     year : "2025 - 2026"
-                }]
+                },{
+                    role : "vice-preases",
+                    year : "2024 - 2025"
+                }
+]
             },
                         { 
                 id : 2,

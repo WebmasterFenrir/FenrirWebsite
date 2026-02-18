@@ -32,7 +32,7 @@ export default function SponsorComponent({ data, variant = "default" }: SponSorI
 
   return (
     /* We use margin-bottom: 80px (mb-20) to ensure the cards themselves are separated */
-    <Card className="bg-zinc-900/40 border-none overflow-hidden mb-20">
+    <Card className="border border-transparent text-white shadow-lg transition-all duration-300 hover:border-purple-400/30 hover:shadow-purple-500/20 overflow-hidden mb-20">
       <CardContent className="p-0">
         <div className={`flex flex-col ${isReverse ? "md:flex-row-reverse" : "md:flex-row"} items-stretch`}>
           

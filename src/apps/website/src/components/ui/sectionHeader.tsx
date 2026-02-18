@@ -29,7 +29,7 @@ export default function SectionHeader({ title, description }: SectionHeaderProps
         </div>
         
         {/* Description - Removed the border on mobile to save horizontal space */}
-        <div className="w-1/2">
+        <div className=" md:w-1/2">
           <p className="text-zinc-400 text-sm md:text-lg leading-relaxed border-l-2 md:border-zinc-800 pl-4 md:pl-6 py-1">
             {description}
           </p>
