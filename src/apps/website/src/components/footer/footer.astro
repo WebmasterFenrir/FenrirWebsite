@@ -1,0 +1,44 @@
+---
+import GitHubContributors from "@/components/footer/ContributorList.astro";
+import FooterBottomBar from "@/components/footer/FooterBottomBar.astro";
+import FooterSectionTitle from "@/components/footer/FooterSectionTitle.astro";
+import FooterSocialLinks from "@/components/footer/FooterSocialLinks.astro";
+import FooterMailCard from "@/components/footer/FooterMailCard.astro";
+
+const year = new Date().getFullYear();
+
+const socialLinks = [
+  {
+    label: "Social",
+    title: "Facebook",
+    hint: "Follow us",
+    href: "https://www.facebook.com/fenrir.antwerpen",
+  },
+  {
+    label: "Social",
+    title: "Instagram",
+    hint: "Follow us",
+    href: "https://www.instagram.com/fenrirclub",
+  }
+];
+---
+
+<footer class="relative mt-1 text-zinc-300">
+  <div
+    class="absolute inset-0 bg-[radial-gradient(circle_at_bottom,rgba(168,85,247,0.15),transparent_65%)]"
+    aria-hidden="true"
+  />
+  <div class="relative mx-auto flex max-w-6xl flex-col gap-12 px-6 py-16 lg:flex-row lg:items-start lg:justify-between">
+    <FooterSectionTitle
+      label="Fenrir Club"
+      title="Stay in the loop"
+      description="Follow us online for announcements, events, and stories from our members."
+    />
+    <FooterSocialLinks links={socialLinks} />
+    <div class="flex max-w-sm flex-col gap-6">
+      <FooterMailCard email="webmaster@fenrirclub.be" />
+      <GitHubContributors owner="WebmasterFenrir" repo="FenrirWebsite" />
+    </div>
+  </div>
+  <FooterBottomBar year={year} />
+</footer>

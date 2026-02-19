@@ -2,6 +2,7 @@ export interface Sponsor {
     name: string
     content: string[]
     image: string
+    url : string
 }
 
 export interface Sponsors {

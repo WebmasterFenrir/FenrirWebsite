@@ -7,7 +7,7 @@ interface SponsorListInterface{
 export default function SponsorList({data} : SponsorListInterface){
     return (
         <>
-            {data[0].list.map((e, i) => <SponsorComponent data={e} variant={i % 2 == 0 ? "default" : "reverse"}></SponsorComponent>)}
+            {data[0].list.map((e, i) => <SponsorComponent data={e} key={i} variant={i % 2 == 0 ? "default" : "reverse"}></SponsorComponent>)}
         </>
     )
-}
+}   

@@ -1,0 +1,28 @@
+---
+interface Props {
+  label: string;
+  title: string;
+  hint: string;
+  href: string;
+  rel?: string;
+}
+
+const { label, title, hint, href, rel } = Astro.props as Props;
+const isExternal = href.startsWith("http") || href.startsWith("mailto:");
+const target = isExternal ? "_blank" : undefined;
+const relAttr = isExternal ? rel ?? "noopener noreferrer" : rel;
+---
+
+<a
+  class="group relative overflow-hidden rounded-2xl border border-transparent bg-zinc-900/40 text-white shadow-lg transition-all duration-300 hover:border-purple-400/30 hover:shadow-purple-500/20"
+  href={href}
+  target={target}
+  rel={relAttr}
+>
+  <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_60%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100 p-4" />
+  <div class="relative flex flex-col gap-2 px-5 py-6">
+    <p class="text-[10px] font-black uppercase tracking-[0.4em] text-yellow-400">{label}</p>
+    <span class="text-xl font-semibold tracking-tight">{title}</span>
+    <span class="text-xs uppercase tracking-[0.2em] text-zinc-400">{hint}</span>
+  </div>
+</a>
