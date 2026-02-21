@@ -12,16 +12,20 @@ services:
     restart: unless-stopped
 
   site:
-    build: .
+    image: oven/bun:1.1.30-alpine
     container_name: fenrir-site-dev
+    working_dir: /workspace/src
+    command: ["sh", "-c", "bun install && bun run dev --filter=website -- --host 0.0.0.0 --port ${WEBSITE_PORT:-3460}"]
     environment:
-      - VIRTUAL_HOST=fenrir.local,www.fenrir.local
+      - VIRTUAL_HOST=fenrir.nilsmertens.dev
+      - VIRTUAL_PORT=${WEBSITE_PORT:-3460}
+    volumes:
+      - .:/workspace
     networks:
       - proxy-net
+    ports:
+      - "${WEBSITE_PORT:-3460}:${WEBSITE_PORT:-3460}"
     restart: unless-stopped
-    volumes:
-      - .:/app
-    command: ["sh", "-c", "npm install && npm run dev -- --host"]
 
   pocketbase:
     image: ghcr.io/muchobien/pocketbase:latest
@@ -35,34 +39,21 @@ services:
       - "3000:3000"
     volumes:
       - ./pb_data:/pb_data
+    networks:
+      - proxy-net
     restart: unless-stopped
 
   feedback-api:
     image: oven/bun:1.1.30-alpine
     container_name: feedback-api-dev
     working_dir: /workspace/src/apps/feedback-api
-    command: ["sh", "-c", "bun run start:${FEEDBACK_MODE:-feedback}"]
+    command: ["sh", "-c", "bun install && bun run start:${FEEDBACK_MODE:-feedback} -- --port ${FEEDBACK_API_PORT:-3000}"]
     environment:
       FEEDBACK_MODE: ${FEEDBACK_MODE:-feedback}
       N8N_WEBHOOK_URL: ${N8N_WEBHOOK_URL:-http://host.docker.internal:5678/webhook/feedback}
       FEEDBACK_API_PORT: ${FEEDBACK_API_PORT:-3000}
     ports:
       - "${FEEDBACK_API_PORT:-3000}:${FEEDBACK_API_PORT:-3000}"
-    volumes:
-      - .:/workspace
-    networks:
-      - proxy-net
-    restart: unless-stopped
-
-  feedback-website:
-    image: node:20-alpine
-    container_name: feedback-website-dev
-    working_dir: /workspace/src/apps/feedback-website
-    command: ["sh", "-c", "npm install -g serve && serve -l ${FEEDBACK_WEBSITE_PORT:-4173} public"]
-    environment:
-      FEEDBACK_WEBSITE_PORT: ${FEEDBACK_WEBSITE_PORT:-4173}
-    ports:
-      - "${FEEDBACK_WEBSITE_PORT:-4173}:${FEEDBACK_WEBSITE_PORT:-4173}"
     volumes:
       - .:/workspace
     networks:
