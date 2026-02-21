@@ -28,7 +28,7 @@ jobs:
         run: |
           sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TS_USER }}@${{ secrets.TS_HOST }} "
           cd /home/${{ secrets.TS_USER }}/FenrirWebsite/
-          git pull
+          git pull origin test-env
           docker build -t fenrirwebsite_dev .
           docker stop fenrirwebsite_dev || true
           docker rm fenrirwebsite_dev || true
