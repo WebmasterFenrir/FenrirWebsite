@@ -29,7 +29,6 @@ jobs:
           sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.TS_USER }}@${{ secrets.TS_HOST }} "
           cd /home/${{ secrets.TS_USER }}/FenrirWebsite/
           git pull origin test-env
-            sudo docker compose -f docker-compose.dev.yml down
-            git pull origin main
-            sudo docker compose -f docker-compose.dev.yml up -d --build
+          docker compose -f docker-compose.dev.yml down
+          docker compose -f docker-compose.dev.yml up -d --build
           "
