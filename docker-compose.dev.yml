@@ -1,67 +1,45 @@
 services:
   nginx-proxy:
     image: nginxproxy/nginx-proxy:alpine
-    container_name: nginx-proxy-dev
+    container_name: nginx-proxy
     ports:
-      - "80:80"
+      - "3460:80"
     volumes:
-      - html-dev:/usr/share/nginx/html
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
     networks:
       - proxy-net
     restart: unless-stopped
 
   site:
-    image: oven/bun:1.1.30-alpine
-    container_name: fenrir-site-dev
-    working_dir: /workspace/src
-    command: ["sh", "-c", "bun install && bun run dev --filter=website -- --host 0.0.0.0 --port ${WEBSITE_PORT:-3460}"]
+    build: .
+    container_name: fenrir-site
+    expose:
+      - "80"
     environment:
-      - VIRTUAL_HOST=fenrir.nilsmertens.dev
-      - VIRTUAL_PORT=${WEBSITE_PORT:-3460}
-    volumes:
-      - .:/workspace
+      - VIRTUAL_HOST=fenrirclub.be,www.fenrirclub.be
     networks:
       - proxy-net
-    ports:
-      - "${WEBSITE_PORT:-3460}:${WEBSITE_PORT:-3460}"
     restart: unless-stopped
 
   pocketbase:
     image: ghcr.io/muchobien/pocketbase:latest
-    container_name: pocketbase-dev
+    container_name: pocketbase
     environment:
       PB_PORT: 3000
-      PB_ADMIN_EMAIL: ${PB_ADMIN_EMAIL:-admin@local.dev}
-      PB_ADMIN_PASSWORD: ${PB_ADMIN_PASSWORD:-password}
+      PB_ADMIN_EMAIL: webmaster@fenrirclub.be
+      PB_ADMIN_PASSWORD: Fenrir123456789!
       TZ: Europe/Berlin
     ports:
-      - "3000:3000"
+      - "3421:3000"
     volumes:
       - ./pb_data:/pb_data
-    networks:
-      - proxy-net
-    restart: unless-stopped
-
-  feedback-api:
-    image: oven/bun:1.1.30-alpine
-    container_name: feedback-api-dev
-    working_dir: /workspace/src/apps/feedback-api
-    command: ["sh", "-c", "bun install && bun run start:${FEEDBACK_MODE:-feedback} -- --port ${FEEDBACK_API_PORT:-3000}"]
-    environment:
-      FEEDBACK_MODE: ${FEEDBACK_MODE:-feedback}
-      N8N_WEBHOOK_URL: ${N8N_WEBHOOK_URL:-http://host.docker.internal:5678/webhook/feedback}
-      FEEDBACK_API_PORT: ${FEEDBACK_API_PORT:-3000}
-    ports:
-      - "${FEEDBACK_API_PORT:-3000}:${FEEDBACK_API_PORT:-3000}"
-    volumes:
-      - .:/workspace
-    networks:
-      - proxy-net
     restart: unless-stopped
 
 networks:
   proxy-net:
 
 volumes:
-  html-dev:
+  vhost:
+  html:
