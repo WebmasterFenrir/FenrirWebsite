@@ -8,7 +8,7 @@ interface Props {
   hint?: string;
 }
 
-const { email, label = "Contact", title = "Webmaster", hint = email } = Astro.props as Props;
+const { email, label = "Contact", title = "info", hint = email } = Astro.props as Props;
 const mailHref = `mailto:${email}`;
 ---
 
