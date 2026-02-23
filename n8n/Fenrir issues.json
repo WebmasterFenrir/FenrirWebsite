@@ -1,0 +1,159 @@
+{
+  "name": "Fenrir issues",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1GkPsGjZPaQRsDHE6n00Bry0cLCKO01BpNGa6S8gqOp4",
+          "mode": "list",
+          "cachedResultName": "Fenrir website issue form (Antwoorden)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GkPsGjZPaQRsDHE6n00Bry0cLCKO01BpNGa6S8gqOp4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 289156332,
+          "mode": "list",
+          "cachedResultName": "Formulierreacties 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GkPsGjZPaQRsDHE6n00Bry0cLCKO01BpNGa6S8gqOp4/edit#gid=289156332"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0069395c-6b75-446f-8867-9ceb3aa210f4",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "O60q2E1bX1las2UP",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "owner": {
+          "__rl": true,
+          "value": "WebmasterFenrir",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "FenrirWebsite",
+          "mode": "list",
+          "cachedResultName": "FenrirWebsite",
+          "cachedResultUrl": "https://github.com/WebmasterFenrir/FenrirWebsite"
+        },
+        "title": "={{ $json['Wat is uw naam?'] }} - {{ $json['wat voor soort issue?'] }}",
+        "body": "={{ $json['beschrijf de issue'] }}",
+        "labels": [
+          {
+            "label": "={{ $json['wat voor soort issue?'].split('(')[0] }}"
+          }
+        ],
+        "assignees": []
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "18e72a73-8339-4eb0-a512-2ac2fe25d44e",
+      "name": "Create an issue",
+      "webhookId": "4183cbd1-07f5-4ff6-898d-683810c26f74",
+      "credentials": {
+        "githubApi": {
+          "id": "GqUexgb3NXa7ugTC",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0da59ae2-5c59-4450-9523-e81ee42f0fc2",
+              "leftValue": "={{ $json['wat voor soort issue?'].split('(')[0] }}",
+              "rightValue": "\"spelling mistake\"",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        160
+      ],
+      "id": "dcd36d1e-9031-455f-9ffd-2ab190f0878a",
+      "name": "If"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Create an issue",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an issue": {
+      "main": [
+        []
+      ]
+    },
+    "If": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a565d37e-6ec1-42ed-9283-fe4f0ba24a7f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8023711550ea986c186ba8312e351465b9ebdf10c0a168822fadf5a9375a4423"
+  },
+  "id": "uULNc04tz6NFvjmU",
+  "tags": []
+}
