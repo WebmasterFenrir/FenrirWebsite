@@ -2,12 +2,17 @@
 import MainLayout from '@/layouts/main.astro';
 import ContextLayout from '@/layouts/context.astro'
 import ImageCarousel from '@/components/carousel/Carousel';
+import Spacer from '@/components/ui/spacer';
 ---
 <MainLayout title="About us">
     <ContextLayout>
-        <div class="mx-auto px-6 sm:px-8 py-10 w-full">
-            <h1 class="text-4xl sm:text-6xl lg:text-8xl text-white font-bold">Over ons</h1>
-            <ImageCarousel client:load />
+        <div class="mx-auto sm:px-8 py-10 w-full">
+            <h1 class="text-6xl sm:text-6xl lg:text-8xl text-white font-bold">Over ons</h1>
+            <Spacer/>
+            <div class="px-10">
+                <ImageCarousel client:load/>
+            </div>
+            
         </div>
     </ContextLayout>
 </MainLayout>
