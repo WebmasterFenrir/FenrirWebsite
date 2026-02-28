@@ -1,5 +1,6 @@
 import type { PreasidiumLid } from "../../../types";
 import { Card, CardContent } from "./ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 
 interface PreasidiumLidPrevieuwinterface {
   data: PreasidiumLid;
@@ -11,6 +12,8 @@ export default function PreasidiumLidPrevieuw({ data }: PreasidiumLidPrevieuwint
   const roleYear = primaryRole.year;
 
   return (
+  <Dialog>
+    <DialogTrigger asChild>
     <Card className="group relative h-full overflow-hidden border border-transparent text-white shadow-lg transition-all duration-300 hover:border-purple-400/30 hover:shadow-purple-500/20">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_60%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       <div className="relative">
@@ -33,6 +36,21 @@ export default function PreasidiumLidPrevieuw({ data }: PreasidiumLidPrevieuwint
           </p>
         )}
       </CardContent>
-    </Card>
+</Card>
+  </DialogTrigger>
+
+  <DialogContent className="sm:max-w-[425px] bg-card text-white border-zinc-800">
+    <DialogHeader>
+      <DialogTitle>{data.firstName} {data.lastName}</DialogTitle>
+      <DialogDescription className="text-zinc-400">
+        Detailed information about {roleLabel}.
+      </DialogDescription>
+    </DialogHeader>
+    {/* Add your extra details/content here */}
+    <div className="grid gap-4 py-4">
+       <p>Bio or more specific details go here...</p>
+    </div>
+  </DialogContent>
+</Dialog>
   );
 }

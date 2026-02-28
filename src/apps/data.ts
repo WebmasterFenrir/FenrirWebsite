@@ -55,8 +55,167 @@ export const PreasidiumYearsData : PreasidiumYear[] = [
                     role : "preases",
                     year : "2025 - 2026"
                 }]
-            }
+            },
+            { 
+                id : 1,
+                firstName : "Tibo",
+                lastName : "Van Daalen",
+                birthdate : "12-11-2005",
+                description : "vice-Preases",
+                yearIds : [1],
+                preasidiumRols : [            {
+                    role : "vice-preases",
+                    year : "2025 - 2026"
+                },{
+                    role : "vice-preases",
+                    year : "2024 - 2025"
+                }
+]
+            },
+                        { 
+                id : 2,
+                firstName : "Elien",
+                lastName : "Van looveren",
+                birthdate : "12-11-2005",
+                description : "Preases",
+                yearIds : [1],
+                preasidiumRols : [{
+                    role : "preases",
+                    year : "2025 - 2026"
+                }]
+            },
+            { 
+                id : 1,
+                firstName : "Tibo",
+                lastName : "Van Daalen",
+                birthdate : "12-11-2005",
+                description : "vice-Preases",
+                yearIds : [1],
+                preasidiumRols : [            {
+                    role : "vice-preases",
+                    year : "2025 - 2026"
+                },{
+                    role : "vice-preases",
+                    year : "2024 - 2025"
+                }
+]
+            },
+                    
         ],
         PreasidiumLedenIds : [1,2]
-    }
+    },
+        {
+        id : 1,
+        startDate : "2025",
+        endDate : "2026",
+        PreasidiumLeden : [
+            { 
+                id : 1,
+                firstName : "Tibo",
+                lastName : "Van Daalen",
+                birthdate : "12-11-2005",
+                description : "vice-Preases",
+                yearIds : [1],
+                preasidiumRols : [            {
+                    role : "vice-preases",
+                    year : "2025 - 2026"
+                },{
+                    role : "vice-preases",
+                    year : "2024 - 2025"
+                }
+]
+            },
+                        { 
+                id : 2,
+                firstName : "Elien",
+                lastName : "Van looveren",
+                birthdate : "12-11-2005",
+                description : "Preases",
+                yearIds : [1],
+                preasidiumRols : [{
+                    role : "preases",
+                    year : "2025 - 2026"
+                }]
+            },
+            { 
+                id : 1,
+                firstName : "Tibo",
+                lastName : "Van Daalen",
+                birthdate : "12-11-2005",
+                description : "vice-Preases",
+                yearIds : [1],
+                preasidiumRols : [            {
+                    role : "vice-preases",
+                    year : "2025 - 2026"
+                },{
+                    role : "vice-preases",
+                    year : "2024 - 2025"
+                }
+]
+            },
+                        { 
+                id : 2,
+                firstName : "Elien",
+                lastName : "Van looveren",
+                birthdate : "12-11-2005",
+                description : "Preases",
+                yearIds : [1],
+                preasidiumRols : [{
+                    role : "preases",
+                    year : "2025 - 2026"
+                }]
+            },
+            { 
+                id : 1,
+                firstName : "Tibo",
+                lastName : "Van Daalen",
+                birthdate : "12-11-2005",
+                description : "vice-Preases",
+                yearIds : [1],
+                preasidiumRols : [            {
+                    role : "vice-preases",
+                    year : "2025 - 2026"
+                },{
+                    role : "vice-preases",
+                    year : "2024 - 2025"
+                }
+                ]
+            },
+                        { 
+                id : 1,
+                firstName : "Tibo",
+                lastName : "Van Daalen",
+                birthdate : "12-11-2005",
+                description : "vice-Preases",
+                yearIds : [1],
+                preasidiumRols : [            {
+                    role : "vice-preases",
+                    year : "2025 - 2026"
+                },{
+                    role : "vice-preases",
+                    year : "2024 - 2025"
+                }
+                ]
+            },
+                        { 
+                id : 1,
+                firstName : "Tibo",
+                lastName : "Van Daalen",
+                birthdate : "12-11-2005",
+                description : "vice-Preases",
+                yearIds : [1],
+                preasidiumRols : [            {
+                    role : "vice-preases",
+                    year : "2025 - 2026"
+                },{
+                    role : "vice-preases",
+                    year : "2024 - 2025"
+                }
+                ]
+            },
+            
+                    
+        ],
+        PreasidiumLedenIds : [1,2]
+    },
 ]
