@@ -10,8 +10,8 @@ export default function PreasidiumPrevieuwHomePage()
                 <>
                     <Spacer/>
                     {<h2>{e.startDate}</h2>}
-                    <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 w-full">
-                        {e.PreasidiumLeden.map((ee, j) => <PreasidiumLidPrevieuw data={ee}/>)}
+                    <div key={i} className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 w-full">
+                        {e.PreasidiumLeden.map((ee, j) => <PreasidiumLidPrevieuw key={j} data={ee}/>)}
                     </div>
                 </>
             )}
