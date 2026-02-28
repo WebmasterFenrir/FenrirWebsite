@@ -39,18 +39,58 @@ export default function PreasidiumLidPrevieuw({ data }: PreasidiumLidPrevieuwint
 </Card>
   </DialogTrigger>
 
-  <DialogContent className="sm:max-w-[425px] bg-card text-white border-zinc-800">
-    <DialogHeader>
-      <DialogTitle>{data.firstName} {data.lastName}</DialogTitle>
-      <DialogDescription className="text-zinc-400">
-        Detailed information about {roleLabel}.
-      </DialogDescription>
-    </DialogHeader>
-    {/* Add your extra details/content here */}
-    <div className="grid gap-4 py-4">
-       <p>Bio or more specific details go here...</p>
+  <DialogContent className="sm:max-w-[800px] p-0 overflow-hidden bg-card border border-zinc-800 shadow-2xl transition-all duration-300 hover:border-purple-400/30">
+  <div className="flex flex-col md:flex-row items-stretch">
+    
+{/* LEFT/TOP SECTION: Seamless Image Container */}
+<div className="w-full md:w-2/5 bg-zinc-900 flex items-stretch overflow-hidden">
+  <img
+    src={!data.imageUrl || data.imageUrl.trim().length === 0 
+      ? `https://avatar.vercel.sh/${data.firstName}` 
+      : `/images/praesidium/${data.imageUrl}`
+    }
+    alt={`${data.firstName} ${data.lastName}`}
+    /* 'object-cover' ensures the image fills the space without white gaps.
+       'aspect-square md:aspect-auto' keeps it proportional on mobile vs desktop.
+    */
+    className="w-full h-full min-h-[300px] md:min-h-full object-cover"
+  />
+</div>
+
+    {/* RIGHT SECTION: Content */}
+    <div className="flex-1 p-[2rem] md:p-[3rem] flex flex-col justify-center">
+      <DialogHeader className="text-left">
+        {/* Role Label with Yellow Accent */}
+        <p className="text-yellow-400 text-[10px] md:text-xs font-black uppercase tracking-[0.4em] mb-4">
+          {roleLabel}
+        </p>
+        
+        {/* Name with Purple Split */}
+        <DialogTitle className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">
+          {data.firstName} <span className="text-purple-500">{data.lastName}</span>
+        </DialogTitle>
+        
+        <DialogDescription className="sr-only">
+          Detailed information about {data.firstName}
+        </DialogDescription>
+      </DialogHeader>
+
+      {/* Bio / Description Section */}
+      <div className="space-y-4">
+        <p className="text-zinc-400 text-sm md:text-base leading-relaxed">
+          {data.description || "No description provided."}
+        </p>
+        
+        {/* <div className="pt-4 border-t border-zinc-800/50">
+          <p className="text-zinc-500 text-xs uppercase tracking-widest">
+            Member Since: {data.birthdate}
+          </p>
+        </div> */}
+      </div>
     </div>
-  </DialogContent>
+
+  </div>
+</DialogContent>
 </Dialog>
   );
 }

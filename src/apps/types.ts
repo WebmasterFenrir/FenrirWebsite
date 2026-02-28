@@ -20,6 +20,7 @@ export interface PreasidiumLid {
     lastName : string
     birthdate : string
     description : string
+    imageUrl : string;
     yearIds : YearId[]
     preasidiumRols : PreasidiumRolInWhatYear[]
 }
