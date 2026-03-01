@@ -5,19 +5,17 @@ import FooterSectionTitle from "@/components/footer/FooterSectionTitle.astro";
 import FooterSocialLinks from "@/components/footer/FooterSocialLinks.astro";
 import FooterMailCard from "@/components/footer/FooterMailCard.astro";
 
-const year = new Date().getFullYear();
-
 const socialLinks = [
   {
     label: "Social",
     title: "Facebook",
-    hint: "Follow us",
+    hint: "Volg ons",
     href: "https://www.facebook.com/fenrir.antwerpen",
   },
   {
     label: "Social",
     title: "Instagram",
-    hint: "Follow us",
+    hint: "Volg ons",
     href: "https://www.instagram.com/fenrirclub",
   }
 ];
@@ -31,14 +29,14 @@ const socialLinks = [
   <div class="relative mx-auto flex max-w-6xl flex-col gap-12 px-6 py-16 lg:flex-row lg:items-start lg:justify-between">
     <FooterSectionTitle
       label="Fenrir Club"
-      title="Stay in the loop"
-      description="Follow us online for announcements, events, and stories from our members."
+      title="Blijf in de loop"
+      description="volg ons online voor meldingen van evenements en zo veel meer"
     />
     <FooterSocialLinks links={socialLinks} />
     <div class="flex max-w lg:max-w-sm flex-col gap-6">
       <FooterMailCard email="info@fenrirclub.be" />
-      <!-- <GitHubContributors owner="WebmasterFenrir" repo="FenrirWebsite" /> -->
+      <GitHubContributors owner="WebmasterFenrir" repo="FenrirWebsite" />
     </div>
   </div>
-  <FooterBottomBar year={year} />
+  <FooterBottomBar />
 </footer>
