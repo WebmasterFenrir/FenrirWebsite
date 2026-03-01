@@ -1,5 +1,7 @@
 ---
+import { Menu } from "lucide-react";
 import { Button } from "../ui/button";
+import HamburgerMenu from "./HamburgerMenu"
 const pages = await Astro.glob("../../pages/**/*.astro");
 
 // Normalize route + label
@@ -21,12 +23,21 @@ const navItems = pages
   });
 ---
 
-<nav class="fixed top-0 inset-x-0 z-50">
-  <div class="flex p-4 gap-2">
+<nav class="fixed top-0 inset-x-0 z-50 flex flex-row-reverse sm:flex-row">
+  <div class="hidden sm:flex p-2 rounded-br-2xl gap-2 bg-card w-max">
     {navItems.map((page) => (
       <a href={page.url}>
-        <Button variant="ghost">{page.label}</Button>
+        <Button variant="link">{page.label.charAt(0).toUpperCase() + page.label.slice(1)}</Button>
       </a>
     ))}
+  </div>
+  
+    <div class="sm:hidden p-2 rounded-bl-2xl sm:rounded-br-2xl gap-2 bg-card w-max">
+      <HamburgerMenu links={pages} client:load/>
+    <!-- {navItems.map((page) => (
+      <a href={page.url}>
+        <Button variant="link">{page.label.charAt(0).toUpperCase() + page.label.slice(1)}</Button>
+      </a>
+    ))} -->
   </div>
 </nav>
