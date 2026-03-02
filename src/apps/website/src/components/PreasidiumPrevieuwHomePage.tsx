@@ -9,7 +9,7 @@ export default function PreasidiumPrevieuwHomePage()
             <PreasidiumLidPrevieuw data={PreasidiumYearsData[0].PreasidiumLeden[0]}/>
             <PreasidiumLidPrevieuw data={PreasidiumYearsData[0].PreasidiumLeden[1]}/>
             <a href="/preasidium">
-                <GotoMoreCard title="Ontdek ons volledige praesidium" description="Bekijk alle leden, rollen en verhalen van onze vereniging."/>
+                <GotoMoreCard title="Ontdek ons voledige praesidium" description="Bekijk alle leden, rollen en verhalen van onze vereniging."/>
             </a>
         </div>
     )

@@ -38,7 +38,7 @@ export default function HamburgerMenu({ links }: MenuInterface) {
                     <Menu />
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="bg-card">
                 <DialogHeader className="mt-4 text-left">
                     <DialogTitle>Menu</DialogTitle>
                     <DialogDescription>Verken onze website!</DialogDescription>
