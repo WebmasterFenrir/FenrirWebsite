@@ -1,0 +1,19 @@
+---
+interface Props {
+  label: string;
+  title: string;
+  description?: string;
+}
+
+const { label, title, description } = Astro.props;
+---
+
+<section class="max-w-sm space-y-5 text-white">
+  <p class="text-[10px] font-black uppercase tracking-[0.4em] text-yellow-400">{label}</p>
+  <h2 class="text-3xl font-semibold tracking-tight">{title}</h2>
+  {description && (
+    <p class="text-sm text-zinc-400">
+      {description}
+    </p>
+  )}
+</section>

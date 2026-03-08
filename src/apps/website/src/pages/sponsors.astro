@@ -1,0 +1,113 @@
+---
+import MainLayout from "@/layouts/main.astro";
+import ContextLayout from "@/layouts/context.astro";
+import SectionHeader from "@/components/ui/sectionHeader";
+import Spacer from "@/components/ui/spacer";
+import Sponsordata from "@/components/SponsorPositivedata";
+import SponsorList from "@/components/SponsorList";
+import { SponsorData } from "../../../data";
+import { Button } from "../components/ui/button";
+import SponsorPositiveData from "@/components/SponsorPositivedata";
+---
+
+<MainLayout title="Sponsors">
+    <div
+        class="grid place-items-center mt-30 md:mt-0 md:h-[50vh] content-center"
+    >
+        <div class="text-center px-6">
+            <h1 class="text-6xl md:text-8xl text-white font-bold">
+                Onze Sponsors
+            </h1>
+            <h2
+                class="text-base sm:text-xl lg:text-2xl mt-4 text-white/90 font-medium max-w-3xl"
+            >
+                Dankzij deze geweldige partners kunnen wij onze werking
+                uitbouwen en onze studenten ondersteunen.
+            </h2>
+        </div>
+    </div>
+    <ContextLayout>
+        <div class="mx-auto px-6 sm:px-8 py-12 w-full">
+            <SectionHeader
+                title="Partners Van Fenrir"
+                description="Samen maken we meer mogelijk voor onze leden."
+            />
+            <div class="w-full">
+                <SponsorList data={SponsorData} />
+            </div>
+
+            <Spacer />
+            <SectionHeader
+                title="Waarom Fenrir Sponsoren?"
+                description="Bereik studenten in Antwerpen, bouw merkvoorkeur op en maak tastbare impact."
+            />
+            <div class="overflow-x-auto rounded-">
+                <Sponsordata />
+            </div>
+
+            <Spacer />
+            <SectionHeader
+                title="Sponsor Worden?"
+                description="Unieke samenwerking met wederzijds voordeel: snel en laagdrempelig geregeld."
+            />
+            <div class="grid gap-12">
+                <p class="text-lg md:text-xl leading-relaxed">
+                    We verkennen graag jullie doelen <span
+                        class="text-white font-medium"
+                        >(zichtbaarheid, rekrutering, activatie)</span
+                    > en stellen op basis daarvan een voorstel voor.
+                </p>
+
+                <ol class="grid gap-4 sm:grid-cols-3">
+                    <li class="bg-card border rounded-xl p-6">
+                        <h4 class="font-bold text-accent tracking-tight">
+                            Kennismaking
+                        </h4>
+
+                        <p class="text-sm leading-relaxed font-light">
+                            Doelen, doelgroep en timing afstemmen voor een
+                            optimale match.
+                        </p>
+                    </li>
+
+                    <li class="bg-card border rounded-xl p-6">
+                        <h4 class="font-bold text-accent tracking-tight">
+                            Voorstel
+                        </h4>
+                        <p class="text-sm leading-relaxed font-light">
+                            Een concreet pakket op maat (zichtbaarheid,
+                            activatie, rekrutering).
+                        </p>
+                    </li>
+
+                    <li class="bg-card border rounded-xl p-6">
+                        <h4 class="font-bold text-accent tracking-tight">
+                            Start
+                        </h4>
+                        <p class="text-sm leading-relaxed font-light">
+                            Afspraken vastleggen en samen de campagne lanceren.
+                        </p>
+                    </li>
+                </ol>
+<div class="flex flex-col items-center justify-center text-center gap-8 mt-24 mb-12 w-full">
+  
+  <div class="space-y-4">
+    <h3 class="text-4xl md:text-6xl font-bold text-white tracking-tighter leading-none">
+      Interesse of <span class="text-purple-500">meer info?</span>
+    </h3>
+  </div>
+
+  <div class="flex flex-col items-center">
+    <a href="mailto:pr@fenrirclub.be" class="group">
+      <Button 
+        variant="secondary" 
+        className="p-6 sm:p-6 lg:p-8 text-2xl lg:text-4xl"
+      >
+        Neem contact op
+      </Button>
+    </a>
+  </div>
+  
+</div>
+    </ContextLayout>
+</MainLayout>

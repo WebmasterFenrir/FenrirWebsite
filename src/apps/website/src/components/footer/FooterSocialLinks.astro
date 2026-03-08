@@ -1,0 +1,29 @@
+---
+import FooterLinkCard from "@/components/footer/FooterLinkCard.astro";
+
+interface SocialLink {
+  label: string;
+  title: string;
+  hint: string;
+  href: string;
+  rel?: string;
+}
+
+interface Props {
+  links: SocialLink[];
+}
+
+const { links } = Astro.props as Props;
+---
+
+<nav class="flex flex-col max-w text-sm font-semibold text-white">
+  {links.map((link) => (
+    <FooterLinkCard
+      label={link.label}
+      title={link.title}
+      hint={link.hint}
+      href={link.href}
+      rel={link.rel}
+    />
+  ))}
+</nav>

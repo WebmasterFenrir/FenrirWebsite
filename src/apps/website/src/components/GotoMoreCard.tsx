@@ -10,8 +10,8 @@ interface PreasidiumCtaCardProps {
 }
 
 export function GotoMoreCard({
-  title = "Ontdek ons volledige praesidium",
-  description = "Bekijk alle leden, rollen en verhalen van onze vereniging.",
+  title = "",
+  description = "",
   icon,
 }: PreasidiumCtaCardProps) {
   return (

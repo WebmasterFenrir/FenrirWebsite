@@ -9,9 +9,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     # Define your variables here
+
     env:
-      PROJECT_PATH: "/root/FenrirWebsite" 
-      
+      PROJECT_PATH: "/root/FenrirWebsite"
+
     steps:
       - name: Execute remote commands via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -24,7 +25,8 @@ jobs:
           script: |
             echo "Deploying to $PROJECT_PATH"
             cd $PROJECT_PATH || { echo "Directory not found"; exit 1; }
-            
-            sudo docker compose down
+
+            sudo docker compose -f docker-compose.prod.yml down
             git pull origin main
-            sudo docker compose up -d --build
+            sudo docker compose -f docker-compose.prod.yml up -d --build
+

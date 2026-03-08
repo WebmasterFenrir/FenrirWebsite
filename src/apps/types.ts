@@ -2,6 +2,7 @@ export interface Sponsor {
     name: string
     content: string[]
     image: string
+    url : string
 }
 
 export interface Sponsors {
@@ -19,6 +20,7 @@ export interface PreasidiumLid {
     lastName : string
     birthdate : string
     description : string
+    imageUrl : string;
     yearIds : YearId[]
     preasidiumRols : PreasidiumRolInWhatYear[]
 }
