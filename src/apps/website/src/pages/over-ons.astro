@@ -5,26 +5,25 @@ import ImageCarousel from "@/components/carousel/Carousel";
 import Spacer from "@/components/ui/spacer";
 ---
 
-<MainLayout title="About us">
+<MainLayout title="Over ons">
     <ContextLayout>
-        <div class="mx-auto sm:px-8 py-10 w-full">
+        <div class="mx-auto px-6 sm:px-8 py-10">
+            <Spacer variant='halfed'/>
             <h1 class="text-6xl sm:text-6xl lg:text-8xl text-white font-bold">
                 Over ons
             </h1>
             <Spacer variant="halfed" />
-            <div class="px-10">
-                <ImageCarousel client:load />
-            </div>
-            <Spacer variant="halfed" />
+            
             <h2
                 class="text-4xl sm:text-4xl lg:text-4xl text-accent-foreground font-bold mb-4 mt-8"
             >
-                Hoe is Fenrir Ontstaan?
+                Onze Geschiedenis
             </h2>
             <p class="mb-4">
-                Fenrir is opgericht in Brugge. Na stopzetting, is Fenrir als
-                studentenclub in Antwerpen verder gedragen. Lees hier meer over
-                onze geschiedenis en waarvoor de naam ‘Fenrir’ staat.
+                Opgericht in Brugge (2014). Na een korte stop verdergezet als studentenclub in Antwerpen (vanaf 2016).
+            </p>
+            <p class="mb-4">
+                Sinds 2016 groeide Fenrir verder in Antwerpen. Hieronder lees je hoe dat verliep.
             </p>
             <h2
                 class="text-4xl sm:text-4xl lg:text-4xl text-accent-foreground font-bold mb-4 mt-8"
@@ -57,7 +56,9 @@ import Spacer from "@/components/ui/spacer";
                 2017-2018 deel zou uitmaken van KdG Hogeschool, specifiek KdG
                 campus Groenplaats.
             </p>
-            <h1>De oorsprong</h1>
+                        <div class="mt-4">
+                <ImageCarousel client:load />
+            </div>
             <h2
                 class="text-4xl sm:text-4xl lg:text-4xl text-accent-foreground font-bold mb-4 mt-8"
             >
@@ -91,8 +92,11 @@ import Spacer from "@/components/ui/spacer";
             <h2
                 class="text-4xl sm:text-4xl lg:text-4xl text-accent-foreground font-bold mb-4 mt-8"
             >
-                Waarvoor staat de naam Fenrir?
+                De naam Fenrir
             </h2>
+            <p class="mb-4">
+                Noordse mythologie: de reusachtige wolf, zoon van Loki; sleutelrol in Ragnarok.
+            </p>
             <p class="mb-4">
                 De naam Fenrir komt uit de Noordse mythologie. Fenrir was de
                 middelste zoon Loki, de God van de Misleiding. Hij was geen mens
@@ -114,11 +118,11 @@ import Spacer from "@/components/ui/spacer";
                 muil met de punt omhoog zodat hij niet kon bijten. Door het
                 gekwijl van Fenrir ontstond de rivier Ván.
             </p>
-            <p class="mb-4">
-                Fenrir stierf aan het einde van de wereld, tijdens Ragnarok. De
-                zoon van Odin, genaamd Vidar, doodde hem om zijn vader te
-                wreken.
-            </p>
+             <p class="mb-4">
+                 Fenrir stierf aan het einde van de wereld, tijdens Ragnarok. De
+                 zoon van Odin, genaamd Vidar, doodde hem om zijn vader te
+                 wreken.
+             </p>
         </div>
     </ContextLayout>
 </MainLayout>
