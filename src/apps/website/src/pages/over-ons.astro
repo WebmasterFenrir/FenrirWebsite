@@ -1,128 +1,173 @@
 ---
-import MainLayout from "@/layouts/main.astro";
-import ContextLayout from "@/layouts/context.astro";
-import ImageCarousel from "@/components/carousel/Carousel";
-import Spacer from "@/components/ui/spacer";
+import MainLayout from '@/layouts/main.astro';
+import ContextLayout from '@/layouts/context.astro';
+import SectionHeader from '@/components/ui/sectionHeader';
+import ImageCarousel from '@/components/carousel/Carousel';
+import Spacer from '@/components/ui/spacer';
 ---
 
 <MainLayout title="Over ons">
-    <ContextLayout>
-        <div class="mx-auto px-6 sm:px-8 py-10">
-            <Spacer variant='halfed'/>
-            <h1 class="text-6xl sm:text-6xl lg:text-8xl text-white font-bold">
-                Over ons
-            </h1>
-            <Spacer variant="halfed" />
-            
-            <h2
-                class="text-4xl sm:text-4xl lg:text-4xl text-accent-foreground font-bold mb-4 mt-8"
-            >
-                Onze Geschiedenis
-            </h2>
-            <p class="mb-4">
-                Opgericht in Brugge (2014). Na een korte stop verdergezet als studentenclub in Antwerpen (vanaf 2016).
-            </p>
-            <p class="mb-4">
-                Sinds 2016 groeide Fenrir verder in Antwerpen. Hieronder lees je hoe dat verliep.
-            </p>
-            <h2
-                class="text-4xl sm:text-4xl lg:text-4xl text-accent-foreground font-bold mb-4 mt-8"
-            >
-                Fenrir Antwerpen
-            </h2>
-            <p class="mb-4">
-                Fenrir Antwerpen werd op 9 mei 2016 officieel opgericht door
-                Nick Peeters, Gilles Obourdin, Andreas de Rop en Dario Tielens.
-                Het nieuwe schild had nog steeds een aantal verbintenissen naar
-                de oude club. Bovenaan staat de naam, in hetzelfde lettertype
-                als het vorige schild. Ook de wolf is terug te vinden op het
-                nieuwe schild. De kleuren veranderden naar paars-geel-zilver.
-                Voor 9 mei werden er nog een aantal activiteiten georganiseerd
-                in Brugge, maar de meesten werden naar Antwerpen over gebracht.
-                Zo maakte Fenrir Antwerpen indruk met de Bierfietscantus,
-                waarbij ze met een grote bierfiets (en een hoop bier,
-                natuurlijk) al zingend door stad Antwerpen reden.
-            </p>
-            <p class="mb-4">
-                Het was pas eind juni 2016 dat Fenrir Antwerpen een café vondt
-                dat volledig bij de club paste. La Dolce Vita werd dan ook vanaf
-                dan hét clubcafé van Fenrir Antwerpen. In 2021, is Fenrir
-                Antwerpen van stamcafé veranderd. Voortaan vind je ons In Den
-                Echo.
-            </p>
-            <p class="mb-4">
-                Na vele gesprekken geleid door Nick Peeters en Gilles Obourdin,
-                werd besloten dat Fenrir Antwerpen vanaf het schooljaar
-                2017-2018 deel zou uitmaken van KdG Hogeschool, specifiek KdG
-                campus Groenplaats.
-            </p>
-                        <div class="mt-4">
-                <ImageCarousel client:load />
-            </div>
-            <h2
-                class="text-4xl sm:text-4xl lg:text-4xl text-accent-foreground font-bold mb-4 mt-8"
-            >
-                Fenrir Brugge
-            </h2>
-            <p class="mb-4">
-                Fenrir is opgericht in Brugge op 25 november 2014. De club was
-                op dat moment verbonden met Howest, Hogeschool West-Vlaanderen.
-                Het clubcafé was Charlie Rockets, waar er een aantal cantussen
-                en feestjes georganiseerd zijn.
-            </p>
-            <p class="mb-4">
-                Fenrir Brugge stond bekend om de zilver-rode linten en de
-                interessante lezingen, beter bekend als Fentalks. Deze lezingen
-                waren voor iedereen die geïnteresseerd was. Ook de thema’s en
-                gastsprekers verschilden telkens, om een zo breed mogelijk
-                publiek aan te kunnen spreken. De club werd onder de leuze ‘No
-                one can stop the wolf, we are Fenrir’ geleid door de eerste
-                praesidia.
-            </p>
-            <p class="mb-4">
-                Op 11 oktober 2015 werd de club op non-actief gezet.
-            </p>
-            <p class="mb-4">
-                Deze stopzetting was van korte duur, Fenrir maakte een comeback
-                met zijn Fenrir is back cantus op 19 februari 2016. De cantus
-                werd feestelijk ingezet met de bekendmaking van het vernieuwde
-                schild, nieuwe praesidium- en schachtenlinten en de nieuwe vlag.
-                Dit was het startschot voor Fenrir Antwerpen.
-            </p>
-            <h2
-                class="text-4xl sm:text-4xl lg:text-4xl text-accent-foreground font-bold mb-4 mt-8"
-            >
-                De naam Fenrir
-            </h2>
-            <p class="mb-4">
-                Noordse mythologie: de reusachtige wolf, zoon van Loki; sleutelrol in Ragnarok.
-            </p>
-            <p class="mb-4">
-                De naam Fenrir komt uit de Noordse mythologie. Fenrir was de
-                middelste zoon Loki, de God van de Misleiding. Hij was geen mens
-                of god, maar leek toen hij klein was op een klein hondje. De
-                oppergod Odin nam Fenrir mee naar Asgard, waar de volgelingen
-                van Odin woonden.
-            </p>
-            <p class="mb-4">
-                Fenrir stond bekend als een kwaadaardig wezen. Het wezen
-                ontwikkelde zich tot een reusachtige wolf met verschrikkelijke
-                kaken. De wolf had de sluwheid van zijn vader Loki geërfd.
-            </p>
-            <p class="mb-4">
-                Al snel werd de wolf als onhandelbaar gezien. De goden beraamden
-                onder elkaar een plan om hem vast te binden. Na veel zoeken
-                lieten de æsen een speciale ketting maken. Toen Fenrir
-                vastgebonden werd, kon hij zichzelf niet bevrijden. Uit woede
-                hapte de wolf naar de æsen, maar zij staken een zwaard in zijn
-                muil met de punt omhoog zodat hij niet kon bijten. Door het
-                gekwijl van Fenrir ontstond de rivier Ván.
-            </p>
-             <p class="mb-4">
-                 Fenrir stierf aan het einde van de wereld, tijdens Ragnarok. De
-                 zoon van Odin, genaamd Vidar, doodde hem om zijn vader te
-                 wreken.
-             </p>
+    
+  <div class="grid place-items-center mt-30 md:mt-0 md:h-[50vh] content-center">
+    <div class="text-center px-6">
+      <h1 class="text-6xl md:text-8xl text-white font-bold">Over Ons</h1>
+      <h2 class="text-base sm:text-xl lg:text-2xl mt-4 text-white/90 font-medium max-w-3xl">
+        Lees meer over onze geschiedenis, roots in Brugge en Antwerpen, en de mythische oorsprong van onze naam.
+      </h2>
+    </div>
+  </div>
+  <ContextLayout>
+    <div class="mx-auto px-6 sm:px-8 py-12 w-full">
+      <SectionHeader
+        title="Onze Geschiedenis"
+        description="Opgericht in Brugge (2014). Na een korte stop verdergezet als studentenclub in Antwerpen (vanaf 2016)."
+      />
+      <div class="grid gap-6 text-zinc-200">
+        <p>
+          Opgericht in Brugge (2014). Na een korte stop verdergezet als studentenclub in Antwerpen (vanaf 2016).<br>
+          Sinds 2016 groeide Fenrir verder in Antwerpen. Hieronder lees je hoe dat verliep.
+      </div>
+
+      <Spacer />
+      <h2 class="text-4xl sm:text-4xl lg:text-4xl text-accent-foreground font-bold mb-4 mt-8">Fenrir Antwerpen</h2>
+      <div class="grid gap-6 text-zinc-200">
+        <p>
+          Fenrir Antwerpen werd op 9 mei 2016 officieel opgericht door
+          Nick Peeters, Gilles Obourdin, Andreas de Rop en Dario Tielens.
+          Het nieuwe schild had nog steeds een aantal verbintenissen naar
+          de oude club. Bovenaan staat de naam, in hetzelfde lettertype
+          als het vorige schild. Ook de wolf is terug te vinden op het
+          nieuwe schild. De kleuren veranderden naar paars-geel-zilver.
+          Voor 9 mei werden er nog een aantal activiteiten georganiseerd
+          in Brugge, maar de meesten werden naar Antwerpen over gebracht.
+          Zo maakte Fenrir Antwerpen indruk met de Bierfietscantus,
+          waarbij ze met een grote bierfiets (en een hoop bier,
+          natuurlijk) al zingend door stad Antwerpen reden.
+        </p>
+        <p>
+          Het was pas eind juni 2016 dat Fenrir Antwerpen een café vondt
+          dat volledig bij de club paste. La Dolce Vita werd dan ook vanaf
+          dan hét clubcafé van Fenrir Antwerpen. In 2021, is Fenrir
+          Antwerpen van stamcafé veranderd. Voortaan vind je ons In Den
+          Echo.
+        </p>
+        <p>
+          Na vele gesprekken geleid door Nick Peeters en Gilles Obourdin,
+          werd besloten dat Fenrir Antwerpen vanaf het schooljaar
+          2017-2018 deel zou uitmaken van KdG Hogeschool, specifiek KdG
+          campus Groenplaats.
+        </p>
+        <div class="mt-2 sm:mt-4">
+          <ImageCarousel client:load />
         </div>
-    </ContextLayout>
+      </div>
+
+      <Spacer />
+      <h2 class="text-4xl sm:text-4xl lg:text-4xl text-accent-foreground font-bold mb-4 mt-8">Fenrir Brugge</h2>
+      <div class="grid gap-6 text-zinc-200">
+        <p>
+          Fenrir is opgericht in Brugge op 25 november 2014. De club was
+          op dat moment verbonden met Howest, Hogeschool West-Vlaanderen.
+          Het clubcafé was Charlie Rockets, waar er een aantal cantussen
+          en feestjes georganiseerd zijn.
+        </p>
+        <p>
+          Fenrir Brugge stond bekend om de zilver-rode linten en de
+          interessante lezingen, beter bekend als Fentalks. Deze lezingen
+          waren voor iedereen die geïnteresseerd was. Ook de thema’s en
+          gastsprekers verschilden telkens, om een zo breed mogelijk
+          publiek aan te kunnen spreken. De club werd onder de leuze ‘No
+          one can stop the wolf, we are Fenrir’ geleid door de eerste
+          praesidia.
+        </p>
+        <p>
+          Op 11 oktober 2015 werd de club op non-actief gezet.
+        </p>
+        <p>
+          Deze stopzetting was van korte duur, Fenrir maakte een comeback
+          met zijn Fenrir is back cantus op 19 februari 2016. De cantus
+          werd feestelijk ingezet met de bekendmaking van het vernieuwde
+          schild, nieuwe praesidium- en schachtenlinten en de nieuwe vlag.
+          Dit was het startschot voor Fenrir Antwerpen.
+        </p>
+      </div>
+
+      <Spacer />
+      <SectionHeader
+        title="De naam Fenrir"
+        description="Noordse mythologie: de reusachtige wolf, zoon van Loki; sleutelrol in Ragnarok."
+      />
+      <div class="grid gap-6 text-zinc-200">
+        <p>
+          De naam Fenrir komt uit de Noordse mythologie. Fenrir was de
+          middelste zoon Loki, de God van de Misleiding. Hij was geen mens
+          of god, maar leek toen hij klein was op een klein hondje. De
+          oppergod Odin nam Fenrir mee naar Asgard, waar de volgelingen
+          van Odin woonden.
+        </p>
+        <p>
+          Fenrir stond bekend als een kwaadaardig wezen. Het wezen
+          ontwikkelde zich tot een reusachtige wolf met verschrikkelijke
+          kaken. De wolf had de sluwheid van zijn vader Loki geërfd.
+        </p>
+        <p>
+          Al snel werd de wolf als onhandelbaar gezien. De goden beraamden
+          onder elkaar een plan om hem vast te binden. Na veel zoeken
+          lieten de aesen een speciale ketting maken. Toen Fenrir
+          vastgebonden werd, kon hij zichzelf niet bevrijden. Uit woede
+          hapte de wolf naar de aesen, maar zij staken een zwaard in zijn
+          muil met de punt omhoog zodat hij niet kon bijten. Door het
+          gekwijl van Fenrir ontstond de rivier Van.
+        </p>
+        <p>
+          Fenrir stierf aan het einde van de wereld, tijdens Ragnarok. De
+          zoon van Odin, genaamd Vidar, doodde hem om zijn vader te
+          wreken.
+        </p>
+      </div>
+
+      <Spacer />
+      <SectionHeader
+        title="Ons Clublied"
+        description="Gezongen op cantussen en bij bijzondere momenten. melodie: De Blauwvoet"
+      />
+      <div class="grid gap-4 text-zinc-200">
+        <p>
+          Ons clublied is een vaste waarde tijdens cantussen en grote momenten zoals openingsactiviteiten,
+          doop of lustrum. Het brengt sfeer, verbindt generaties leden en zet de toon voor de avond.
+        </p>
+        <p>
+          De strofe wordt doorgaans ingezet door de aanwezigen, terwijl de keerzang door iedereen
+          voluit wordt meegezongen. De melodie is gebaseerd op
+          <a class="underline hover:no-underline" href="https://www.youtube.com/watch?v=Q9qN88UU7aU" target="_blank" rel="noopener">De Blauwvoet</a>.
+        </p>
+        <div class="grid gap-4 md:gap-6 md:grid-cols-2">
+          <div class="bg-card border border-accent-foreground rounded-lg p-4 md:p-6">
+            <div class="flex items-center gap-2 text-[11px] tracking-wide uppercase text-accent-foreground">
+              <span class="inline-block h-3 w-1 rounded-sm bg-accent-foreground"></span>
+              Strofe
+            </div>
+            <div class="mt-3 space-y-1 leading-relaxed">
+              <p>Brugse wolven sta nu recht</p>
+              <p>Moeders wees gewaarschuwd</p>
+              <p>Wij gaan ons hier bezuipen</p>
+              <p>Gelijk de wereld morgen eind</p>
+            </div>
+          </div>
+          <div class="bg-card border border-accent rounded-lg p-4 md:p-6">
+            <div class="flex items-center gap-2 text-[11px] tracking-wide uppercase text-accent">
+              <span class="inline-block h-3 w-1 rounded-sm bg-accent"></span>
+              Keerzang
+            </div>
+            <div class="mt-3 space-y-1 leading-relaxed">
+              <p>Nu het lied der Brugse wolven</p>
+              <p>Stralend gaan wij naar de kloten</p>
+              <p>Geen keten houdt ons tegen</p>
+              <p>Straalt Fenrir, drinkt er nog een!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ContextLayout>
 </MainLayout>
