@@ -23,6 +23,24 @@ export const SponsorData : Sponsors[] = [
 ]
 
 export const PreasidiumYearsData : PreasidiumYear[] = [
+    // Antwerpen 2025-2026
+    {
+        id: 2025,
+        startDate: "2025",
+        endDate: "2026",
+        PreasidiumLeden: [
+            { id: 202501, firstName: "Elien", lastName: "Van Looveren", birthdate: "", description: "", imageUrl: "elien2025.jpg", yearIds: [2025], preasidiumRols: [ { role: "Praeses", year: "2025 - 2026" } ] },
+            { id: 202502, firstName: "Tibo", lastName: "Van Daele", birthdate: "", description: "", imageUrl: "tibo2025.jpg", yearIds: [2025], preasidiumRols: [ { role: "Vice-Praeses", year: "2025 - 2026" }, { role: "Media", year: "2025 - 2026" } ] },
+            { id: 202503, firstName: "Anne", lastName: "Peeters", birthdate: "", description: "", imageUrl: "anne2025.jpg", yearIds: [2025], preasidiumRols: [ { role: "Quaestor", year: "2025 - 2026" }, { role: "PR", year: "2025 - 2026" } ] },
+            { id: 202504, firstName: "Nils", lastName: "Mertens", birthdate: "", description: "", imageUrl: "nils2025.jpg", yearIds: [2025], preasidiumRols: [ { role: "S.O.C.", year: "2025 - 2026" }, { role: "Ab-Actis", year: "2025 - 2026" } ] },
+            { id: 202505, firstName: "Linda", lastName: "Bruyneels", birthdate: "", description: "", imageUrl: "linda2025.jpg", yearIds: [2025], preasidiumRols: [ { role: "S.O.C.", year: "2025 - 2026" }, { role: "Schachtentemmer", year: "2025 - 2026" } ] },
+            { id: 202506, firstName: "Andries", lastName: "Lamberts", birthdate: "", description: "", imageUrl: "", yearIds: [2025], preasidiumRols: [ { role: "Keizer", year: "2025 - 2026" }, { role: "Cantor", year: "2025 - 2026" } ] },
+            { id: 202507, firstName: "Django", lastName: "Van Gool", birthdate: "", description: "", imageUrl: "django2025.jpg", yearIds: [2025], preasidiumRols: [ { role: "Feest", year: "2025 - 2026" }, { role: "Schachtentemmer", year: "2025 - 2026" } ] },
+            { id: 202508, firstName: "Rafaella", lastName: "Jardim", birthdate: "", description: "", imageUrl: "rafaella2025.jpg", yearIds: [2025], preasidiumRols: [ { role: "Mentor", year: "2025 - 2026" } ] },
+            { id: 202509, firstName: "Vincent", lastName: "Orban", birthdate: "", description: "AKA Panini", imageUrl: "vincent2025.png", yearIds: [2025], preasidiumRols: [ { role: "Peter", year: "2025 - 2026" } ] }
+        ],
+        PreasidiumLedenIds: [202501,202502,202503,202504,202505,202506,202507,202508,202509]
+    },
     // Antwerpen 2024-2025
     {
         id: 2024,
