@@ -41,6 +41,9 @@ services:
       - VIRTUAL_HOST=fenrirclub.be,www.fenrirclub.be
       - LETSENCRYPT_HOST=fenrirclub.be,www.fenrirclub.be
       - LETSENCRYPT_EMAIL=webmaster@fenrirclub.be
+    depends_on:
+      pocketbase:
+        condition: service_healthy
     networks:
       - proxy-net
     restart: unless-stopped
@@ -53,11 +56,18 @@ services:
       PB_ADMIN_EMAIL: ${PB_ADMIN_EMAIL}
       PB_ADMIN_PASSWORD: ${PB_ADMIN_PASSWORD}
       TZ: Europe/Berlin
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     volumes:
       - ./pb_data:/pb_data
       - ./src/apps/pocketbase/pb_migrations:/pb_migrations
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - proxy-net
     restart: unless-stopped
 
 networks:
