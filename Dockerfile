@@ -4,7 +4,10 @@ WORKDIR /app
 
 COPY ./src .
 RUN bun install
-RUN bun run build --filter=website
+
+# 3. Build the website
+# This will now find all relative files (like that types folder)
+RUN bun run build
 
 # Stage 2: Serve
 FROM node:lts-alpine
