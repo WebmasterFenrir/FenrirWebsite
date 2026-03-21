@@ -6,7 +6,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "seed": "bun seed.ts"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.13",
@@ -21,6 +22,7 @@
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.6.0",
     "lucide-react": "^0.563.0",
+    "@astrojs/node": "^9.0.0",
     "pocketbase": "^0.26.8",
     "radix-ui": "^1.4.3",
     "react": "^19.2.4",

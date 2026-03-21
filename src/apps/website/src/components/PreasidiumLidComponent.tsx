@@ -10,6 +10,9 @@ export default function PreasidiumLidPrevieuw({ data }: PreasidiumLidPrevieuwint
   const primaryRole = data.preasidiumRols[0];
   const roleLabel = primaryRole.role;
   const roleYear = primaryRole.year;
+  const imageSrc = !data.imageUrl || data.imageUrl.trim().length === 0
+    ? `https://avatar.vercel.sh/${data.firstName}`
+    : `/images/preasidium/${data.imageUrl}`;
 
   return (
   <Dialog>
@@ -18,9 +21,9 @@ export default function PreasidiumLidPrevieuw({ data }: PreasidiumLidPrevieuwint
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_60%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       <div className="relative">
         <img
-          src="https://avatar.vercel.sh/shadcn1"
+          src={imageSrc}
           alt={`${data.firstName} ${data.lastName}`}
-          className="aspect-[4/3] w-full rounded-t-xl object-cover"
+          className="aspect-square w-full rounded-t-xl object-cover"
         />
       </div>
       <CardContent className="relative space-y-5 pb-[2rem] md:pb-[2rem]">
@@ -42,18 +45,12 @@ export default function PreasidiumLidPrevieuw({ data }: PreasidiumLidPrevieuwint
   <DialogContent className="sm:max-w-[800px] p-0 overflow-hidden bg-card border border-zinc-800 shadow-2xl transition-all duration-300 hover:border-purple-400/30">
   <div className="flex flex-col md:flex-row items-stretch">
     
-{/* LEFT/TOP SECTION: Seamless Image Container */}
-<div className="w-full md:w-2/5 bg-zinc-900 flex items-stretch overflow-hidden">
+{/* LEFT/TOP SECTION: Uniform Square Image */}
+<div className="w-full md:w-2/5 md:flex-none bg-zinc-900 overflow-hidden aspect-square md:aspect-square">
   <img
-    src={!data.imageUrl || data.imageUrl.trim().length === 0 
-      ? `https://avatar.vercel.sh/${data.firstName}` 
-      : `/images/praesidium/${data.imageUrl}`
-    }
+    src={imageSrc}
     alt={`${data.firstName} ${data.lastName}`}
-    /* 'object-cover' ensures the image fills the space without white gaps.
-       'aspect-square md:aspect-auto' keeps it proportional on mobile vs desktop.
-    */
-    className="w-full h-full min-h-[300px] md:min-h-full object-cover"
+    className="w-full h-full object-cover"
   />
 </div>
 

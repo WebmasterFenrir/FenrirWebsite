@@ -2,10 +2,7 @@
 FROM oven/bun:latest AS builder
 WORKDIR /app
 
-# 1. Copy the entire 'src' folder (contains package.json, turbo.json, and all apps/packages)
 COPY ./src .
-
-# 2. Install all dependencies
 RUN bun install
 
 # 3. Build the website
@@ -13,12 +10,15 @@ RUN bun install
 RUN bun run build
 
 # Stage 2: Serve
-FROM nginx:alpine
-RUN rm -rf /usr/share/nginx/html/*
+FROM node:lts-alpine
+WORKDIR /app
 
-# Copy from the builder stage
-# Path: /app (WORKDIR) + apps/website/dist
-COPY --from=builder /app/apps/website/dist /usr/share/nginx/html
+COPY --from=builder /app/apps/website/dist ./dist
+COPY --from=builder /app/apps/website/package.json ./package.json
+RUN npm install --omit=dev --ignore-scripts
 
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+ENV HOST=0.0.0.0
+ENV PORT=4321
+EXPOSE 4321
+
+CMD ["node", "./dist/server/entry.mjs"]

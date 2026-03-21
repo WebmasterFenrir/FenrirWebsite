@@ -1,0 +1,257 @@
+{
+  "name": "Fenrir issues ai",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1GkPsGjZPaQRsDHE6n00Bry0cLCKO01BpNGa6S8gqOp4",
+          "mode": "list",
+          "cachedResultName": "Fenrir website issue form (Antwoorden)",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GkPsGjZPaQRsDHE6n00Bry0cLCKO01BpNGa6S8gqOp4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 289156332,
+          "mode": "list",
+          "cachedResultName": "Formulierreacties 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1GkPsGjZPaQRsDHE6n00Bry0cLCKO01BpNGa6S8gqOp4/edit#gid=289156332"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        160
+      ],
+      "id": "cc6da2ce-cd77-4e28-a446-720910123db3",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "O60q2E1bX1las2UP",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "owner": {
+          "__rl": true,
+          "value": "WebmasterFenrir",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "FenrirWebsite",
+          "mode": "list",
+          "cachedResultName": "FenrirWebsite",
+          "cachedResultUrl": "https://github.com/WebmasterFenrir/FenrirWebsite"
+        },
+        "title": "={{ $('Google Sheets Trigger').item.json['Wat is uw naam?'] }} - {{ $('Google Sheets Trigger').item.json['wat voor soort issue?'].split('(')[0] }}",
+        "body": "=AI CAN MAKE ISSUES, read carefull\n\n{{ $json.stdout }} \n---\nissue that is send in by the user:\n{{ $('Google Sheets Trigger').item.json['beschrijf de issue'] }}",
+        "labels": [
+          {
+            "label": "={{ $('Google Sheets Trigger').item.json['wat voor soort issue?'].split('(')[0] }}"
+          }
+        ],
+        "assignees": []
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        528,
+        304
+      ],
+      "id": "9a299a7b-2fea-40c4-ab07-82f7993f2ecd",
+      "name": "Create an issue",
+      "webhookId": "02f92dcf-5cb6-4cd8-81c6-3eea0c3ddc6e",
+      "credentials": {
+        "githubApi": {
+          "id": "GqUexgb3NXa7ugTC",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0da59ae2-5c59-4450-9523-e81ee42f0fc2",
+              "leftValue": "={{ $json['wat voor soort issue?'].split('(')[0] }}",
+              "rightValue": "\"spelling mistake\"",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        160
+      ],
+      "id": "b9520663-5f6f-4a66-9e5a-8cb33c626c4a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "command": "=aichat $(find ./FenrirWebsite/src/apps/website -type f \\\n  \\( -name \"*.ts\" -o -name \"*.tsx\" -o -name \"*.vue\" -o -name \"*.js\" -o -name \"*.jsx\" -o -name \"*.css\" -o -name \"*.html\" -o -name \"*.json\" \\) \\\n  | sed 's/^/-f /') \\ \"describe the issue for developers so they more know in technical terms what the issue can be in what file. the dir is /home/nils/FenrirWebsite. only return a good formated issue for on github. the issue that the user describes the issue as {{ $json['beschrijf de issue'] }}\"",
+        "cwd": "/home/nils"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        352,
+        272
+      ],
+      "id": "f1a7de23-7740-4e03-b97b-ce4139c37231",
+      "name": "Execute a command",
+      "credentials": {
+        "sshPassword": {
+          "id": "4tNJH5j78rDfbDWA",
+          "name": "SSH Password account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "owner": {
+          "__rl": true,
+          "value": "WebmasterFenrir",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "FenrirWebsite",
+          "mode": "list",
+          "cachedResultName": "FenrirWebsite",
+          "cachedResultUrl": "https://github.com/WebmasterFenrir/FenrirWebsite"
+        },
+        "title": "={{ $('Google Sheets Trigger').item.json['Wat is uw naam?'] }} - {{ $('Google Sheets Trigger').item.json['wat voor soort issue?'].split('(')[0] }}",
+        "body": "={{ $json.stdout }}",
+        "labels": [
+          {
+            "label": "={{ $('Google Sheets Trigger').item.json['wat voor soort issue?'].split('(')[0] }}"
+          }
+        ],
+        "assignees": []
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        528,
+        144
+      ],
+      "id": "eb1202e8-2998-4c6b-8132-d135f9b54ace",
+      "name": "Create an issue1",
+      "webhookId": "02f92dcf-5cb6-4cd8-81c6-3eea0c3ddc6e",
+      "credentials": {
+        "githubApi": {
+          "id": "GqUexgb3NXa7ugTC",
+          "name": "GitHub account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Google Sheets Trigger": [
+      {
+        "json": {
+          "Tijdstempel": "23-2-2026 0:05:08",
+          "E-mailadres": "dramwot46@gmail.com",
+          "Wat is uw naam?": "Nils Mertens",
+          "wat voor soort issue?": "breaking bug(werkt totaal niet, totaal niet bruikbaar)",
+          "beschrijf de issue": "de button lees meer werkt niet, dit zou iets moeten doen. de mail in de footer moet een andere mail zijn",
+          "toon een screenshot van de issue": ""
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an issue": {
+      "main": [
+        []
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Create an issue1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute a command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a command": {
+      "main": [
+        [
+          {
+            "node": "Create an issue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "19762035-549c-4d76-a78a-8f284e92a842",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8023711550ea986c186ba8312e351465b9ebdf10c0a168822fadf5a9375a4423"
+  },
+  "id": "leGrJ5wr0l8wchbo",
+  "tags": [
+    {
+      "createdAt": "2026-02-22T03:19:43.059Z",
+      "updatedAt": "2026-02-22T03:19:43.059Z",
+      "id": "qNuCnSC6dKakTyq5",
+      "name": "ai"
+    }
+  ]
+}

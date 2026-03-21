@@ -59,7 +59,7 @@ export default function SponsorComponent({ data,variant = "default" }: SponSorIn
             </p>
             
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">
-              {mainName} <span className="text-purple-500">{lastName}</span>
+              {mainName} <span className="text-accent-foreground">{lastName}</span>
             </h2>
 
             <div className="space-y-4">

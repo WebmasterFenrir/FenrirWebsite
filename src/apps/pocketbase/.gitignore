@@ -1,1 +1,3 @@
+# Runtime data — commit pb_migrations/ but never pb_data/
+pb_data/
 **.db
