@@ -1,12 +1,12 @@
 import PreasidiumLidPrevieuw from "./PreasidiumLidComponent"
-import { PreasidiumYearsData } from "../../../data"
+import type { PreasidiumYear } from "../../../types"
 import Spacer from "./ui/spacer"
 
-export default function PreasidiumPrevieuwHomePage()
+export default function PreasidiumPrevieuwHomePage({ data }: { data: PreasidiumYear[] })
 {
     return (
         <>
-            {PreasidiumYearsData.map((e, i) => 
+            {data.map((e, i) =>
                 <>
                     {<h2 className="text-6xl sm:text-6xl lg:text-7xl text-accent-foreground font-bold mb-8">{e.startDate} <span className="text-white">-</span> <span className="text-accent">{e.endDate}</span></h2>}
                     <div key={i} className="grid gap-8 sm:grid-cols-2 md:grid-cols-3 w-full">

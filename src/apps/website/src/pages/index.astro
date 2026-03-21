@@ -4,11 +4,13 @@ import { Button } from '../components/ui/button';
 import MainLayout from '@/layouts/main.astro';
 import ContextLayout from '@/layouts/context.astro'
 import SponsorList from '@/components/SponsorList';
-import { SponsorData } from '../../../data';
 import SectionHeader from '@/components/ui/sectionHeader';
-import PreasidiumLidPrevieuw from '@/components/PreasidiumLidComponent';
 import PreasidiumPrevieuwHomePage from '@/components/PreasidiumPrevieuwHomePage';
 import Spacer from '@/components/ui/spacer';
+import { getSponsors, getPreasidiumYears } from '@/lib/pocketbase';
+
+const [sponsors, years] = await Promise.all([getSponsors(), getPreasidiumYears()]);
+const previewLeden = years[0]?.PreasidiumLeden.slice(0, 2) ?? [];
 ---
 <style>
 	.hero{
@@ -52,12 +54,12 @@ import Spacer from '@/components/ui/spacer';
 	<Spacer/>
 	<SectionHeader title='Huidig Preasidium' description='Het preasidium is het kloppend hart van Fenrir dat elk evenemt zijn best doet om er weer een geweldige tijd van te maken.'/>
 	<div>
-		<PreasidiumPrevieuwHomePage client:load/>
+		<PreasidiumPrevieuwHomePage leden={previewLeden} client:load/>
 	</div>
 	<Spacer/>
     <SectionHeader title='Onze Sponsors' description='Dankzij deze partners kunnen we onze werking verder uitbouwen en onze studenten blijven ondersteunen.'/>
     <div class="w-full">
-        <SponsorList data={SponsorData}/>
+        <SponsorList data={sponsors}/>
     </div>
 
 		</ContextLayout>

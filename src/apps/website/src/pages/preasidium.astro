@@ -4,6 +4,9 @@ import ContextLayout from '@/layouts/context.astro'
 import PreasidiumList from '@/components/PreasidiumList';
 import Spacer from '@/components/ui/spacer';
 import SectionHeader from '@/components/ui/sectionHeader';
+import { getPreasidiumYears } from '@/lib/pocketbase';
+
+const years = await getPreasidiumYears();
 ---
 <MainLayout title="Preasidium">
   <div class="grid place-items-center mt-30 md:mt-0 md:h-[50vh] content-center">
@@ -59,7 +62,7 @@ import SectionHeader from '@/components/ui/sectionHeader';
         title="Preasidium Per Jaar"
         description="Bekijk wie er de voorbije jaren mee de schouders onder Fenrir zette."
       />
-      <PreasidiumList client:load />
+      <PreasidiumList data={years} client:load />
     </div>
   </ContextLayout>
 </MainLayout>

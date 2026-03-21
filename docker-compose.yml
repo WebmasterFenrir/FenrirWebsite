@@ -36,11 +36,15 @@ services:
     build: .
     container_name: fenrir-site
     expose:
-      - "80"
+      - "4321"
     environment:
       - VIRTUAL_HOST=fenrirclub.be,www.fenrirclub.be
+      - VIRTUAL_PORT=4321
       - LETSENCRYPT_HOST=fenrirclub.be,www.fenrirclub.be
       - LETSENCRYPT_EMAIL=webmaster@fenrirclub.be
+      - PB_URL=http://pocketbase:3000
+      - PB_EMAIL=${PB_ADMIN_EMAIL}
+      - PB_PASSWORD=${PB_ADMIN_PASSWORD}
     depends_on:
       pocketbase:
         condition: service_healthy
@@ -56,6 +60,10 @@ services:
       PB_ADMIN_EMAIL: ${PB_ADMIN_EMAIL}
       PB_ADMIN_PASSWORD: ${PB_ADMIN_PASSWORD}
       TZ: Europe/Berlin
+      VIRTUAL_HOST: pb.fenrirclub.be
+      VIRTUAL_PORT: 3000
+      LETSENCRYPT_HOST: pb.fenrirclub.be
+      LETSENCRYPT_EMAIL: webmaster@fenrirclub.be
     expose:
       - "3000"
     volumes:

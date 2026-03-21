@@ -16,9 +16,13 @@ services:
     build: .
     container_name: fenrir-site
     expose:
-      - "80"
+      - "4321"
     environment:
       - VIRTUAL_HOST=fenrir.nilsmertens.dev
+      - VIRTUAL_PORT=4321
+      - PB_URL=http://pocketbase:3000
+      - PB_EMAIL=${PB_ADMIN_EMAIL}
+      - PB_PASSWORD=${PB_ADMIN_PASSWORD}
     depends_on:
       pocketbase:
         condition: service_healthy
