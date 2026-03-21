@@ -11,6 +11,8 @@ FROM node:lts-alpine
 WORKDIR /app
 
 COPY --from=builder /app/apps/website/dist ./dist
+COPY --from=builder /app/apps/website/package.json ./package.json
+RUN npm install --omit=dev --ignore-scripts
 
 ENV HOST=0.0.0.0
 ENV PORT=4321
