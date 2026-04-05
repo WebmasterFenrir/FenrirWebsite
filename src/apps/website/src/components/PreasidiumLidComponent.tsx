@@ -12,7 +12,7 @@ export default function PreasidiumLidPrevieuw({ data }: PreasidiumLidPrevieuwint
   const roleYear = primaryRole.year;
   const imageSrc = !data.imageUrl || data.imageUrl.trim().length === 0
     ? `https://avatar.vercel.sh/${data.firstName}`
-    : `/images/preasidium/${data.imageUrl}`;
+    : `/images/praesidium/${data.imageUrl}`;
 
   return (
   <Dialog>
