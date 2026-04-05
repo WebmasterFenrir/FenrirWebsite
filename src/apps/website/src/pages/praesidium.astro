@@ -8,12 +8,12 @@ import { getPreasidiumYears } from '@/lib/pocketbase';
 
 const years = await getPreasidiumYears();
 ---
-<MainLayout title="Preasidium">
+<MainLayout title="Praesidium">
   <div class="grid place-items-center mt-30 md:mt-0 md:h-[50vh] content-center">
     <div class="text-center px-6">
-      <h1 class="text-6xl md:text-8xl text-white font-bold">Het Preasidium</h1>
+      <h1 class="text-6xl md:text-8xl text-white font-bold">Het Praesidium</h1>
       <h2 class="text-base sm:text-xl lg:text-2xl mt-4 text-white/90 font-medium max-w-3xl">
-        Het preasidium is het kloppend hart van Fenrir. Een team van gemotiveerde studenten
+        Het praesidium is het kloppend hart van Fenrir. Een team van gemotiveerde studenten
         dat activiteiten organiseert, nieuwe leden onthaalt en zorgt dat onze club blijft draaien.
       </h2>
     </div>
@@ -21,12 +21,12 @@ const years = await getPreasidiumYears();
   <ContextLayout>
     <div class="mx-auto px-6 sm:px-8 py-12 w-full">
       <SectionHeader
-        title="Wat Doet Het Preasidium"
+        title="Wat Doet Het Praesidium"
         description="Van planning tot promotie en van cantussen tot sport en cultuur: elk lid heeft een eigen rol en verantwoordelijkheid. Samen zorgen ze voor een warm welkom, een goed gevulde kalender en onvergetelijke momenten."
       />
         <div class="grid gap-6 text-zinc-200">
           <p>
-            Het preasidium bestaat uit verschillende functies zoals praeses, vice-praeses,
+            Het praesidium bestaat uit verschillende functies zoals praeses, vice-praeses,
             quaestor, ab-actis, cantor, feest, media, sport, schachtenmeester/-temmer,
             cultuur & ontspanning, mentor/meter/peter ... Elke functie draagt bij aan
             de werking van onze vereniging.
@@ -53,13 +53,13 @@ const years = await getPreasidiumYears();
           </ul>
           <p>
             Heb je vragen of wil je mee het verschil maken? Spreek iemand van het
-            preasidium aan tijdens een activiteit of stuur ons een berichtje via onze kanalen.
+            praesidium aan tijdens een activiteit of stuur ons een berichtje via onze kanalen.
           </p>
         </div>
 
       <Spacer />
       <SectionHeader
-        title="Preasidium Per Jaar"
+        title="Praesidium Per Jaar"
         description="Bekijk wie er de voorbije jaren mee de schouders onder Fenrir zette."
       />
       <PreasidiumList data={years} client:load />
