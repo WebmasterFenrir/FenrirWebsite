@@ -33,6 +33,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# PocketBase runtime data (bind mount for Docker)
+pb_data/
+
 # Misc
 .DS_Store
 *.pem
@@ -41,6 +44,7 @@ yarn-error.log*
 .idea/
 .vscode/
 
+.claude/
 # Test
 test-results/
 playwright-report/

@@ -5,9 +5,10 @@ import SectionHeader from "@/components/ui/sectionHeader";
 import Spacer from "@/components/ui/spacer";
 import Sponsordata from "@/components/SponsorPositivedata";
 import SponsorList from "@/components/SponsorList";
-import { SponsorData } from "../../../data";
 import { Button } from "../components/ui/button";
-import SponsorPositiveData from "@/components/SponsorPositivedata";
+import { getSponsors } from "@/lib/pocketbase";
+
+const sponsors = await getSponsors();
 ---
 
 <MainLayout title="Sponsors">
@@ -33,7 +34,7 @@ import SponsorPositiveData from "@/components/SponsorPositivedata";
                 description="Samen maken we meer mogelijk voor onze leden."
             />
             <div class="w-full">
-                <SponsorList data={SponsorData} />
+                <SponsorList data={sponsors} />
             </div>
 
             <Spacer />
@@ -89,26 +90,31 @@ import SponsorPositiveData from "@/components/SponsorPositivedata";
                         </p>
                     </li>
                 </ol>
-            </div>
-<div class="flex flex-col items-center justify-center text-center gap-8 mt-24 mb-12 w-full">
-  
-  <div class="space-y-4">
-    <h3 class="text-4xl md:text-6xl font-bold text-white tracking-tighter leading-none">
-      Interesse of <span class="text-purple-500">meer info?</span>
-    </h3>
-  </div>
+                <div
+                    class="flex flex-col items-center justify-center text-center gap-8 mt-24 mb-12 w-full"
+                >
+                    <div class="space-y-4">
+                        <h3
+                            class="text-4xl md:text-6xl font-bold text-white tracking-tighter leading-none"
+                        >
+                            Interesse of <span class="text-purple-500"
+                                >meer info?</span
+                            >
+                        </h3>
+                    </div>
 
-  <div class="flex flex-col items-center">
-    <a href="mailto:pr@fenrirclub.be" class="group">
-      <Button 
-        variant="secondary" 
-        className="p-6 sm:p-6 lg:p-8 text-2xl lg:text-4xl"
-      >
-        Neem contact op
-      </Button>
-    </a>
-  </div>
-  
-</div>
-    </ContextLayout>
-</MainLayout>
+                    <div class="flex flex-col items-center">
+                        <a href="mailto:pr@fenrirclub.be" class="group">
+                            <Button
+                                variant="secondary"
+                                className="p-6 sm:p-6 lg:p-8 text-2xl lg:text-4xl"
+                            >
+                                Neem contact op
+                            </Button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ContextLayout></MainLayout
+>
