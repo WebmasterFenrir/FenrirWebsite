@@ -3,10 +3,10 @@ import type { PreasidiumLid, PreasidiumYear, Sponsors } from '../../../types'
 
 
 async function createClient() {
-    const pb = new PocketBase(import.meta.env.PB_URL ?? 'http://127.0.0.1:8090')
+    const pb = new PocketBase(import.meta.env.PB_URL ?? process.env.PB_URL ?? 'http://127.0.0.1:8090')
     await pb.collection('_superusers').authWithPassword(
-        import.meta.env.PB_EMAIL,
-        import.meta.env.PB_PASSWORD,
+        import.meta.env.PB_EMAIL ?? process.env.PB_EMAIL,
+        import.meta.env.PB_PASSWORD ?? process.env.PB_PASSWORD,
     )
     return pb
 }
