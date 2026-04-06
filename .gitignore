@@ -45,3 +45,6 @@ pb_data/
 .vscode/
 
 .claude/
+# Test
+test-results/
+playwright-report/
