@@ -7,11 +7,15 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
+    "test": "turbo run test",
+    "test:e2e": "playwright test",
     "start:feedback": "bun run --cwd apps/feedback-api start:feedback",
     "start:silent": "bun run --cwd apps/feedback-api start:silent"
   },
 
   "devDependencies": {
+    "@playwright/test": "latest",
+    "@types/node": "latest",
     "prettier": "^3.7.4",
     "turbo": "^2.8.3",
     "typescript": "5.9.2"

@@ -40,3 +40,7 @@ yarn-error.log*
 # IDE's
 .idea/
 .vscode/
+
+# Test
+test-results/
+playwright-report/
