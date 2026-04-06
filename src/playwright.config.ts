@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
@@ -18,7 +19,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "bun --cwd ./apps/website run dev",
+    command: process.env.CI
+      ? "bun --cwd ./apps/website run preview"
+      : "bun --cwd ./apps/website run dev",
     url: "http://localhost:4321",
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
