@@ -13,16 +13,70 @@ const [sponsors, years] = await Promise.all([getSponsors(), getPreasidiumYears()
 const previewLeden = years[0]?.PreasidiumLeden.slice(0, 2) ?? [];
 ---
 <style>
-	.hero{
+	.hero {
 		background: linear-gradient(rgba(93,63,211,0.6), rgb(12, 10, 9)), url('../../images/hero.jpg') center/cover no-repeat;
+	}
+
+	@keyframes fadeInUp {
+		from {
+			opacity: 0;
+			transform: translateY(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.hero-title {
+		opacity: 0;
+		animation: fadeInUp 0.7s ease-out forwards;
+	}
+
+	.hero-subtitle {
+		opacity: 0;
+		animation: fadeInUp 0.7s ease-out 0.15s forwards;
+	}
+
+	.hero-cta {
+		opacity: 0;
+		animation: fadeInUp 0.7s ease-out 0.3s forwards;
+	}
+
+	@keyframes heroBtnShake {
+		/* shake happens in the first ~15%, rest is a pause */
+		0%        { transform: rotate(0deg); }
+		2%        { transform: rotate(-4deg); }
+		4%        { transform: rotate(4deg); }
+		6%        { transform: rotate(-3deg); }
+		8%        { transform: rotate(3deg); }
+		10%       { transform: rotate(-1deg); }
+		12%       { transform: rotate(1deg); }
+		14%, 100% { transform: rotate(0deg); }
+	}
+
+	.hero-btn {
+		transition: transform 0.18s ease, box-shadow 0.18s ease !important;
+		animation: heroBtnShake 4s ease-in-out 1.8s infinite;
+	}
+
+	.hero-btn:hover {
+		transform: translateY(-3px) scale(1.04);
+		box-shadow: 0 8px 32px oklch(0.627 0.265 303.9 / 0.55);
+		animation-play-state: paused;
+	}
+
+	.hero-btn:active {
+		transform: translateY(0) scale(0.97);
+		box-shadow: 0 2px 8px oklch(0.627 0.265 303.9 / 0.3);
 	}
 </style>
 <MainLayout title="Fenrir Antwerpen">
 		<div class="grid place-items-center h-screen content-center hero">
-			<h1 class="text-4xl sm:text-6xl lg:text-8xl text-white font-bold">Fenrir Antwerpen</h1>
-			<h2 class="text-lg sm:text-2xl lg:text-4xl mt-5 text-white font-medium">De vriendelijkste club van Antwerpen!</h2>
-			<span class="flex flex-col sm:flex-row w-3/6 sm:w-max gap-3 sm:gap-4 mt-4">
-				<a href="https://docs.google.com/forms/d/e/1FAIpQLSdaEL-QgBllK1SMC0Ckwrr98dDxFbch5TijesD71YsS8t5g4g/viewform?usp=sharing&ouid=100528290258116040611"><Button variant="default" className='w-full sm:w-auto p-6 sm:p-6 lg:p-8 text-2xl lg:text-4xl'>Word lid!</Button></a>
+			<h1 class="hero-title text-4xl sm:text-6xl lg:text-8xl text-white font-bold">Fenrir Antwerpen</h1>
+			<h2 class="hero-subtitle text-lg sm:text-2xl lg:text-4xl mt-5 text-white font-medium">De vriendelijkste club van Antwerpen!</h2>
+			<span class="hero-cta flex flex-col sm:flex-row w-3/6 sm:w-max gap-3 sm:gap-4 mt-4">
+				<a href="https://docs.google.com/forms/d/e/1FAIpQLSdaEL-QgBllK1SMC0Ckwrr98dDxFbch5TijesD71YsS8t5g4g/viewform?usp=sharing&ouid=100528290258116040611"><Button variant="default" className='hero-btn w-full sm:w-auto p-6 sm:p-6 lg:p-8 text-2xl lg:text-4xl'>Word lid!</Button></a>
 			</span>
 		</div>
 		<ContextLayout>

@@ -2,18 +2,45 @@
 import MainLayout from '@/layouts/main.astro';
 import ContextLayout from '@/layouts/context.astro';
 import SectionHeader from '@/components/ui/sectionHeader';
-import ImageCarousel from '@/components/carousel/Carousel';
 import Spacer from '@/components/ui/spacer';
 ---
 
+<style>
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .page-hero {
+    background: radial-gradient(ellipse at 50% 0%, oklch(0.627 0.265 303.9 / 0.18) 0%, transparent 70%);
+  }
+
+  .page-hero-title {
+    animation: fadeInUp 0.7s ease-out both;
+  }
+
+  .page-hero-subtitle {
+    animation: fadeInUp 0.7s ease-out 0.15s both;
+  }
+
+  .page-hero-line {
+    animation: fadeInUp 0.7s ease-out 0.25s both;
+    width: 60px;
+    height: 2px;
+    background: oklch(0.627 0.265 303.9 / 0.6);
+    margin: 1.5rem auto 0;
+    border-radius: 999px;
+  }
+</style>
 <MainLayout title="Over ons">
-    
-  <div class="grid place-items-center mt-30 md:mt-0 md:h-[50vh] content-center">
+
+  <div class="page-hero grid place-items-center pt-30 md:pt-0 min-h-[50vh] content-center">
     <div class="text-center px-6">
-      <h1 class="text-6xl md:text-8xl text-white font-bold">Over Ons</h1>
-      <h2 class="text-base sm:text-xl lg:text-2xl mt-4 text-white/90 font-medium max-w-3xl">
+      <h1 class="page-hero-title text-6xl md:text-8xl text-white font-bold">Over Ons</h1>
+      <h2 class="page-hero-subtitle text-base sm:text-xl lg:text-2xl mt-4 text-white/90 font-medium max-w-3xl">
         Lees meer over onze geschiedenis, roots in Brugge en Antwerpen, en de mythische oorsprong van onze naam.
       </h2>
+      <div class="page-hero-line"></div>
     </div>
   </div>
   <ContextLayout>
