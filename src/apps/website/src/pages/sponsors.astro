@@ -11,20 +11,91 @@ import { getSponsors } from "@/lib/pocketbase";
 const sponsors = await getSponsors();
 ---
 
+<style>
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-hero {
+        background: radial-gradient(ellipse at 50% 0%, oklch(0.627 0.265 303.9 / 0.18) 0%, transparent 70%);
+    }
+
+    .page-hero-title {
+        animation: fadeInUp 0.7s ease-out both;
+    }
+
+    .page-hero-subtitle {
+        animation: fadeInUp 0.7s ease-out 0.15s both;
+    }
+
+    .page-hero-line {
+        animation: fadeInUp 0.7s ease-out 0.25s both;
+        width: 60px;
+        height: 2px;
+        background: oklch(0.627 0.265 303.9 / 0.6);
+        margin: 1.5rem auto 0;
+        border-radius: 999px;
+    }
+
+    @keyframes contactShine {
+        from { left: -80%; }
+        to { left: 130%; }
+    }
+
+    .contact-btn {
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, letter-spacing 0.2s ease !important;
+    }
+
+    .contact-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -80%;
+        width: 55%;
+        height: 100%;
+        background: linear-gradient(
+            to right,
+            transparent 0%,
+            oklch(1 0 0 / 0.2) 50%,
+            transparent 100%
+        );
+        transform: skewX(-15deg);
+        pointer-events: none;
+    }
+
+    .contact-btn:hover::before {
+        animation: contactShine 0.55s ease forwards;
+    }
+
+    .contact-btn:hover {
+        transform: translateY(-4px) scale(1.04);
+        box-shadow: 0 12px 40px oklch(0.879 0.169 91.6 / 0.45);
+        letter-spacing: 0.02em;
+    }
+
+    .contact-btn:active {
+        transform: translateY(0) scale(0.97);
+        box-shadow: 0 2px 10px oklch(0.879 0.169 91.6 / 0.25);
+    }
+</style>
 <MainLayout title="Sponsors">
     <div
-        class="grid place-items-center mt-30 md:mt-0 md:h-[50vh] content-center"
+        class="page-hero grid place-items-center pt-30 md:pt-0 min-h-[50vh] content-center"
     >
         <div class="text-center px-6">
-            <h1 class="text-6xl md:text-8xl text-white font-bold">
+            <h1 class="page-hero-title text-6xl md:text-8xl text-white font-bold">
                 Onze Sponsors
             </h1>
             <h2
-                class="text-base sm:text-xl lg:text-2xl mt-4 text-white/90 font-medium max-w-3xl"
+                class="page-hero-subtitle text-base sm:text-xl lg:text-2xl mt-4 text-white/90 font-medium max-w-3xl"
             >
                 Dankzij deze geweldige partners kunnen wij onze werking
                 uitbouwen en onze studenten ondersteunen.
             </h2>
+            <div class="page-hero-line"></div>
         </div>
     </div>
     <ContextLayout>
@@ -107,7 +178,7 @@ const sponsors = await getSponsors();
                         <a href="mailto:pr@fenrirclub.be" class="group">
                             <Button
                                 variant="secondary"
-                                className="p-6 sm:p-6 lg:p-8 text-2xl lg:text-4xl"
+                                className="contact-btn p-6 sm:p-6 lg:p-8 text-2xl lg:text-4xl"
                             >
                                 Neem contact op
                             </Button>
