@@ -1,0 +1,40 @@
+---
+import MainLayout from '@/layouts/main.astro';
+---
+
+<style>
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-glow {
+    background: radial-gradient(ellipse at 50% 0%, oklch(0.627 0.265 303.9 / 0.18) 0%, transparent 70%);
+  }
+
+  .fade-1 { animation: fadeInUp 0.6s ease-out both; }
+  .fade-2 { animation: fadeInUp 0.6s ease-out 0.15s both; }
+  .fade-3 { animation: fadeInUp 0.6s ease-out 0.3s both; }
+</style>
+
+<MainLayout title="404 – Pagina niet gevonden">
+  <div class="hero-glow min-h-[80vh] grid place-items-center px-6">
+    <div class="text-center flex flex-col items-center gap-6">
+      <img
+        src="/images/404.png"
+        alt="404 – pagina niet gevonden"
+        class="fade-1 w-64 sm:w-80 md:w-96 object-contain rounded-sm"
+      />
+      <h1 class="fade-2 text-5xl md:text-7xl font-bold text-white">Pagina niet gevonden</h1>
+      <p class="fade-3 text-base sm:text-lg text-white/70 max-w-md">
+        Deze pagina bestaat niet of werd verplaatst. Ga terug naar de homepagina.
+      </p>
+      <a
+        href="/"
+        class="fade-3 inline-flex items-center gap-2 rounded-xl bg-primary px-10 py-4 text-lg font-semibold text-primary-foreground transition-opacity hover:opacity-80"
+      >
+        Terug naar home
+      </a>
+    </div>
+  </div>
+</MainLayout>
