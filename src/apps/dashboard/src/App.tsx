@@ -1,139 +1,86 @@
-import React, { useState, useEffect } from 'react';
-import pb from './lib/pocketbase';
-import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import Login from './components/Login';
-import ProtectedRoute from './components/ProtectedRoute';
-import ProfileSetup from './components/ProfileSetup';
-import AdminUserAdd from './components/AdminUserAdd';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react'
+import pb from './lib/pocketbase'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import Login from './components/Login'
+import ProtectedRoute from './components/ProtectedRoute'
+import ProfileSetup from './components/ProfileSetup'
+import { AppLayout } from './components/layout/AppLayout'
+import { OverviewPage } from './components/pages/OverviewPage'
+import { YearsPage } from './components/pages/YearsPage'
+import { SponsorsPage } from './components/pages/SponsorsPage'
+import { PeoplePage } from './components/pages/PeoplePage'
+import { AdminUsersPage } from './components/pages/AdminUsersPage'
 
-const SUPERUSER_EMAIL = 'webmaster@fenrirclub.be';
-
-const DashboardHome: React.FC<{ user: any; isSuperuser: boolean }> = ({ user, isSuperuser }) => {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    pb.authStore.clear();
-    navigate('/login');
-  };
-
-  return (
-    <div className="p-6 flex flex-col gap-4">
-      <h1 className="text-2xl font-bold">Dashboard</h1>
-      <p className="text-muted-foreground">Welcome, {user.name || user.email}</p>
-      <div className="flex gap-2">
-        {isSuperuser && (
-          <Button asChild variant="outline">
-            <Link to="/admin">Admin Panel</Link>
-          </Button>
-        )}
-        <Button variant="destructive" onClick={handleLogout}>
-          Logout
-        </Button>
-      </div>
-    </div>
-  );
-};
-
-const AdminDashboard: React.FC = () => {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    pb.authStore.clear();
-    navigate('/login');
-  };
-
-  return (
-    <div className="p-6 flex flex-col gap-4">
-      <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-      <AdminUserAdd />
-      <div className="flex gap-2 mt-4">
-        <Button asChild variant="outline">
-          <Link to="/">Back to Dashboard</Link>
-        </Button>
-        <Button variant="destructive" onClick={handleLogout}>
-          Logout
-        </Button>
-      </div>
-    </div>
-  );
-};
+const SUPERUSER_EMAIL = 'webmaster@fenrirclub.be'
 
 export function App() {
-  const [user, setUser] = useState<any>(pb.authStore.isValid ? pb.authStore.record : null);
+  const [user, setUser] = useState<any>(pb.authStore.isValid ? pb.authStore.record : null)
 
   useEffect(() => {
-    const removeListener = pb.authStore.onChange(() => {
-      setUser(pb.authStore.isValid ? pb.authStore.record : null);
-    });
-    return () => removeListener();
-  }, []);
+    const remove = pb.authStore.onChange(() => {
+      setUser(pb.authStore.isValid ? pb.authStore.record : null)
+    })
+    return () => remove()
+  }, [])
 
-  const handleLoginSuccess = (userData: any) => {
-    setUser(userData);
-  };
+  const isAuthenticated = !!user
+  const isSuperuser = user?.email === SUPERUSER_EMAIL
+  const needsSetup = isAuthenticated && !user?.name
 
-  const handleSetupComplete = (updatedUser: Record<string, unknown>) => {
-    setUser(updatedUser);
-  };
-
-  const isAuthenticated = !!user;
-  const isSuperuser = user?.email === SUPERUSER_EMAIL;
-  const needsSetup = isAuthenticated && !user?.name;
+  const redirectIfAuth = isAuthenticated
+    ? <Navigate to={needsSetup ? '/setup' : '/'} replace />
+    : undefined
 
   return (
     <Router>
       <Routes>
+        {/* Public */}
         <Route
           path="/login"
-          element={
-            isAuthenticated
-              ? <Navigate to={needsSetup ? '/setup' : '/'} replace />
-              : <Login onLoginSuccess={handleLoginSuccess} />
-          }
+          element={redirectIfAuth ?? <Login onLoginSuccess={setUser} />}
         />
 
+        {/* First-time setup */}
         <Route
           path="/setup"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
               {needsSetup
-                ? <ProfileSetup user={user} onComplete={handleSetupComplete} />
-                : <Navigate to="/" replace />
-              }
+                ? <ProfileSetup user={user} onComplete={setUser} />
+                : <Navigate to="/" replace />}
             </ProtectedRoute>
           }
         />
 
+        {/* Dashboard shell — all authenticated pages live inside */}
         <Route
-          path="/"
           element={
             <ProtectedRoute isAuthenticated={isAuthenticated}>
-              {needsSetup
-                ? <Navigate to="/setup" replace />
-                : <DashboardHome user={user} isSuperuser={isSuperuser} />
-              }
+              {needsSetup ? <Navigate to="/setup" replace /> : <AppLayout />}
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<OverviewPage />} />
+          <Route path="years" element={<YearsPage />} />
+          <Route path="sponsors" element={<SponsorsPage />} />
+          <Route path="people" element={<PeoplePage />} />
+          <Route
+            path="admin/users"
+            element={
+              isSuperuser
+                ? <AdminUsersPage />
+                : <Navigate to="/" replace />
+            }
+          />
+        </Route>
 
         <Route
-          path="/admin"
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated} requireSuperuser isSuperuser={isSuperuser}>
-              {needsSetup
-                ? <Navigate to="/setup" replace />
-                : <AdminDashboard />
-              }
-            </ProtectedRoute>
-          }
+          path="*"
+          element={<Navigate to={isAuthenticated ? (needsSetup ? '/setup' : '/') : '/login'} replace />}
         />
-
-        <Route path="*" element={<Navigate to={isAuthenticated ? (needsSetup ? '/setup' : '/') : '/login'} replace />} />
       </Routes>
     </Router>
-  );
+  )
 }
 
-export default App;
+export default App
