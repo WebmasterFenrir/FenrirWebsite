@@ -9,6 +9,14 @@ export interface Person {
   imageUrl?: string
 }
 
+export interface PersonFunctie {
+  id: string
+  yearId: string
+  yearLabel: string
+  roleId: string
+  roleName: string
+}
+
 export type PersonCreate = Omit<Person, 'id'>
 export type PersonUpdate = Partial<PersonCreate>
 
@@ -25,5 +33,33 @@ export async function updatePerson(id: string, data: PersonUpdate): Promise<Pers
 }
 
 export async function deletePerson(id: string): Promise<void> {
+  const functies = await pb.collection('preasidium_jaar_functies').getFullList({ filter: `lid = "${id}"` })
+  await Promise.all(functies.map(f => pb.collection('preasidium_jaar_functies').delete(f.id)))
   await pb.collection('preasidium_leden').delete(id)
+}
+
+export async function getPersonFuncties(personId: string): Promise<PersonFunctie[]> {
+  const records = await pb.collection('preasidium_jaar_functies').getFullList({
+    filter: `lid = "${personId}"`,
+    expand: 'year,role',
+  })
+  return records.map(r => ({
+    id: r.id,
+    yearId: r.year,
+    yearLabel: `${r.expand!.year.startDate} – ${r.expand!.year.endDate}`,
+    roleId: r.role,
+    roleName: r.expand!.role.name,
+  }))
+}
+
+export async function addPersonFunctie(personId: string, yearId: string, roleId: string): Promise<void> {
+  await pb.collection('preasidium_jaar_functies').create({ lid: personId, year: yearId, role: roleId })
+}
+
+export async function removePersonFunctie(functieId: string): Promise<void> {
+  await pb.collection('preasidium_jaar_functies').delete(functieId)
+}
+
+export async function getRollen(): Promise<{ id: string; name: string }[]> {
+  return pb.collection('preasidium_rollen').getFullList({ sort: 'name' })
 }

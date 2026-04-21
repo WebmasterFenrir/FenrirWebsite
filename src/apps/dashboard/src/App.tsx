@@ -10,8 +10,8 @@ import { YearsPage } from './components/pages/YearsPage'
 import { SponsorsPage } from './components/pages/SponsorsPage'
 import { PeoplePage } from './components/pages/PeoplePage'
 import { AdminUsersPage } from './components/pages/AdminUsersPage'
-
-const SUPERUSER_EMAIL = 'webmaster@fenrirclub.be'
+import { RoleContext } from './lib/RoleContext'
+import { can, type Role } from './lib/roles'
 
 export function App() {
   const [user, setUser] = useState<any>(pb.authStore.isValid ? pb.authStore.record : null)
@@ -24,7 +24,7 @@ export function App() {
   }, [])
 
   const isAuthenticated = !!user
-  const isSuperuser = user?.email === SUPERUSER_EMAIL
+  const role: Role | undefined = user?.role
   const needsSetup = isAuthenticated && !user?.name
 
   const redirectIfAuth = isAuthenticated
@@ -32,54 +32,53 @@ export function App() {
     : undefined
 
   return (
-    <Router>
-      <Routes>
-        {/* Public */}
-        <Route
-          path="/login"
-          element={redirectIfAuth ?? <Login onLoginSuccess={setUser} />}
-        />
-
-        {/* First-time setup */}
-        <Route
-          path="/setup"
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
-              {needsSetup
-                ? <ProfileSetup user={user} onComplete={setUser} />
-                : <Navigate to="/" replace />}
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Dashboard shell — all authenticated pages live inside */}
-        <Route
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
-              {needsSetup ? <Navigate to="/setup" replace /> : <AppLayout />}
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<OverviewPage />} />
-          <Route path="years" element={<YearsPage />} />
-          <Route path="sponsors" element={<SponsorsPage />} />
-          <Route path="people" element={<PeoplePage />} />
+    <RoleContext.Provider value={{ role, can: (action) => can(role, action) }}>
+      <Router>
+        <Routes>
           <Route
-            path="admin/users"
+            path="/login"
+            element={redirectIfAuth ?? <Login onLoginSuccess={setUser} />}
+          />
+
+          <Route
+            path="/setup"
             element={
-              isSuperuser
-                ? <AdminUsersPage />
-                : <Navigate to="/" replace />
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                {needsSetup
+                  ? <ProfileSetup user={user} onComplete={setUser} />
+                  : <Navigate to="/" replace />}
+              </ProtectedRoute>
             }
           />
-        </Route>
 
-        <Route
-          path="*"
-          element={<Navigate to={isAuthenticated ? (needsSetup ? '/setup' : '/') : '/login'} replace />}
-        />
-      </Routes>
-    </Router>
+          <Route
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                {needsSetup ? <Navigate to="/setup" replace /> : <AppLayout />}
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<OverviewPage />} />
+            <Route path="years" element={<YearsPage />} />
+            <Route path="sponsors" element={<SponsorsPage />} />
+            <Route path="people" element={<PeoplePage />} />
+            <Route
+              path="admin/users"
+              element={
+                can(role, 'manageUsers')
+                  ? <AdminUsersPage />
+                  : <Navigate to="/" replace />
+              }
+            />
+          </Route>
+
+          <Route
+            path="*"
+            element={<Navigate to={isAuthenticated ? (needsSetup ? '/setup' : '/') : '/login'} replace />}
+          />
+        </Routes>
+      </Router>
+    </RoleContext.Provider>
   )
 }
 

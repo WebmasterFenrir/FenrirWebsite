@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import { Plus, Pencil, Trash2, Users } from 'lucide-react'
+import { Plus, Pencil, Trash2, Users, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
 import {
   Dialog,
   DialogContent,
@@ -28,9 +30,16 @@ import {
   createPerson,
   updatePerson,
   deletePerson,
+  getPersonFuncties,
+  addPersonFunctie,
+  removePersonFunctie,
+  getRollen,
   type Person,
   type PersonCreate,
+  type PersonFunctie,
 } from '@/lib/db/people'
+import { getYears, type Year } from '@/lib/db/years'
+import { useRole } from '@/lib/RoleContext'
 
 const emptyForm: PersonCreate = {
   externalId: 0,
@@ -41,6 +50,7 @@ const emptyForm: PersonCreate = {
 }
 
 export function PeoplePage() {
+  const { can } = useRole()
   const [people, setPeople] = useState<Person[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -49,6 +59,14 @@ export function PeoplePage() {
   const [form, setForm] = useState<PersonCreate>(emptyForm)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+
+  // year/role connections
+  const [functies, setFuncties] = useState<PersonFunctie[]>([])
+  const [years, setYears] = useState<Year[]>([])
+  const [rollen, setRollen] = useState<{ id: string; name: string }[]>([])
+  const [newYearId, setNewYearId] = useState('')
+  const [newRoleId, setNewRoleId] = useState('')
+  const [addingFunctie, setAddingFunctie] = useState(false)
 
   const load = () => {
     setLoading(true)
@@ -62,8 +80,13 @@ export function PeoplePage() {
   const openCreate = () => {
     setEditing(null)
     setForm(emptyForm)
+    setFuncties([])
     setError('')
     setDialogOpen(true)
+    Promise.all([getYears(), getRollen()]).then(([y, r]) => {
+      setYears(y)
+      setRollen(r)
+    })
   }
 
   const openEdit = (person: Person) => {
@@ -75,8 +98,16 @@ export function PeoplePage() {
       description: person.description ?? '',
       imageUrl: person.imageUrl ?? '',
     })
+    setFuncties([])
+    setNewYearId('')
+    setNewRoleId('')
     setError('')
     setDialogOpen(true)
+    Promise.all([getYears(), getRollen(), getPersonFuncties(person.id)]).then(([y, r, f]) => {
+      setYears(y)
+      setRollen(r)
+      setFuncties(f)
+    })
   }
 
   const handleSave = async (e: React.FormEvent) => {
@@ -109,6 +140,25 @@ export function PeoplePage() {
     }
   }
 
+  const handleAddFunctie = async () => {
+    if (!editing || !newYearId || !newRoleId) return
+    setAddingFunctie(true)
+    try {
+      await addPersonFunctie(editing.id, newYearId, newRoleId)
+      const updated = await getPersonFuncties(editing.id)
+      setFuncties(updated)
+      setNewYearId('')
+      setNewRoleId('')
+    } finally {
+      setAddingFunctie(false)
+    }
+  }
+
+  const handleRemoveFunctie = async (functieId: string) => {
+    await removePersonFunctie(functieId)
+    setFuncties(f => f.filter(x => x.id !== functieId))
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -116,9 +166,11 @@ export function PeoplePage() {
           <h1 className="text-2xl font-bold tracking-tight">People</h1>
           <p className="text-sm text-muted-foreground mt-1">Manage presidium members.</p>
         </div>
-        <Button onClick={openCreate} size="sm" className="gap-1.5">
-          <Plus className="size-4" /> Add Person
-        </Button>
+        {can('write') && (
+          <Button onClick={openCreate} size="sm" className="gap-1.5">
+            <Plus className="size-4" /> Add Person
+          </Button>
+        )}
       </div>
 
       <Card>
@@ -138,6 +190,7 @@ export function PeoplePage() {
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>ID</TableHead>
+                  <TableHead>Image URL</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead className="w-24 text-right">Actions</TableHead>
                 </TableRow>
@@ -154,26 +207,29 @@ export function PeoplePage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground">{person.externalId}</TableCell>
-                    <TableCell className="max-w-[220px] truncate text-muted-foreground">
+                    <TableCell className="max-w-40 truncate text-muted-foreground">
+                      {person.imageUrl || '—'}
+                    </TableCell>
+                    <TableCell className="max-w-55 truncate text-muted-foreground">
                       {person.description || '—'}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => openEdit(person)}
-                        >
-                          <Pencil className="size-3.5" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => setDeleteId(person.id)}
-                        >
-                          <Trash2 className="size-3.5" />
-                        </Button>
+                        {can('write') && (
+                          <Button variant="ghost" size="icon-sm" onClick={() => openEdit(person)}>
+                            <Pencil className="size-3.5" />
+                          </Button>
+                        )}
+                        {can('delete') && (
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => setDeleteId(person.id)}
+                          >
+                            <Trash2 className="size-3.5" />
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -186,7 +242,7 @@ export function PeoplePage() {
 
       {/* Create / Edit dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>{editing ? 'Edit Person' : 'Add Person'}</DialogTitle>
           </DialogHeader>
@@ -225,7 +281,7 @@ export function PeoplePage() {
               <Label htmlFor="imageUrl">Image URL</Label>
               <Input
                 id="imageUrl"
-                placeholder="https://…"
+                placeholder="e.g. nils2025.jpg"
                 value={form.imageUrl}
                 onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
               />
@@ -237,9 +293,75 @@ export function PeoplePage() {
                 placeholder="Short bio…"
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                rows={3}
+                rows={2}
               />
             </div>
+
+            {/* Year/role connections — only shown when editing an existing person */}
+            {editing && (
+              <>
+                <Separator />
+                <div className="flex flex-col gap-2">
+                  <Label>Year connections</Label>
+                  {functies.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No year connections yet.</p>
+                  ) : (
+                    <div className="flex flex-col gap-1">
+                      {functies.map(f => (
+                        <div key={f.id} className="flex items-center justify-between rounded-md border px-3 py-1.5 text-sm">
+                          <span>{f.yearLabel} — <span className="text-muted-foreground">{f.roleName}</span></span>
+                          {can('write') && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveFunctie(f.id)}
+                              className="ml-2 text-destructive hover:text-destructive/80"
+                            >
+                              <X className="size-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {can('write') && (
+                    <div className="flex gap-2 pt-1">
+                      <Select value={newYearId} onValueChange={setNewYearId}>
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Year" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {years.map(y => (
+                            <SelectItem key={y.id} value={y.id}>
+                              {y.startDate} – {y.endDate}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Select value={newRoleId} onValueChange={setNewRoleId}>
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {rollen.map(r => (
+                            <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={!newYearId || !newRoleId || addingFunctie}
+                        onClick={handleAddFunctie}
+                      >
+                        <Plus className="size-3.5" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+
             {error && <p className="text-xs text-destructive">{error}</p>}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
@@ -259,7 +381,7 @@ export function PeoplePage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete person?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this person. This action cannot be undone.
+              This will permanently delete this person and remove them from all years. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

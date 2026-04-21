@@ -1,6 +1,7 @@
 import React from 'react'
 import { NavLink, useNavigate, Outlet, useLocation } from 'react-router-dom'
 import pb from '@/lib/pocketbase'
+import { useRole } from '@/lib/RoleContext'
 import {
   Sidebar,
   SidebarContent,
@@ -28,8 +29,6 @@ import {
   Shield,
 } from 'lucide-react'
 
-const SUPERUSER_EMAIL = 'webmaster@fenrirclub.be'
-
 interface NavItem {
   label: string
   to: string
@@ -51,7 +50,7 @@ export function AppLayout() {
   const navigate = useNavigate()
   const location = useLocation()
   const user = pb.authStore.record
-  const isSuperuser = user?.email === SUPERUSER_EMAIL
+  const { can } = useRole()
 
   const handleLogout = () => {
     pb.authStore.clear()
@@ -103,7 +102,7 @@ export function AppLayout() {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          {isSuperuser && (
+          {can('manageUsers') && (
             <>
               <SidebarSeparator />
               <SidebarGroup>
