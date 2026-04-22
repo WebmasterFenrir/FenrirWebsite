@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
 import {
   Dialog,
   DialogContent,
@@ -77,7 +76,9 @@ export function PeoplePage() {
       .finally(() => setLoading(false))
   }
 
-  useEffect(load, [])
+  useEffect(() => {
+    getPeople().then(setPeople).finally(() => setLoading(false))
+  }, [])
 
   const loadSidePanelData = (personId?: string) => {
     Promise.all([getYears(), getRollen()]).then(([y, r]) => {
@@ -257,93 +258,61 @@ export function PeoplePage() {
 
       {/* Create / Edit dialog */}
       <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) handleClose() }}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>{editing ? 'Edit Person' : createdPersonId ? 'Person Created' : 'Add Person'}</DialogTitle>
           </DialogHeader>
 
-          {/* Person fields — hide after create so user focuses on year connections */}
-          {!createdPersonId && (
-            <form onSubmit={handleSave} className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input
-                    id="firstName"
-                    value={form.firstName}
-                    onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-                    required
-                  />
+          {editing ? (
+            /* Editing: 2-column — form left, year connections right */
+            <div className="grid grid-cols-2 gap-8">
+              <form onSubmit={handleSave} className="flex flex-col gap-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input id="firstName" value={form.firstName}
+                      onChange={(e) => setForm({ ...form, firstName: e.target.value })} required />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input id="lastName" value={form.lastName}
+                      onChange={(e) => setForm({ ...form, lastName: e.target.value })} required />
+                  </div>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input
-                    id="lastName"
-                    value={form.lastName}
-                    onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-                    required
-                  />
+                  <Label htmlFor="externalId">External ID</Label>
+                  <Input id="externalId" type="number" value={form.externalId}
+                    onChange={(e) => setForm({ ...form, externalId: Number(e.target.value) })} required />
                 </div>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="externalId">External ID</Label>
-                <Input
-                  id="externalId"
-                  type="number"
-                  value={form.externalId}
-                  onChange={(e) => setForm({ ...form, externalId: Number(e.target.value) })}
-                  required
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="imageUrl">Image URL</Label>
-                <Input
-                  id="imageUrl"
-                  placeholder="e.g. nils2025.jpg"
-                  value={form.imageUrl}
-                  onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Short bio…"
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  rows={2}
-                />
-              </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="imageUrl">Image URL</Label>
+                  <Input id="imageUrl" placeholder="e.g. nils2025.jpg" value={form.imageUrl}
+                    onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea id="description" placeholder="Short bio…" value={form.description}
+                    onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} />
+                </div>
+                {error && <p className="text-xs text-destructive">{error}</p>}
+                <DialogFooter className="mt-auto">
+                  <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>
+                  <Button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
+                </DialogFooter>
+              </form>
 
-              {error && <p className="text-xs text-destructive">{error}</p>}
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>
-                <Button type="submit" disabled={saving}>
-                  {saving ? 'Saving…' : editing ? 'Save' : 'Create & Add to Years'}
-                </Button>
-              </DialogFooter>
-            </form>
-          )}
-
-          {/* Year/role connections — shown after person exists (edit or just created) */}
-          {(editing || createdPersonId) && (
-            <>
-              {editing && <Separator />}
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-3 border-l pl-8">
                 <Label>Year connections</Label>
                 {functies.length === 0 ? (
                   <p className="text-xs text-muted-foreground">No year connections yet.</p>
                 ) : (
-                  <div className="flex flex-col gap-1 max-h-48 overflow-y-auto pr-1">
+                  <div className="flex flex-col gap-1 max-h-64 overflow-y-auto pr-1">
                     {functies.map(f => (
                       <div key={f.id} className="flex items-center justify-between rounded-md border px-3 py-1.5 text-sm">
                         <span>{f.yearLabel} — <span className="text-muted-foreground">{f.roleName}</span></span>
                         {can('write') && (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveFunctie(f.id)}
-                            className="ml-2 text-destructive hover:text-destructive/80"
-                          >
+                          <button type="button" onClick={() => handleRemoveFunctie(f.id)}
+                            className="ml-2 text-muted-foreground hover:text-destructive">
                             <X className="size-3.5" />
                           </button>
                         )}
@@ -351,7 +320,6 @@ export function PeoplePage() {
                     ))}
                   </div>
                 )}
-
                 {can('write') && (
                   <div className="flex gap-2 pt-1">
                     <Select value={newYearId} onValueChange={setNewYearId}>
@@ -359,11 +327,7 @@ export function PeoplePage() {
                         <SelectValue placeholder="Year" />
                       </SelectTrigger>
                       <SelectContent>
-                        {years.map(y => (
-                          <SelectItem key={y.id} value={y.id}>
-                            {y.yearId}
-                          </SelectItem>
-                        ))}
+                        {years.map(y => <SelectItem key={y.id} value={y.id}>{y.yearId}</SelectItem>)}
                       </SelectContent>
                     </Select>
                     <Select value={newRoleId} onValueChange={setNewRoleId}>
@@ -371,29 +335,106 @@ export function PeoplePage() {
                         <SelectValue placeholder="Role" />
                       </SelectTrigger>
                       <SelectContent>
-                        {rollen.map(r => (
-                          <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
-                        ))}
+                        {rollen.map(r => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
-                    <Button
-                      type="button"
-                      size="sm"
-                      disabled={!newYearId || !newRoleId || addingFunctie}
-                      onClick={handleAddFunctie}
-                    >
+                    <Button type="button" size="sm" disabled={!newYearId || !newRoleId || addingFunctie}
+                      onClick={handleAddFunctie}>
                       <Plus className="size-3.5" />
                     </Button>
                   </div>
                 )}
-
-                {createdPersonId && (
-                  <div className="flex justify-end pt-2">
-                    <Button type="button" onClick={handleClose}>Done</Button>
-                  </div>
-                )}
               </div>
-            </>
+            </div>
+          ) : !createdPersonId ? (
+            /* Creating new person */
+            <form onSubmit={handleSave} className="flex flex-col gap-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input id="firstName" value={form.firstName}
+                    onChange={(e) => setForm({ ...form, firstName: e.target.value })} required />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input id="lastName" value={form.lastName}
+                    onChange={(e) => setForm({ ...form, lastName: e.target.value })} required />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="externalId">External ID</Label>
+                  <Input id="externalId" type="number" value={form.externalId}
+                    onChange={(e) => setForm({ ...form, externalId: Number(e.target.value) })} required />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="imageUrl">Image URL</Label>
+                  <Input id="imageUrl" placeholder="e.g. nils2025.jpg" value={form.imageUrl}
+                    onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} />
+                </div>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="description">Description</Label>
+                <Textarea id="description" placeholder="Short bio…" value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} />
+              </div>
+              {error && <p className="text-xs text-destructive">{error}</p>}
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>
+                <Button type="submit" disabled={saving}>
+                  {saving ? 'Saving…' : 'Create & Add to Years'}
+                </Button>
+              </DialogFooter>
+            </form>
+          ) : (
+            /* After create — add year connections */
+            <div className="flex flex-col gap-3">
+              <Label>Year connections</Label>
+              {functies.length === 0 ? (
+                <p className="text-xs text-muted-foreground">No year connections yet. Add one below.</p>
+              ) : (
+                <div className="flex flex-col gap-1 max-h-64 overflow-y-auto pr-1">
+                  {functies.map(f => (
+                    <div key={f.id} className="flex items-center justify-between rounded-md border px-3 py-1.5 text-sm">
+                      <span>{f.yearLabel} — <span className="text-muted-foreground">{f.roleName}</span></span>
+                      {can('write') && (
+                        <button type="button" onClick={() => handleRemoveFunctie(f.id)}
+                          className="ml-2 text-muted-foreground hover:text-destructive">
+                          <X className="size-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {can('write') && (
+                <div className="flex gap-2 pt-1">
+                  <Select value={newYearId} onValueChange={setNewYearId}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {years.map(y => <SelectItem key={y.id} value={y.id}>{y.yearId}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                  <Select value={newRoleId} onValueChange={setNewRoleId}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {rollen.map(r => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                  <Button type="button" size="sm" disabled={!newYearId || !newRoleId || addingFunctie}
+                    onClick={handleAddFunctie}>
+                    <Plus className="size-3.5" />
+                  </Button>
+                </div>
+              )}
+              <div className="flex justify-end pt-2">
+                <Button type="button" onClick={handleClose}>Done</Button>
+              </div>
+            </div>
           )}
         </DialogContent>
       </Dialog>

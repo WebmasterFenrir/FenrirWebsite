@@ -300,7 +300,7 @@ export function YearsPage() {
 
       {/* ── Members dialog ────────────────────────────────────────────────────── */}
       <Dialog open={!!membersYear} onOpenChange={(o) => { if (!o) closeMembers() }}>
-        <DialogContent className="w-[1/2]">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>{membersYear?.yearId}</DialogTitle>
             <p className="text-sm text-muted-foreground">
@@ -316,7 +316,7 @@ export function YearsPage() {
               onChange={(e) => setMemberSearch(e.target.value)}
             />
 
-            <div className="flex flex-col gap-1 max-h-80 overflow-y-auto pr-1">
+            <div className="flex flex-col gap-1 max-h-96 overflow-y-auto pr-1">
               {functiesLoading ? (
                 <p className="text-sm text-muted-foreground py-4 text-center">Loading…</p>
               ) : functies.length === 0 ? (
@@ -379,7 +379,7 @@ export function YearsPage() {
 
       {/* ── Edit / Create dialog ──────────────────────────────────────────────── */}
       <Dialog open={editOpen} onOpenChange={(open) => { if (!open) setEditOpen(false) }}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>{editingYear ? `Edit Year ${editingYear.yearId}` : 'Add Year'}</DialogTitle>
           </DialogHeader>
@@ -389,15 +389,17 @@ export function YearsPage() {
               <Input id="yearId" type="number" value={form.yearId}
                 onChange={(e) => setForm({ ...form, yearId: Number(e.target.value) })} required />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="startDate">Start Date</Label>
-              <Input id="startDate" placeholder="e.g. 2025-09-01" value={form.startDate}
-                onChange={(e) => setForm({ ...form, startDate: e.target.value })} required />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="endDate">End Date</Label>
-              <Input id="endDate" placeholder="e.g. 2026-08-31" value={form.endDate}
-                onChange={(e) => setForm({ ...form, endDate: e.target.value })} required />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="startDate">Start Date</Label>
+                <Input id="startDate" placeholder="e.g. 2025-09-01" value={form.startDate}
+                  onChange={(e) => setForm({ ...form, startDate: e.target.value })} required />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="endDate">End Date</Label>
+                <Input id="endDate" placeholder="e.g. 2026-08-31" value={form.endDate}
+                  onChange={(e) => setForm({ ...form, endDate: e.target.value })} required />
+              </div>
             </div>
             {editError && <p className="text-xs text-destructive">{editError}</p>}
             <DialogFooter>
