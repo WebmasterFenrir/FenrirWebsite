@@ -240,6 +240,7 @@ export function YearsPage() {
         )}
       </div>
 
+      <div className="rounded-lg overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center py-16 text-sm text-muted-foreground">Loading…</div>
           ) : years.length === 0 ? (
@@ -295,6 +296,7 @@ export function YearsPage() {
               </TableBody>
             </Table>
           )}
+      </div>
 
       {/* ── Members dialog ────────────────────────────────────────────────────── */}
       <Dialog open={!!membersYear} onOpenChange={(o) => { if (!o) closeMembers() }}>

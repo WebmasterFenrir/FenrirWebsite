@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import AdminUserAdd from '@/components/AdminUserAdd'
 
 export function AdminUsersPage() {
@@ -9,15 +8,10 @@ export function AdminUsersPage() {
         <p className="text-sm text-muted-foreground mt-1">Add new dashboard users.</p>
       </div>
 
-      <Card className="max-w-md">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Add User</CardTitle>
-          <CardDescription>Create a new account for a presidium member.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <AdminUserAdd />
-        </CardContent>
-      </Card>
+      <div className="max-w-md">
+        <p className="text-sm font-medium mb-3">Create a new account for a presidium member.</p>
+        <AdminUserAdd />
+      </div>
     </div>
   )
 }

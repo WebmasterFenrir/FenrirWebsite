@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
@@ -191,72 +190,70 @@ export function PeoplePage() {
         )}
       </div>
 
-      <Card>
-        <CardContent className="p-0">
-          {loading ? (
-            <div className="flex items-center justify-center py-16 text-sm text-muted-foreground">
-              Loading…
-            </div>
-          ) : people.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-2 py-16 text-muted-foreground">
-              <Users className="size-8 opacity-30" />
-              <p className="text-sm">No people yet.</p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Image URL</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="w-24 text-right">Actions</TableHead>
+      <div className="rounded-lg overflow-hidden">
+        {loading ? (
+          <div className="flex items-center justify-center py-16 text-sm text-muted-foreground">
+            Loading…
+          </div>
+        ) : people.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-2 py-16 text-muted-foreground">
+            <Users className="size-8 opacity-30" />
+            <p className="text-sm">No people yet.</p>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>ID</TableHead>
+                <TableHead>Image URL</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead className="w-24 text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {people.map((person) => (
+                <TableRow key={person.id}>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary">
+                        {person.firstName[0]}
+                      </div>
+                      {person.firstName} {person.lastName}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">{person.externalId}</TableCell>
+                  <TableCell className="max-w-40 truncate text-muted-foreground">
+                    {person.imageUrl || '—'}
+                  </TableCell>
+                  <TableCell className="max-w-55 truncate text-muted-foreground">
+                    {person.description || '—'}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      {can('write') && (
+                        <Button variant="ghost" size="icon-sm" onClick={() => openEdit(person)}>
+                          <Pencil className="size-3.5" />
+                        </Button>
+                      )}
+                      {can('delete') && (
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => setDeleteId(person.id)}
+                        >
+                          <Trash2 className="size-3.5" />
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {people.map((person) => (
-                  <TableRow key={person.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2.5">
-                        <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary">
-                          {person.firstName[0]}
-                        </div>
-                        {person.firstName} {person.lastName}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{person.externalId}</TableCell>
-                    <TableCell className="max-w-40 truncate text-muted-foreground">
-                      {person.imageUrl || '—'}
-                    </TableCell>
-                    <TableCell className="max-w-55 truncate text-muted-foreground">
-                      {person.description || '—'}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        {can('write') && (
-                          <Button variant="ghost" size="icon-sm" onClick={() => openEdit(person)}>
-                            <Pencil className="size-3.5" />
-                          </Button>
-                        )}
-                        {can('delete') && (
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() => setDeleteId(person.id)}
-                          >
-                            <Trash2 className="size-3.5" />
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </div>
 
       {/* Create / Edit dialog */}
       <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) handleClose() }}>

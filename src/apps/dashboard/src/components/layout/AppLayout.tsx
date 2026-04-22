@@ -26,7 +26,6 @@ import {
   Users,
   UserPlus,
   LogOut,
-  Shield,
 } from 'lucide-react'
 
 interface NavItem {
@@ -67,11 +66,13 @@ export function AppLayout() {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton size="lg" asChild>
-                <div className="flex items-center gap-2">
-                  <div className="flex size-8 items-center justify-center rounded-lg bg-primary/20">
-                    <Shield className="size-4 text-primary" />
-                  </div>
-                  <div className="flex flex-col leading-tight">
+                <div className="flex items-center gap-2.5">
+                  <img
+                    src="/schild.png"
+                    alt="Fenrir"
+                    className="size-8 shrink-0 object-contain"
+                  />
+                  <div className="flex flex-col leading-tight group-data-[collapsible=icon]:hidden">
                     <span className="text-sm font-semibold">Fenrir</span>
                     <span className="text-xs text-muted-foreground">Dashboard</span>
                   </div>
@@ -84,12 +85,21 @@ export function AppLayout() {
         <SidebarContent>
           <SidebarGroup>
             <SidebarGroupContent>
-              <SidebarMenu>
+              <SidebarMenu className="gap-0.5">
                 {mainNav.map((item) => {
                   const Icon = item.icon
+                  const active = isActive(item.to)
                   return (
                     <SidebarMenuItem key={item.to}>
-                      <SidebarMenuButton asChild isActive={isActive(item.to)} tooltip={item.label}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={active}
+                        tooltip={item.label}
+                        className={active
+                          ? 'bg-primary/15! text-primary! hover:bg-primary/20! hover:text-primary!'
+                          : 'text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-transparent!'
+                        }
+                      >
                         <NavLink to={item.to} end={item.to === '/'}>
                           <Icon />
                           <span>{item.label}</span>
@@ -108,12 +118,21 @@ export function AppLayout() {
               <SidebarGroup>
                 <SidebarGroupLabel>Admin</SidebarGroupLabel>
                 <SidebarGroupContent>
-                  <SidebarMenu>
+                  <SidebarMenu className="gap-0.5">
                     {adminNav.map((item) => {
                       const Icon = item.icon
+                      const active = isActive(item.to)
                       return (
                         <SidebarMenuItem key={item.to}>
-                          <SidebarMenuButton asChild isActive={isActive(item.to)} tooltip={item.label}>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={active}
+                            tooltip={item.label}
+                            className={active
+                              ? '!bg-primary/15 !text-primary hover:!bg-primary/20 hover:!text-primary'
+                              : 'text-sidebar-foreground/60 hover:text-sidebar-foreground hover:!bg-transparent'
+                            }
+                          >
                             <NavLink to={item.to}>
                               <Icon />
                               <span>{item.label}</span>
@@ -129,19 +148,23 @@ export function AppLayout() {
           )}
         </SidebarContent>
 
-        <SidebarFooter>
-          <SidebarMenu>
+        <SidebarFooter className="border-t border-sidebar-border">
+          <SidebarMenu className="gap-0.5">
             <SidebarMenuItem>
-              <SidebarMenuButton size="lg" tooltip="Account">
+              <SidebarMenuButton
+                size="lg"
+                tooltip={user?.name || user?.email || 'Account'}
+                className="cursor-default hover:bg-transparent!"
+              >
                 <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-semibold text-primary">
                   {(user?.name || user?.email || '?')[0].toUpperCase()}
                 </div>
-                <div className="flex min-w-0 flex-col leading-tight">
-                  <span className="truncate text-xs font-medium">
+                <div className="flex min-w-0 flex-col leading-tight group-data-[collapsible=icon]:hidden">
+                  <span className="truncate text-xs font-medium text-sidebar-foreground">
                     {user?.name || user?.email}
                   </span>
                   {user?.name && (
-                    <span className="truncate text-[10px] text-muted-foreground">
+                    <span className="truncate text-[10px] text-sidebar-foreground/50">
                       {user.email}
                     </span>
                   )}
@@ -149,7 +172,11 @@ export function AppLayout() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton onClick={handleLogout} tooltip="Log out">
+              <SidebarMenuButton
+                onClick={handleLogout}
+                tooltip="Log out"
+                className="text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-transparent!"
+              >
                 <LogOut />
                 <span>Log out</span>
               </SidebarMenuButton>
