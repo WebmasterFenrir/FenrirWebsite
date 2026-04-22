@@ -67,6 +67,9 @@ export function PeoplePage() {
   const [newYearId, setNewYearId] = useState('')
   const [newRoleId, setNewRoleId] = useState('')
   const [addingFunctie, setAddingFunctie] = useState(false)
+  const [createdPersonId, setCreatedPersonId] = useState<string | null>(null)
+
+  const activePersonId = editing?.id ?? createdPersonId
 
   const load = () => {
     setLoading(true)
@@ -77,20 +80,32 @@ export function PeoplePage() {
 
   useEffect(load, [])
 
-  const openCreate = () => {
-    setEditing(null)
-    setForm(emptyForm)
-    setFuncties([])
-    setError('')
-    setDialogOpen(true)
+  const loadSidePanelData = (personId?: string) => {
     Promise.all([getYears(), getRollen()]).then(([y, r]) => {
       setYears(y)
       setRollen(r)
     })
+    if (personId) {
+      getPersonFuncties(personId).then(setFuncties)
+    } else {
+      setFuncties([])
+    }
+  }
+
+  const openCreate = () => {
+    setEditing(null)
+    setCreatedPersonId(null)
+    setForm(emptyForm)
+    setNewYearId('')
+    setNewRoleId('')
+    setError('')
+    setDialogOpen(true)
+    loadSidePanelData()
   }
 
   const openEdit = (person: Person) => {
     setEditing(person)
+    setCreatedPersonId(null)
     setForm({
       externalId: person.externalId,
       firstName: person.firstName,
@@ -98,16 +113,11 @@ export function PeoplePage() {
       description: person.description ?? '',
       imageUrl: person.imageUrl ?? '',
     })
-    setFuncties([])
     setNewYearId('')
     setNewRoleId('')
     setError('')
     setDialogOpen(true)
-    Promise.all([getYears(), getRollen(), getPersonFuncties(person.id)]).then(([y, r, f]) => {
-      setYears(y)
-      setRollen(r)
-      setFuncties(f)
-    })
+    loadSidePanelData(person.id)
   }
 
   const handleSave = async (e: React.FormEvent) => {
@@ -117,11 +127,13 @@ export function PeoplePage() {
     try {
       if (editing) {
         await updatePerson(editing.id, form)
+        setDialogOpen(false)
+        load()
       } else {
-        await createPerson(form)
+        const created = await createPerson(form)
+        setCreatedPersonId(created.id)
+        load()
       }
-      setDialogOpen(false)
-      load()
     } catch {
       setError('Failed to save. Please try again.')
     } finally {
@@ -141,11 +153,11 @@ export function PeoplePage() {
   }
 
   const handleAddFunctie = async () => {
-    if (!editing || !newYearId || !newRoleId) return
+    if (!activePersonId || !newYearId || !newRoleId) return
     setAddingFunctie(true)
     try {
-      await addPersonFunctie(editing.id, newYearId, newRoleId)
-      const updated = await getPersonFuncties(editing.id)
+      await addPersonFunctie(activePersonId, newYearId, newRoleId)
+      const updated = await getPersonFuncties(activePersonId)
       setFuncties(updated)
       setNewYearId('')
       setNewRoleId('')
@@ -157,6 +169,12 @@ export function PeoplePage() {
   const handleRemoveFunctie = async (functieId: string) => {
     await removePersonFunctie(functieId)
     setFuncties(f => f.filter(x => x.id !== functieId))
+  }
+
+  const handleClose = () => {
+    setDialogOpen(false)
+    setCreatedPersonId(null)
+    load()
   }
 
   return (
@@ -241,137 +259,145 @@ export function PeoplePage() {
       </Card>
 
       {/* Create / Edit dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) handleClose() }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editing ? 'Edit Person' : 'Add Person'}</DialogTitle>
+            <DialogTitle>{editing ? 'Edit Person' : createdPersonId ? 'Person Created' : 'Add Person'}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSave} className="flex flex-col gap-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input
-                  id="firstName"
-                  value={form.firstName}
-                  onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input
-                  id="lastName"
-                  value={form.lastName}
-                  onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-                  required
-                />
-              </div>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="externalId">External ID</Label>
-              <Input
-                id="externalId"
-                type="number"
-                value={form.externalId}
-                onChange={(e) => setForm({ ...form, externalId: Number(e.target.value) })}
-                required
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="imageUrl">Image URL</Label>
-              <Input
-                id="imageUrl"
-                placeholder="e.g. nils2025.jpg"
-                value={form.imageUrl}
-                onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                placeholder="Short bio…"
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-                rows={2}
-              />
-            </div>
 
-            {/* Year/role connections — only shown when editing an existing person */}
-            {editing && (
-              <>
-                <Separator />
-                <div className="flex flex-col gap-2">
-                  <Label>Year connections</Label>
-                  {functies.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">No year connections yet.</p>
-                  ) : (
-                    <div className="flex flex-col gap-1">
-                      {functies.map(f => (
-                        <div key={f.id} className="flex items-center justify-between rounded-md border px-3 py-1.5 text-sm">
-                          <span>{f.yearLabel} — <span className="text-muted-foreground">{f.roleName}</span></span>
-                          {can('write') && (
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveFunctie(f.id)}
-                              className="ml-2 text-destructive hover:text-destructive/80"
-                            >
-                              <X className="size-3.5" />
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {can('write') && (
-                    <div className="flex gap-2 pt-1">
-                      <Select value={newYearId} onValueChange={setNewYearId}>
-                        <SelectTrigger className="flex-1">
-                          <SelectValue placeholder="Year" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {years.map(y => (
-                            <SelectItem key={y.id} value={y.id}>
-                              {y.startDate} – {y.endDate}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Select value={newRoleId} onValueChange={setNewRoleId}>
-                        <SelectTrigger className="flex-1">
-                          <SelectValue placeholder="Role" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {rollen.map(r => (
-                            <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Button
-                        type="button"
-                        size="sm"
-                        disabled={!newYearId || !newRoleId || addingFunctie}
-                        onClick={handleAddFunctie}
-                      >
-                        <Plus className="size-3.5" />
-                      </Button>
-                    </div>
-                  )}
+          {/* Person fields — hide after create so user focuses on year connections */}
+          {!createdPersonId && (
+            <form onSubmit={handleSave} className="flex flex-col gap-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input
+                    id="firstName"
+                    value={form.firstName}
+                    onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                    required
+                  />
                 </div>
-              </>
-            )}
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input
+                    id="lastName"
+                    value={form.lastName}
+                    onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="externalId">External ID</Label>
+                <Input
+                  id="externalId"
+                  type="number"
+                  value={form.externalId}
+                  onChange={(e) => setForm({ ...form, externalId: Number(e.target.value) })}
+                  required
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="imageUrl">Image URL</Label>
+                <Input
+                  id="imageUrl"
+                  placeholder="e.g. nils2025.jpg"
+                  value={form.imageUrl}
+                  onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Short bio…"
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  rows={2}
+                />
+              </div>
 
-            {error && <p className="text-xs text-destructive">{error}</p>}
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={saving}>
-                {saving ? 'Saving…' : 'Save'}
-              </Button>
-            </DialogFooter>
-          </form>
+              {error && <p className="text-xs text-destructive">{error}</p>}
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>
+                <Button type="submit" disabled={saving}>
+                  {saving ? 'Saving…' : editing ? 'Save' : 'Create & Add to Years'}
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
+
+          {/* Year/role connections — shown after person exists (edit or just created) */}
+          {(editing || createdPersonId) && (
+            <>
+              {editing && <Separator />}
+              <div className="flex flex-col gap-2">
+                <Label>Year connections</Label>
+                {functies.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">No year connections yet.</p>
+                ) : (
+                  <div className="flex flex-col gap-1 max-h-48 overflow-y-auto pr-1">
+                    {functies.map(f => (
+                      <div key={f.id} className="flex items-center justify-between rounded-md border px-3 py-1.5 text-sm">
+                        <span>{f.yearLabel} — <span className="text-muted-foreground">{f.roleName}</span></span>
+                        {can('write') && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveFunctie(f.id)}
+                            className="ml-2 text-destructive hover:text-destructive/80"
+                          >
+                            <X className="size-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {can('write') && (
+                  <div className="flex gap-2 pt-1">
+                    <Select value={newYearId} onValueChange={setNewYearId}>
+                      <SelectTrigger className="flex-1">
+                        <SelectValue placeholder="Year" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {years.map(y => (
+                          <SelectItem key={y.id} value={y.id}>
+                            {y.yearId}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={newRoleId} onValueChange={setNewRoleId}>
+                      <SelectTrigger className="flex-1">
+                        <SelectValue placeholder="Role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {rollen.map(r => (
+                          <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={!newYearId || !newRoleId || addingFunctie}
+                      onClick={handleAddFunctie}
+                    >
+                      <Plus className="size-3.5" />
+                    </Button>
+                  </div>
+                )}
+
+                {createdPersonId && (
+                  <div className="flex justify-end pt-2">
+                    <Button type="button" onClick={handleClose}>Done</Button>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
 

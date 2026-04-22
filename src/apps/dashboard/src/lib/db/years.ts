@@ -40,15 +40,16 @@ export async function getYearFuncties(yearId: string): Promise<YearFunctie[]> {
   const records = await pb.collection('preasidium_jaar_functies').getFullList({
     filter: `year = "${yearId}"`,
     expand: 'lid,role',
-    sort: 'expand.role.name',
   })
-  return records.map(r => ({
-    id: r.id,
-    personId: r.lid,
-    personName: `${r.expand!.lid.firstName} ${r.expand!.lid.lastName}`,
-    roleId: r.role,
-    roleName: r.expand!.role.name,
-  }))
+  return records
+    .map(r => ({
+      id: r.id,
+      personId: r.lid,
+      personName: `${r.expand!.lid.firstName} ${r.expand!.lid.lastName}`,
+      roleId: r.role,
+      roleName: r.expand!.role.name,
+    }))
+    .sort((a, b) => a.roleName.localeCompare(b.roleName) || a.personName.localeCompare(b.personName))
 }
 
 export async function addYearFunctie(yearId: string, personId: string, roleId: string): Promise<void> {
@@ -57,4 +58,13 @@ export async function addYearFunctie(yearId: string, personId: string, roleId: s
 
 export async function removeYearFunctie(functieId: string): Promise<void> {
   await pb.collection('preasidium_jaar_functies').delete(functieId)
+}
+
+export async function getYearMemberCounts(): Promise<Record<string, number>> {
+  const records = await pb.collection('preasidium_jaar_functies').getFullList({ fields: 'year' })
+  const counts: Record<string, number> = {}
+  for (const r of records) {
+    counts[r.year] = (counts[r.year] ?? 0) + 1
+  }
+  return counts
 }
