@@ -18,15 +18,27 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
   ],
-  webServer: {
-    command: process.env.CI
-      ? "node ./apps/website/dist/server/entry.mjs"
-      : "bun --cwd ./apps/website run dev",
-    url: "http://localhost:4321",
-    reuseExistingServer: !process.env.CI,
-    timeout: 60_000,
-    env: process.env.CI
-      ? { PORT: "4321", HOST: "localhost" }
-      : {},
-  },
+  webServer: [
+    {
+      command: "node ./apps/e2e/mock-pocketbase.mjs",
+      url: "http://localhost:8090",
+      reuseExistingServer: !process.env.CI,
+      timeout: 10_000,
+    },
+    {
+      command: process.env.CI
+        ? "node ./apps/website/dist/server/entry.mjs"
+        : "bun --cwd ./apps/website run dev",
+      url: "http://localhost:4321",
+      reuseExistingServer: !process.env.CI,
+      timeout: 60_000,
+      env: {
+        PORT: "4321",
+        HOST: "localhost",
+        PB_URL: "http://localhost:8090",
+        PB_EMAIL: "ci@test.com",
+        PB_PASSWORD: "mock-password",
+      },
+    },
+  ],
 });
