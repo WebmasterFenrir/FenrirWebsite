@@ -21,7 +21,7 @@ export default defineConfig({
   webServer: [
     {
       command: "node ./apps/e2e/mock-pocketbase.mjs",
-      url: "http://localhost:8090",
+      url: "http://localhost:8090/api/health",
       reuseExistingServer: !process.env.CI,
       timeout: 10_000,
     },

@@ -10,6 +10,8 @@ const server = createServer((req, res) => {
     res.end(AUTH_OK)
   } else if (req.url?.includes('/api/collections/')) {
     res.end(EMPTY_LIST)
+  } else if (req.url === '/api/health') {
+    res.end(JSON.stringify({ code: 200, message: 'API is healthy.' }))
   } else {
     res.statusCode = 404
     res.end(JSON.stringify({ code: 404, message: 'Not found' }))
