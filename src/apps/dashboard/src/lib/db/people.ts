@@ -21,7 +21,7 @@ export type PersonCreate = Omit<Person, 'id'>
 export type PersonUpdate = Partial<PersonCreate>
 
 export async function getPeople(): Promise<Person[]> {
-  return pb.collection('preasidium_leden').getFullList<Person>({ sort: 'firstName,lastName' })
+  return pb.collection('preasidium_leden').getFullList<Person>({ sort: 'firstName,lastName', requestKey: null })
 }
 
 export async function createPerson(data: PersonCreate): Promise<Person> {
@@ -33,7 +33,7 @@ export async function updatePerson(id: string, data: PersonUpdate): Promise<Pers
 }
 
 export async function deletePerson(id: string): Promise<void> {
-  const functies = await pb.collection('preasidium_jaar_functies').getFullList({ filter: `lid = "${id}"` })
+  const functies = await pb.collection('preasidium_jaar_functies').getFullList({ filter: `lid = "${id}"`, requestKey: null })
   await Promise.all(functies.map(f => pb.collection('preasidium_jaar_functies').delete(f.id)))
   await pb.collection('preasidium_leden').delete(id)
 }
@@ -42,6 +42,7 @@ export async function getPersonFuncties(personId: string): Promise<PersonFunctie
   const records = await pb.collection('preasidium_jaar_functies').getFullList({
     filter: `lid = "${personId}"`,
     expand: 'year,role',
+    requestKey: null,
   })
   return records.map(r => ({
     id: r.id,
@@ -61,5 +62,5 @@ export async function removePersonFunctie(functieId: string): Promise<void> {
 }
 
 export async function getRollen(): Promise<{ id: string; name: string }[]> {
-  return pb.collection('preasidium_rollen').getFullList({ sort: 'name' })
+  return pb.collection('preasidium_rollen').getFullList({ sort: 'name', requestKey: null })
 }

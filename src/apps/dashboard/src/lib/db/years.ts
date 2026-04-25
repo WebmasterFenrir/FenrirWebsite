@@ -19,7 +19,7 @@ export type YearCreate = Omit<Year, 'id'>
 export type YearUpdate = Partial<YearCreate>
 
 export async function getYears(): Promise<Year[]> {
-  return pb.collection('preasidium_years').getFullList<Year>({ sort: '-yearId' })
+  return pb.collection('preasidium_years').getFullList<Year>({ sort: '-yearId', requestKey: null })
 }
 
 export async function createYear(data: YearCreate): Promise<Year> {
@@ -31,7 +31,7 @@ export async function updateYear(id: string, data: YearUpdate): Promise<Year> {
 }
 
 export async function deleteYear(id: string): Promise<void> {
-  const functies = await pb.collection('preasidium_jaar_functies').getFullList({ filter: `year = "${id}"` })
+  const functies = await pb.collection('preasidium_jaar_functies').getFullList({ filter: `year = "${id}"`, requestKey: null })
   await Promise.all(functies.map(f => pb.collection('preasidium_jaar_functies').delete(f.id)))
   await pb.collection('preasidium_years').delete(id)
 }
@@ -40,6 +40,7 @@ export async function getYearFuncties(yearId: string): Promise<YearFunctie[]> {
   const records = await pb.collection('preasidium_jaar_functies').getFullList({
     filter: `year = "${yearId}"`,
     expand: 'lid,role',
+    requestKey: null,
   })
   return records
     .map(r => ({
@@ -61,7 +62,7 @@ export async function removeYearFunctie(functieId: string): Promise<void> {
 }
 
 export async function getYearMemberCounts(): Promise<Record<string, number>> {
-  const records = await pb.collection('preasidium_jaar_functies').getFullList({ fields: 'year' })
+  const records = await pb.collection('preasidium_jaar_functies').getFullList({ fields: 'year', requestKey: null })
   const counts: Record<string, number> = {}
   for (const r of records) {
     counts[r.year] = (counts[r.year] ?? 0) + 1

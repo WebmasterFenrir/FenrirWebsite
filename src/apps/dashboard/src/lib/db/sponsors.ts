@@ -14,7 +14,7 @@ export type SponsorCreate = Omit<Sponsor, 'id'>
 export type SponsorUpdate = Partial<SponsorCreate>
 
 export async function getSponsors(): Promise<Sponsor[]> {
-  return pb.collection('sponsors').getFullList<Sponsor>({ sort: '-startYear,name' })
+  return pb.collection('sponsors').getFullList<Sponsor>({ sort: '-startYear,name', requestKey: null })
 }
 
 export async function createSponsor(data: SponsorCreate): Promise<Sponsor> {

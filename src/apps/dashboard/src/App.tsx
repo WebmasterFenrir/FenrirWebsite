@@ -20,6 +20,9 @@ export function App() {
     const remove = pb.authStore.onChange(() => {
       setUser(pb.authStore.isValid ? pb.authStore.record : null)
     })
+    if (pb.authStore.isValid) {
+      pb.collection('users').authRefresh().catch(() => pb.authStore.clear())
+    }
     return () => remove()
   }, [])
 

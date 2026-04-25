@@ -58,16 +58,12 @@ export function PeoplePage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
-  // year/role connections
   const [functies, setFuncties] = useState<PersonFunctie[]>([])
   const [years, setYears] = useState<Year[]>([])
   const [rollen, setRollen] = useState<{ id: string; name: string }[]>([])
   const [newYearId, setNewYearId] = useState('')
   const [newRoleId, setNewRoleId] = useState('')
   const [addingFunctie, setAddingFunctie] = useState(false)
-  const [createdPersonId, setCreatedPersonId] = useState<string | null>(null)
-
-  const activePersonId = editing?.id ?? createdPersonId
 
   const load = () => {
     setLoading(true)
@@ -80,32 +76,15 @@ export function PeoplePage() {
     getPeople().then(setPeople).finally(() => setLoading(false))
   }, [])
 
-  const loadSidePanelData = (personId?: string) => {
-    Promise.all([getYears(), getRollen()]).then(([y, r]) => {
-      setYears(y)
-      setRollen(r)
-    })
-    if (personId) {
-      getPersonFuncties(personId).then(setFuncties)
-    } else {
-      setFuncties([])
-    }
-  }
-
   const openCreate = () => {
     setEditing(null)
-    setCreatedPersonId(null)
     setForm(emptyForm)
-    setNewYearId('')
-    setNewRoleId('')
     setError('')
     setDialogOpen(true)
-    loadSidePanelData()
   }
 
   const openEdit = (person: Person) => {
     setEditing(person)
-    setCreatedPersonId(null)
     setForm({
       externalId: person.externalId,
       firstName: person.firstName,
@@ -116,8 +95,12 @@ export function PeoplePage() {
     setNewYearId('')
     setNewRoleId('')
     setError('')
+    Promise.all([getYears(), getRollen(), getPersonFuncties(person.id)]).then(([y, r, f]) => {
+      setYears(y)
+      setRollen(r)
+      setFuncties(f)
+    })
     setDialogOpen(true)
-    loadSidePanelData(person.id)
   }
 
   const handleSave = async (e: React.FormEvent) => {
@@ -127,13 +110,11 @@ export function PeoplePage() {
     try {
       if (editing) {
         await updatePerson(editing.id, form)
-        setDialogOpen(false)
-        load()
       } else {
-        const created = await createPerson(form)
-        setCreatedPersonId(created.id)
-        load()
+        await createPerson(form)
       }
+      setDialogOpen(false)
+      load()
     } catch {
       setError('Failed to save. Please try again.')
     } finally {
@@ -153,11 +134,11 @@ export function PeoplePage() {
   }
 
   const handleAddFunctie = async () => {
-    if (!activePersonId || !newYearId || !newRoleId) return
+    if (!editing || !newYearId || !newRoleId) return
     setAddingFunctie(true)
     try {
-      await addPersonFunctie(activePersonId, newYearId, newRoleId)
-      const updated = await getPersonFuncties(activePersonId)
+      await addPersonFunctie(editing.id, newYearId, newRoleId)
+      const updated = await getPersonFuncties(editing.id)
       setFuncties(updated)
       setNewYearId('')
       setNewRoleId('')
@@ -169,12 +150,6 @@ export function PeoplePage() {
   const handleRemoveFunctie = async (functieId: string) => {
     await removePersonFunctie(functieId)
     setFuncties(f => f.filter(x => x.id !== functieId))
-  }
-
-  const handleClose = () => {
-    setDialogOpen(false)
-    setCreatedPersonId(null)
-    load()
   }
 
   return (
@@ -257,56 +232,49 @@ export function PeoplePage() {
       </div>
 
       {/* Create / Edit dialog */}
-      <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) handleClose() }}>
-        <DialogContent className="max-w-3xl">
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>{editing ? 'Edit Person' : createdPersonId ? 'Person Created' : 'Add Person'}</DialogTitle>
+            <DialogTitle>{editing ? 'Edit Person' : 'Add Person'}</DialogTitle>
           </DialogHeader>
 
-          {editing ? (
-            /* Editing: 2-column — form left, year connections right */
-            <div className="grid grid-cols-2 gap-8">
-              <form onSubmit={handleSave} className="flex flex-col gap-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="firstName">First Name</Label>
-                    <Input id="firstName" value={form.firstName}
-                      onChange={(e) => setForm({ ...form, firstName: e.target.value })} required />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input id="lastName" value={form.lastName}
-                      onChange={(e) => setForm({ ...form, lastName: e.target.value })} required />
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="externalId">External ID</Label>
-                  <Input id="externalId" type="number" value={form.externalId}
-                    onChange={(e) => setForm({ ...form, externalId: Number(e.target.value) })} required />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="imageUrl">Image URL</Label>
-                  <Input id="imageUrl" placeholder="e.g. nils2025.jpg" value={form.imageUrl}
-                    onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea id="description" placeholder="Short bio…" value={form.description}
-                    onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} />
-                </div>
-                {error && <p className="text-xs text-destructive">{error}</p>}
-                <DialogFooter className="mt-auto">
-                  <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>
-                  <Button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
-                </DialogFooter>
-              </form>
+          <form onSubmit={handleSave} className="flex flex-col gap-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="firstName">First Name</Label>
+                <Input id="firstName" value={form.firstName}
+                  onChange={(e) => setForm({ ...form, firstName: e.target.value })} required />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input id="lastName" value={form.lastName}
+                  onChange={(e) => setForm({ ...form, lastName: e.target.value })} required />
+              </div>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="externalId">External ID</Label>
+              <Input id="externalId" type="number" value={form.externalId}
+                onChange={(e) => setForm({ ...form, externalId: Number(e.target.value) })} required />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="imageUrl">Image URL</Label>
+              <Input id="imageUrl" placeholder="e.g. nils2025.jpg" value={form.imageUrl}
+                onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="description">Description</Label>
+              <Textarea id="description" placeholder="Short bio…" value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} />
+            </div>
+            {error && <p className="text-xs text-destructive">{error}</p>}
 
-              <div className="flex flex-col gap-3 border-l pl-8">
+            {editing && (
+              <div className="flex flex-col gap-3 border-t pt-4">
                 <Label>Year connections</Label>
                 {functies.length === 0 ? (
                   <p className="text-xs text-muted-foreground">No year connections yet.</p>
                 ) : (
-                  <div className="flex flex-col gap-1 max-h-64 overflow-y-auto pr-1">
+                  <div className="flex flex-col gap-1 max-h-40 overflow-y-auto pr-1">
                     {functies.map(f => (
                       <div key={f.id} className="flex items-center justify-between rounded-md border px-3 py-1.5 text-sm">
                         <span>{f.yearLabel} — <span className="text-muted-foreground">{f.roleName}</span></span>
@@ -321,7 +289,7 @@ export function PeoplePage() {
                   </div>
                 )}
                 {can('write') && (
-                  <div className="flex gap-2 pt-1">
+                  <div className="flex gap-2">
                     <Select value={newYearId} onValueChange={setNewYearId}>
                       <SelectTrigger className="flex-1">
                         <SelectValue placeholder="Year" />
@@ -345,97 +313,13 @@ export function PeoplePage() {
                   </div>
                 )}
               </div>
-            </div>
-          ) : !createdPersonId ? (
-            /* Creating new person */
-            <form onSubmit={handleSave} className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input id="firstName" value={form.firstName}
-                    onChange={(e) => setForm({ ...form, firstName: e.target.value })} required />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input id="lastName" value={form.lastName}
-                    onChange={(e) => setForm({ ...form, lastName: e.target.value })} required />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="externalId">External ID</Label>
-                  <Input id="externalId" type="number" value={form.externalId}
-                    onChange={(e) => setForm({ ...form, externalId: Number(e.target.value) })} required />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="imageUrl">Image URL</Label>
-                  <Input id="imageUrl" placeholder="e.g. nils2025.jpg" value={form.imageUrl}
-                    onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} />
-                </div>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="description">Description</Label>
-                <Textarea id="description" placeholder="Short bio…" value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} />
-              </div>
-              {error && <p className="text-xs text-destructive">{error}</p>}
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>
-                <Button type="submit" disabled={saving}>
-                  {saving ? 'Saving…' : 'Create & Add to Years'}
-                </Button>
-              </DialogFooter>
-            </form>
-          ) : (
-            /* After create — add year connections */
-            <div className="flex flex-col gap-3">
-              <Label>Year connections</Label>
-              {functies.length === 0 ? (
-                <p className="text-xs text-muted-foreground">No year connections yet. Add one below.</p>
-              ) : (
-                <div className="flex flex-col gap-1 max-h-64 overflow-y-auto pr-1">
-                  {functies.map(f => (
-                    <div key={f.id} className="flex items-center justify-between rounded-md border px-3 py-1.5 text-sm">
-                      <span>{f.yearLabel} — <span className="text-muted-foreground">{f.roleName}</span></span>
-                      {can('write') && (
-                        <button type="button" onClick={() => handleRemoveFunctie(f.id)}
-                          className="ml-2 text-muted-foreground hover:text-destructive">
-                          <X className="size-3.5" />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-              {can('write') && (
-                <div className="flex gap-2 pt-1">
-                  <Select value={newYearId} onValueChange={setNewYearId}>
-                    <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Year" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {years.map(y => <SelectItem key={y.id} value={y.id}>{y.yearId}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  <Select value={newRoleId} onValueChange={setNewRoleId}>
-                    <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {rollen.map(r => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  <Button type="button" size="sm" disabled={!newYearId || !newRoleId || addingFunctie}
-                    onClick={handleAddFunctie}>
-                    <Plus className="size-3.5" />
-                  </Button>
-                </div>
-              )}
-              <div className="flex justify-end pt-2">
-                <Button type="button" onClick={handleClose}>Done</Button>
-              </div>
-            </div>
-          )}
+            )}
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save'}</Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 

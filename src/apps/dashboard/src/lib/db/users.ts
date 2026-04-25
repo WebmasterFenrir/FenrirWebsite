@@ -10,7 +10,7 @@ export interface DashboardUser {
 }
 
 export async function getUsers(): Promise<DashboardUser[]> {
-  return pb.collection('users').getFullList<DashboardUser>({ sort: 'email' })
+  return pb.collection('users').getFullList<DashboardUser>({ sort: 'email', requestKey: null })
 }
 
 export async function updateUserRole(id: string, role: Role | null): Promise<void> {
