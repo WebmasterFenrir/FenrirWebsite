@@ -3,11 +3,16 @@ import type { PreasidiumLid, PreasidiumYear, Sponsors } from '../../../types'
 
 
 async function createClient() {
-    const pb = new PocketBase(import.meta.env.PB_URL ?? process.env.PB_URL ?? 'http://127.0.0.1:8090')
-    await pb.collection('_superusers').authWithPassword(
-        import.meta.env.PB_EMAIL ?? process.env.PB_EMAIL,
-        import.meta.env.PB_PASSWORD ?? process.env.PB_PASSWORD,
-    )
+    const url = import.meta.env.PB_URL ?? process.env.PB_URL
+    const email = import.meta.env.PB_EMAIL ?? process.env.PB_EMAIL
+    const password = import.meta.env.PB_PASSWORD ?? process.env.PB_PASSWORD
+
+    if (!url || !email || !password) {
+        throw new Error('PocketBase not configured')
+    }
+
+    const pb = new PocketBase(url)
+    await pb.collection('_superusers').authWithPassword(email, password)
     return pb
 }
 
