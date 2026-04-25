@@ -20,10 +20,13 @@ export default defineConfig({
   ],
   webServer: {
     command: process.env.CI
-      ? "bun --cwd ./apps/website run preview"
+      ? "node ./apps/website/dist/server/entry.mjs"
       : "bun --cwd ./apps/website run dev",
     url: "http://localhost:4321",
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
+    env: process.env.CI
+      ? { PORT: "4321", HOST: "localhost" }
+      : {},
   },
 });
