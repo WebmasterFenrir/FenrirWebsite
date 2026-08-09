@@ -18,6 +18,9 @@ const server = createServer((req, res) => {
   }
 })
 
-server.listen(8090, 'localhost', () => {
-  console.log('Mock PocketBase running on http://localhost:8090')
+// Bind to 127.0.0.1 (not 'localhost') so the mock is reachable on the same
+// IPv4 address the app is configured with, regardless of how 'localhost'
+// resolves (::1 on some systems).
+server.listen(8090, '127.0.0.1', () => {
+  console.log('Mock PocketBase running on http://127.0.0.1:8090')
 })
