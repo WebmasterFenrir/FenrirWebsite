@@ -17,6 +17,11 @@ export default function SponsorComponent({ data,variant = "default" }: SponSorIn
   const mainName = words.length > 1 ? words.slice(0, -1).join(" ") : data.name;
   const lastName = words.length > 1 ? words[words.length - 1] : "";
 
+  // Images are served from PocketBase (full URL) or fall back to a neutral placeholder
+  const imageSrc = data.image && data.image.startsWith('http')
+    ? data.image
+    : 'data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1 1\"/>';
+
   const partnerWords: string[] = [
   "Geweldige",
   "Uitstekende",
@@ -43,7 +48,7 @@ export default function SponsorComponent({ data,variant = "default" }: SponSorIn
           */}
           <div className="w-full md:w-2/5 bg-white p-[3rem] md:p-[4rem] flex items-center justify-center min-h-[300px]">
             <img
-              src={`/images/sponsors/${data.image}`}
+              src={imageSrc}
               alt={`${data.name} logo`}
               /* Added h-auto and max-h to ensure the logo stays centered with 'even' air around it */
               className="w-full h-auto max-w-[200px] md:max-w-[260px] max-h-f object-contain"

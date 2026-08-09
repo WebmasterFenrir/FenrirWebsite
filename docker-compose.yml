@@ -43,11 +43,30 @@ services:
       - LETSENCRYPT_HOST=fenrirclub.be,www.fenrirclub.be
       - LETSENCRYPT_EMAIL=webmaster@fenrirclub.be
       - PB_URL=http://pocketbase:3000
+      - PUBLIC_PB_URL=https://pb.fenrirclub.be
       - PB_EMAIL=${PB_ADMIN_EMAIL}
       - PB_PASSWORD=${PB_ADMIN_PASSWORD}
     depends_on:
       pocketbase:
         condition: service_healthy
+    networks:
+      - proxy-net
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+      args:
+        VITE_PB_URL: https://pb.fenrirclub.be
+    container_name: fenrir-dashboard
+    expose:
+      - "80"
+    environment:
+      - VIRTUAL_HOST=dashboard.fenrirclub.be
+      - VIRTUAL_PORT=80
+      - LETSENCRYPT_HOST=dashboard.fenrirclub.be
+      - LETSENCRYPT_EMAIL=webmaster@fenrirclub.be
     networks:
       - proxy-net
     restart: unless-stopped
