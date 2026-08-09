@@ -1,5 +1,6 @@
-import PocketBase from 'pocketbase';
+import PocketBase from 'pocketbase'
 
-const pocketbase = new PocketBase('http://127.0.0.1:8090'); // replace with your actual PocketBase server URL
+const pbUrl = import.meta.env.VITE_PB_URL ?? 'http://127.0.0.1:8090'
+const pocketbase = new PocketBase(pbUrl)
 
-export default pocketbase;
+export default pocketbase

@@ -1,0 +1,31 @@
+# Dependencies — re-installed inside the image
+**/node_modules
+
+# Build output — generated inside the image
+**/dist
+**/.astro
+**/*.tsbuildinfo
+
+# Runtime data
+pb_data/
+**/pb_data
+
+# VCS / tooling
+.git
+.devcontainer
+.github
+.buffy
+.claude
+
+# Local docs / misc that don't belong in the image
+docs
+n8n
+previous page
+
+# Test artifacts
+test-results
+playwright-report
+
+# Env files (secrets are passed via compose)
+.env
+.env.local

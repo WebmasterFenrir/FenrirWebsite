@@ -1,14 +1,23 @@
-import PocketBase from 'pocketbase'
+import PocketBase, { type RecordModel } from 'pocketbase'
 import type { PreasidiumLid, PreasidiumYear, Sponsors } from '../../../types'
 
+const PB_URL = import.meta.env.PB_URL ?? process.env.PB_URL ?? 'http://127.0.0.1:8090'
+const PUBLIC_PB_URL = import.meta.env.PUBLIC_PB_URL ?? process.env.PUBLIC_PB_URL ?? PB_URL
+
+const publicPb = new PocketBase(PUBLIC_PB_URL)
 
 async function createClient() {
-    const pb = new PocketBase(import.meta.env.PB_URL ?? process.env.PB_URL ?? 'http://127.0.0.1:8090')
+    const pb = new PocketBase(PB_URL)
     await pb.collection('_superusers').authWithPassword(
         import.meta.env.PB_EMAIL ?? process.env.PB_EMAIL,
         import.meta.env.PB_PASSWORD ?? process.env.PB_PASSWORD,
     )
     return pb
+}
+
+function getFileUrl(record: RecordModel, filename: string | undefined) {
+    if (!filename) return undefined
+    return publicPb.files.getUrl(record, filename)
 }
 
 export async function getSponsors(): Promise<Sponsors[]> {
@@ -22,7 +31,8 @@ export async function getSponsors(): Promise<Sponsors[]> {
             if (!map.has(key)) {
                 map.set(key, { startYear: r.startYear, endYear: r.endYear, list: [] })
             }
-            map.get(key)!.list.push({ name: r.name, content: r.content, image: r.image, url: r.url })
+            const image = getFileUrl(r, r.imageFile) ?? ''
+            map.get(key)!.list.push({ name: r.name, content: r.content, image, url: r.url })
         }
         return [...map.values()]
     } catch (err) {
@@ -48,13 +58,14 @@ export async function getPreasidiumYears(): Promise<PreasidiumYear[]> {
             for (const f of yearFuncties) {
                 const lid = f.expand!.lid
                 if (!ledenMap.has(lid.id)) {
+                    const imageUrl = getFileUrl(lid, lid.imageFile) ?? ''
                     ledenMap.set(lid.id, {
                         id:            lid.externalId,
                         firstName:     lid.firstName,
                         lastName:      lid.lastName,
                         birthdate:     '',
                         description:   lid.description,
-                        imageUrl:      lid.imageUrl,
+                        imageUrl,
                         yearIds:       [y.yearId],
                         preasidiumRols: [],
                     })

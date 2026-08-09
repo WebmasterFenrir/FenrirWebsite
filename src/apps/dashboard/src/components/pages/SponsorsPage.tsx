@@ -28,21 +28,25 @@ import {
   updateSponsor,
   deleteSponsor,
   type Sponsor,
-  type SponsorCreate,
 } from '@/lib/db/sponsors'
 
 const currentYear = new Date().getFullYear()
-const emptyForm: SponsorCreate & { contentRaw: string } = {
+
+type FormState = {
+  name: string
+  contentRaw: string
+  url: string
+  startYear: number
+  endYear: number
+}
+
+const emptyForm: FormState = {
   name: '',
-  content: [],
   contentRaw: '',
-  image: '',
   url: '',
   startYear: currentYear,
   endYear: currentYear,
 }
-
-type FormState = SponsorCreate & { contentRaw: string }
 
 export function SponsorsPage() {
   const [sponsors, setSponsors] = useState<Sponsor[]>([])
@@ -51,6 +55,8 @@ export function SponsorsPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [editing, setEditing] = useState<Sponsor | null>(null)
   const [form, setForm] = useState<FormState>(emptyForm)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [removeImage, setRemoveImage] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -66,6 +72,8 @@ export function SponsorsPage() {
   const openCreate = () => {
     setEditing(null)
     setForm(emptyForm)
+    setSelectedFile(null)
+    setRemoveImage(false)
     setError('')
     setDialogOpen(true)
   }
@@ -74,13 +82,13 @@ export function SponsorsPage() {
     setEditing(sponsor)
     setForm({
       name: sponsor.name,
-      content: sponsor.content,
       contentRaw: (sponsor.content ?? []).join('\n'),
-      image: sponsor.image ?? '',
       url: sponsor.url ?? '',
       startYear: sponsor.startYear,
       endYear: sponsor.endYear,
     })
+    setSelectedFile(null)
+    setRemoveImage(false)
     setError('')
     setDialogOpen(true)
   }
@@ -89,16 +97,23 @@ export function SponsorsPage() {
     e.preventDefault()
     setSaving(true)
     setError('')
-    const { contentRaw, ...rest } = form
-    const payload: SponsorCreate = {
-      ...rest,
-      content: contentRaw.split('\n').map((s) => s.trim()).filter(Boolean),
-    }
     try {
+      const content = form.contentRaw.split('\n').map(line => line.trim()).filter(Boolean)
+      const formData = new FormData()
+      formData.append('name', form.name)
+      formData.append('url', form.url ?? '')
+      formData.append('startYear', form.startYear.toString())
+      formData.append('endYear', form.endYear.toString())
+      formData.append('content', JSON.stringify(content))
+      if (selectedFile) {
+        formData.append('imageFile', selectedFile)
+      } else if (removeImage) {
+        formData.append('imageFile', '')
+      }
       if (editing) {
-        await updateSponsor(editing.id, payload)
+        await updateSponsor(editing.id, formData)
       } else {
-        await createSponsor(payload)
+        await createSponsor(formData)
       }
       setDialogOpen(false)
       load()
@@ -215,13 +230,30 @@ export function SponsorsPage() {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="image">Image filename</Label>
+              <Label htmlFor="imageFile">Logo image</Label>
               <Input
-                id="image"
-                placeholder="sponsor-logo.png"
-                value={form.image}
-                onChange={(e) => setForm({ ...form, image: e.target.value })}
+                id="imageFile"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  setSelectedFile(e.target.files?.[0] ?? null)
+                  if (e.target.files?.[0]) setRemoveImage(false)
+                }}
               />
+              {editing?.imageFile && !selectedFile && (
+                <div className="flex items-center gap-2">
+                  <input
+                    id="removeImage"
+                    type="checkbox"
+                    checked={removeImage}
+                    onChange={(e) => setRemoveImage(e.target.checked)}
+                    className="size-4 rounded border-input"
+                  />
+                  <Label htmlFor="removeImage" className="text-xs text-muted-foreground font-normal cursor-pointer">
+                    Remove current image
+                  </Label>
+                </div>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">

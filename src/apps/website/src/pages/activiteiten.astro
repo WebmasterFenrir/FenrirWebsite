@@ -1,0 +1,138 @@
+---
+import MainLayout from '@/layouts/main.astro';
+import ContextLayout from '@/layouts/context.astro';
+import SectionHeader from '@/components/ui/sectionHeader';
+import Spacer from '@/components/ui/spacer';
+import { Button } from '@/components/ui/button';
+import { IconCard } from '@/components/IconCard';
+import { Music, PartyPopper, Trophy, Film, Tent } from 'lucide-react';
+---
+
+<style>
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .page-hero {
+    background: radial-gradient(ellipse at 50% 0%, oklch(0.627 0.265 303.9 / 0.18) 0%, transparent 70%);
+  }
+
+  .page-hero-title {
+    animation: fadeInUp 0.7s ease-out both;
+  }
+
+  .page-hero-subtitle {
+    animation: fadeInUp 0.7s ease-out 0.15s both;
+  }
+
+  .page-hero-line {
+    animation: fadeInUp 0.7s ease-out 0.25s both;
+    width: 60px;
+    height: 2px;
+    background: oklch(0.627 0.265 303.9 / 0.6);
+    margin: 1.5rem auto 0;
+    border-radius: 999px;
+  }
+
+  .membership-glow {
+    background: radial-gradient(ellipse at 50% 0%, oklch(0.627 0.265 303.9 / 0.14) 0%, transparent 70%);
+  }
+</style>
+
+<MainLayout title="Activiteiten">
+  <div class="page-hero grid place-items-center pt-30 md:pt-0 min-h-[50vh] content-center">
+    <div class="text-center px-6">
+      <h1 class="page-hero-title text-6xl md:text-8xl text-white font-bold">Activiteiten</h1>
+      <h2 class="page-hero-subtitle text-base sm:text-xl lg:text-2xl mt-4 text-white/90 font-medium max-w-3xl">
+        Bij Fenrir is er altijd wel iets te beleven. Feestjes, cantussen, sport en cultuur:
+        ontdek wat we voor jou in petto hebben.
+      </h2>
+      <div class="page-hero-line"></div>
+    </div>
+  </div>
+
+  <ContextLayout>
+    <div class="mx-auto px-6 sm:px-8 py-12 w-full">
+      <SectionHeader
+        title="Wat doen wij"
+        description="Als studentenclub organiseren we het hele jaar door activiteiten. Sommige zijn exclusief voor leden, andere open voor iedereen die gezelligheid zoekt."
+      />
+
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <IconCard
+          icon={PartyPopper}
+          title="TD's & feestjes"
+          description="Themafeestjes in ons stamcafé Den Echo en samenwerkingen met andere Antwerpse studentenverenigingen. Elke twee weken iets te vieren."
+        />
+        <IconCard
+          icon={Music}
+          title="Cantussen"
+          description="Samen zingen en drinken in De Wagetol. Van klassieke cantusliederen tot ons eigen clublied: er is altijd sfeer."
+        />
+        <IconCard
+          icon={Trophy}
+          title="Sport"
+          description="Blijf fit en sport mee. We doen mee aan voetbal- en basketbaltoernooien in Wilrijk en organiseren sportieve uitstapjes."
+        />
+        <IconCard
+          icon={Film}
+          title="Cultuur & ontspanning"
+          description="Filmavonden, spelletjesavonden en jeneverwandelingen. Ideaal om even te onthaasten tussen de lessen door."
+        />
+        <IconCard
+          icon={Tent}
+          title="Ledenweekend"
+          description="Een weekend in de Ardennen vol cantussen, kwissen, sport en goed eten. Vriendschap en plezier gegarandeerd."
+        />
+      </div>
+
+      <Spacer />
+
+      <SectionHeader
+        title="Hoe werkt het"
+        description="Iedereen is welkom om een activiteit mee te maken. Wil je voordeelprijzen en mee naar het ledenweekend? Dan wordt je lid."
+      />
+
+      <div class="grid gap-6 md:grid-cols-3">
+        <div class="bg-card border border-zinc-800 rounded-xl p-6 text-center">
+          <div class="text-4xl font-bold text-purple-400 mb-2">1</div>
+          <h3 class="text-lg font-bold text-white mb-2">Ontdek</h3>
+          <p class="text-zinc-400 text-sm">Bekijk hier of op onze socials welke activiteiten er aanstaan.</p>
+        </div>
+        <div class="bg-card border border-zinc-800 rounded-xl p-6 text-center">
+          <div class="text-4xl font-bold text-purple-400 mb-2">2</div>
+          <h3 class="text-lg font-bold text-white mb-2">Kom langs</h3>
+          <p class="text-zinc-400 text-sm">Je hoeft geen lid te zijn om mee te doen. Kom gerust een keertje kijken.</p>
+        </div>
+        <div class="bg-card border border-zinc-800 rounded-xl p-6 text-center">
+          <div class="text-4xl font-bold text-purple-400 mb-2">3</div>
+          <h3 class="text-lg font-bold text-white mb-2">Word lid</h3>
+          <p class="text-zinc-400 text-sm">Vaste bezoeker? Word lid voor korting en exclusieve evenementen.</p>
+        </div>
+      </div>
+
+      <Spacer variant="dubble" />
+
+      <div class="membership-glow rounded-3xl border border-zinc-800 bg-zinc-900/50 p-8 md:p-16 text-center">
+        <h2 class="text-3xl md:text-5xl font-bold text-white tracking-tight mb-4">
+          Klaar om mee te doen?
+        </h2>
+        <p class="text-zinc-400 max-w-2xl mx-auto mb-8 text-base md:text-lg">
+          Volg ons op Facebook en Instagram voor de laatste data en foto's, of word direct lid
+          en geniet van voordeelprijzen op al onze activiteiten.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="https://docs.google.com/forms/d/e/1FAIpQLSdaEL-QgBllK1SMC0Ckwrr98dDxFbch5TijesD71YsS8t5g4g/viewform?usp=sharing&ouid=100528290258116040611">
+            <Button variant="default" className="w-full sm:w-auto p-6 text-xl">Word lid!</Button>
+          </a>
+          <a href="https://www.facebook.com/fenrir.antwerpen" target="_blank" rel="noopener">
+            <Button variant="outline" className="w-full sm:w-auto p-6 text-xl border-zinc-700 text-white hover:bg-zinc-800 hover:text-white">
+              Facebook
+            </Button>
+          </a>
+        </div>
+      </div>
+    </div>
+  </ContextLayout>
+</MainLayout>

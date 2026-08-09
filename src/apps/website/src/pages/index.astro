@@ -7,10 +7,19 @@ import SponsorList from '@/components/SponsorList';
 import SectionHeader from '@/components/ui/sectionHeader';
 import PreasidiumPrevieuwHomePage from '@/components/PreasidiumPrevieuwHomePage';
 import Spacer from '@/components/ui/spacer';
+import { IconCard } from '@/components/IconCard';
 import { getSponsors, getPreasidiumYears } from '@/lib/pocketbase';
+import { Users, Calendar, MapPin, HeartHandshake } from 'lucide-react';
 
 const [sponsors, years] = await Promise.all([getSponsors(), getPreasidiumYears()]);
 const previewLeden = years[0]?.PreasidiumLeden.slice(0, 2) ?? [];
+
+const activityTeasers = [
+  { emoji: "🎉", title: "Feestjes & TD's", description: "In Den Echo en samen met andere Antwerpse clubs." },
+  { emoji: "🎵", title: "Cantussen", description: "Zingen, drinken en ons clublied voluit meebrullen." },
+  { emoji: "🏀", title: "Sport", description: "Voetbal- en basketbaltoernooien in Wilrijk." },
+  { emoji: "🍿", title: "Cultuur", description: "Filmavonden, jeneverwandelingen en nog meer." },
+];
 ---
 <style>
 	.hero {
@@ -77,6 +86,7 @@ const previewLeden = years[0]?.PreasidiumLeden.slice(0, 2) ?? [];
 			<h2 class="hero-subtitle text-lg sm:text-2xl lg:text-4xl mt-5 text-white font-medium">De vriendelijkste club van Antwerpen!</h2>
 			<span class="hero-cta flex flex-col sm:flex-row w-3/6 sm:w-max gap-3 sm:gap-4 mt-4">
 				<a href="https://docs.google.com/forms/d/e/1FAIpQLSdaEL-QgBllK1SMC0Ckwrr98dDxFbch5TijesD71YsS8t5g4g/viewform?usp=sharing&ouid=100528290258116040611"><Button variant="default" className='hero-btn w-full sm:w-auto p-6 sm:p-6 lg:p-8 text-2xl lg:text-4xl'>Word lid!</Button></a>
+				<a href="/activiteiten"><Button variant="secondary" className='w-full sm:w-auto p-6 sm:p-6 lg:p-8 text-2xl lg:text-4xl'>Bekijk activiteiten</Button></a>
 			</span>
 		</div>
 		<ContextLayout>
@@ -101,11 +111,65 @@ const previewLeden = years[0]?.PreasidiumLeden.slice(0, 2) ?? [];
 					<h2 class="font-medium text-2xl mb-4">De studentenclub waar vriendschap en gezelligheid voorop staan. Klein van omvang, maar groot in sfeer en saamhorigheid.</h2>
 					<p class="mb-4">Wij zijn studentenvereniging Fenrir, een toffe gezellige vereniging verbonden aan Karel de Grote hogeschool. We nemen je mee in het Antwerps studentleven. Ontmoet vrienden voor het leven, maak de gekste avonturen mee, ontdek Antwerpen en geniet van het studentenleven. </p>
 					<p class="mb-4">Wekelijks organiseren we verschillende activiteiten zoals onder andere feestjes, cultuuractiviteiten en sport.</p>
-					<p class="mb-4">Kom erbij en geniet van je studentenleven! Dansen, lachen, brullen, gieren,… dat beleef je met Fenrir!</p>
+						<p class="mb-4">Kom erbij en geniet van je studentenleven! Dansen, lachen, brullen, gieren,… dat beleef je met Fenrir!</p>
 				</div>
 			</div>
 			</div>
+
 	<Spacer/>
+
+	<SectionHeader title='Waarom Fenrir' description='Studentenleven draait om meer dan alleen studeren. Bij Fenrir vind je vrienden, ontdek je de stad en beleef je samen onvergetelijke momenten.'/>
+
+	<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+		<IconCard
+			icon={Users}
+			title="hechte vriendengroep"
+			description="Je bent nooit alleen. Samen met andere studenten maken we er elke activiteit een gezellige tijd van."
+			variant="subtle"
+		/>
+		<IconCard
+			icon={Calendar}
+			title="Activiteiten het hele jaar"
+			description="Van feestjes en cantussen tot sport en cultuur: er is altijd iets om naar uit te kijken."
+			variant="subtle"
+		/>
+		<IconCard
+			icon={MapPin}
+			title="Antwerpen ontdekken"
+			description="We leren je de leukste plekken van de stad kennen, van goedkope eettentjes tot de beste uitgaansgelegenheden."
+			variant="subtle"
+		/>
+		<IconCard
+			icon={HeartHandshake}
+			title="Iedereen is welkom"
+			description="Je studierichting maakt niet uit. Bij Fenrir is plezier en respect belangrijker dan waar je vandaan komt."
+			variant="subtle"
+		/>
+	</div>
+
+	<Spacer/>
+
+	<!-- <SectionHeader title='Ontdek onze activiteiten' description='Van feestjes en cantussen tot sport en cultuur: er is voor elk wat wils. Bekijk wat we organiseren en kom gerust eens meedoen.'/>
+
+	<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+		{activityTeasers.map((activity) => (
+			<div class="bg-card border border-zinc-800 rounded-xl p-6 text-center transition-all duration-300 hover:border-purple-500/30 hover:bg-zinc-900/80">
+				<div class="text-3xl mb-3">{activity.emoji}</div>
+				<h3 class="text-lg font-bold text-white mb-2">{activity.title}</h3>
+				<p class="text-zinc-400 text-sm">{activity.description}</p>
+			</div>
+		))}
+	</div>
+
+	<div class="flex justify-center mb-8">
+		<a href="/activiteiten">
+			<Button variant="secondary" className="p-6 text-lg">Alle activiteiten bekijken</Button>
+		
+		</a>
+	</div> -->
+
+	<Spacer/>
+
 	<SectionHeader title='Huidig Praesidium' description='Het praesidium is het kloppend hart van Fenrir dat elk evenement zijn best doet om er weer een geweldige tijd van te maken.'/>
 	<div>
 		<PreasidiumPrevieuwHomePage leden={previewLeden} client:load/>

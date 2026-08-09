@@ -32,19 +32,25 @@ import {
   addPersonFunctie,
   removePersonFunctie,
   getRollen,
+  getNextExternalId,
   type Person,
-  type PersonCreate,
   type PersonFunctie,
 } from '@/lib/db/people'
 import { getYears, type Year } from '@/lib/db/years'
 import { useRole } from '@/lib/RoleContext'
 
-const emptyForm: PersonCreate = {
+type FormState = {
+  externalId: number
+  firstName: string
+  lastName: string
+  description: string
+}
+
+const emptyForm: FormState = {
   externalId: 0,
   firstName: '',
   lastName: '',
   description: '',
-  imageUrl: '',
 }
 
 export function PeoplePage() {
@@ -54,7 +60,7 @@ export function PeoplePage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [editing, setEditing] = useState<Person | null>(null)
-  const [form, setForm] = useState<PersonCreate>(emptyForm)
+  const [form, setForm] = useState<FormState>(emptyForm)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -64,6 +70,8 @@ export function PeoplePage() {
   const [newYearId, setNewYearId] = useState('')
   const [newRoleId, setNewRoleId] = useState('')
   const [addingFunctie, setAddingFunctie] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [removeImage, setRemoveImage] = useState(false)
 
   const load = () => {
     setLoading(true)
@@ -76,9 +84,11 @@ export function PeoplePage() {
     getPeople().then(setPeople).finally(() => setLoading(false))
   }, [])
 
-  const openCreate = () => {
+  const openCreate = async () => {
     setEditing(null)
-    setForm(emptyForm)
+    setForm({ ...emptyForm, externalId: await getNextExternalId() })
+    setSelectedFile(null)
+    setRemoveImage(false)
     setError('')
     setDialogOpen(true)
   }
@@ -90,8 +100,9 @@ export function PeoplePage() {
       firstName: person.firstName,
       lastName: person.lastName,
       description: person.description ?? '',
-      imageUrl: person.imageUrl ?? '',
     })
+    setSelectedFile(null)
+    setRemoveImage(false)
     setNewYearId('')
     setNewRoleId('')
     setError('')
@@ -108,10 +119,20 @@ export function PeoplePage() {
     setSaving(true)
     setError('')
     try {
+      const formData = new FormData()
+      formData.append('externalId', form.externalId.toString())
+      formData.append('firstName', form.firstName)
+      formData.append('lastName', form.lastName)
+      formData.append('description', form.description ?? '')
+      if (selectedFile) {
+        formData.append('imageFile', selectedFile)
+      } else if (removeImage) {
+        formData.append('imageFile', '')
+      }
       if (editing) {
-        await updatePerson(editing.id, form)
+        await updatePerson(editing.id, formData)
       } else {
-        await createPerson(form)
+        await createPerson(formData)
       }
       setDialogOpen(false)
       load()
@@ -181,8 +202,7 @@ export function PeoplePage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
-                <TableHead>ID</TableHead>
-                <TableHead>Image URL</TableHead>
+                <TableHead>Image</TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead className="w-24 text-right">Actions</TableHead>
               </TableRow>
@@ -198,9 +218,8 @@ export function PeoplePage() {
                       {person.firstName} {person.lastName}
                     </div>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{person.externalId}</TableCell>
                   <TableCell className="max-w-40 truncate text-muted-foreground">
-                    {person.imageUrl || '—'}
+                    {person.imageFile || person.imageUrl || '—'}
                   </TableCell>
                   <TableCell className="max-w-55 truncate text-muted-foreground">
                     {person.description || '—'}
@@ -252,14 +271,30 @@ export function PeoplePage() {
               </div>
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="externalId">External ID</Label>
-              <Input id="externalId" type="number" value={form.externalId}
-                onChange={(e) => setForm({ ...form, externalId: Number(e.target.value) })} required />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="imageUrl">Image URL</Label>
-              <Input id="imageUrl" placeholder="e.g. nils2025.jpg" value={form.imageUrl}
-                onChange={(e) => setForm({ ...form, imageUrl: e.target.value })} />
+              <Label htmlFor="imageFile">Profile picture</Label>
+              <Input
+                id="imageFile"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  setSelectedFile(e.target.files?.[0] ?? null)
+                  if (e.target.files?.[0]) setRemoveImage(false)
+                }}
+              />
+              {editing?.imageFile && !selectedFile && (
+                <div className="flex items-center gap-2">
+                  <input
+                    id="removeImage"
+                    type="checkbox"
+                    checked={removeImage}
+                    onChange={(e) => setRemoveImage(e.target.checked)}
+                    className="size-4 rounded border-input"
+                  />
+                  <Label htmlFor="removeImage" className="text-xs text-muted-foreground font-normal cursor-pointer">
+                    Remove current image
+                  </Label>
+                </div>
+              )}
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="description">Description</Label>

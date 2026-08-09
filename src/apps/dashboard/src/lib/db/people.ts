@@ -7,6 +7,7 @@ export interface Person {
   lastName: string
   description?: string
   imageUrl?: string
+  imageFile?: string
 }
 
 export interface PersonFunctie {
@@ -24,11 +25,21 @@ export async function getPeople(): Promise<Person[]> {
   return pb.collection('preasidium_leden').getFullList<Person>({ sort: 'firstName,lastName', requestKey: null })
 }
 
-export async function createPerson(data: PersonCreate): Promise<Person> {
+/** Returns the next available externalId (max + 1), falling back to 1 when empty. */
+export async function getNextExternalId(): Promise<number> {
+  const records = await pb.collection('preasidium_leden').getFullList<Pick<Person, 'externalId'>>({
+    fields: 'externalId',
+    requestKey: null,
+  })
+  const max = records.reduce((m, r) => Math.max(m, r.externalId ?? 0), 0)
+  return max + 1
+}
+
+export async function createPerson(data: FormData | PersonCreate): Promise<Person> {
   return pb.collection('preasidium_leden').create<Person>(data)
 }
 
-export async function updatePerson(id: string, data: PersonUpdate): Promise<Person> {
+export async function updatePerson(id: string, data: FormData | PersonUpdate): Promise<Person> {
   return pb.collection('preasidium_leden').update<Person>(id, data)
 }
 
