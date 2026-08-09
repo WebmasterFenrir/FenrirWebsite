@@ -77,6 +77,7 @@ async function createCollections() {
             { name: "firstName",  type: "text",   required: true },
             { name: "lastName",   type: "text",   required: true },
             { name: "description",type: "text",   required: false },
+            { name: "description_en", type: "text", required: false },
             { name: "imageUrl",   type: "text",   required: false },
         ],
     });
@@ -137,6 +138,7 @@ async function createCollections() {
         fields: [
             { name: "name",      type: "text",   required: true },
             { name: "content",   type: "json",   required: false },
+            { name: "content_en", type: "json",  required: false },
             { name: "image",     type: "text",   required: false },
             { name: "url",       type: "text",   required: false },
             { name: "startYear", type: "number", required: true },

@@ -1,5 +1,5 @@
 ---
-const { owner, repo } = Astro.props;
+const { owner, repo, openSourceLabel, title, humansTemplate } = Astro.props;
 
 if (!owner || !repo) {
   throw new Error("owner and repo are required");
@@ -16,16 +16,21 @@ if (!response.ok) {
 } else {
   contributors = await response.json();
 }
+
+const humansText = (humansTemplate ?? "{count} amazing humans").replace(
+  "{count}",
+  String(contributors.length)
+);
 ---
 
 <section class="group relative overflow-hidden rounded-2xl border border-transparent bg-zinc-900/40 text-white shadow-lg transition-all duration-300 hover:border-purple-400/30 hover:shadow-purple-500/20">
   <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_60%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
   <div class="relative space-y-6 px-6 py-8">
     <header class="space-y-3">
-      <p class="text-[10px] font-black uppercase tracking-[0.4em] text-yellow-400">Open Source</p>
-      <h2 class="text-2xl font-semibold tracking-tight">Contributors</h2>
+      <p class="text-[10px] font-black uppercase tracking-[0.4em] text-yellow-400">{openSourceLabel ?? "Open Source"}</p>
+      <h2 class="text-2xl font-semibold tracking-tight">{title ?? "Contributors"}</h2>
       <p class="text-xs uppercase tracking-[0.2em] text-zinc-400">
-        {contributors.length} amazing humans
+        {humansText}
       </p>
     </header>
     <ul class="flex flex-wrap gap-4">
@@ -52,4 +57,3 @@ if (!response.ok) {
     </ul>
   </div>
 </section>
-

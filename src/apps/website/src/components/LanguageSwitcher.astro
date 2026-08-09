@@ -1,0 +1,36 @@
+---
+import { languages, defaultLang, type Locale } from "@/i18n/ui";
+import { localizePathname } from "@/i18n/utils";
+
+interface Props {
+  lang: Locale;
+  /** Optional explicit list of locales to render (defaults to all). */
+  locales?: Locale[];
+}
+
+const { lang } = Astro.props;
+const locales = Astro.props.locales ?? (Object.keys(languages) as Locale[]);
+
+const currentPath = Astro.url.pathname;
+---
+
+<div class="flex items-center gap-1 rounded-xl bg-black/30 p-1 text-xs font-semibold uppercase tracking-widest">
+  {locales.map((locale) => {
+    const href = localizePathname(currentPath, locale);
+    const active = locale === lang;
+    return (
+      <a
+        href={href}
+        aria-current={active ? "true" : undefined}
+        class:list={[
+          "rounded-lg px-2.5 py-1.5 transition-colors duration-200",
+          active
+            ? "bg-purple-500/80 text-white shadow"
+            : "text-zinc-400 hover:bg-white/10 hover:text-white",
+        ]}
+      >
+        {locale === defaultLang ? "NL" : locale.toUpperCase()}
+      </a>
+    );
+  })}
+</div>

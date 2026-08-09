@@ -8,6 +8,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "seed": "bun seed.ts",
+    "backfill-translations": "bun backfill-translations.ts",
     "test": "bun test"
   },
   "dependencies": {

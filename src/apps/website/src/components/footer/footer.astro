@@ -4,20 +4,53 @@ import FooterBottomBar from "@/components/footer/FooterBottomBar.astro";
 import FooterSectionTitle from "@/components/footer/FooterSectionTitle.astro";
 import FooterSocialLinks from "@/components/footer/FooterSocialLinks.astro";
 import FooterMailCard from "@/components/footer/FooterMailCard.astro";
+import { defaultLang, useTranslations, type Locale } from "@/i18n/ui";
+
+interface Props {
+  label?: string;
+  title?: string;
+  description?: string;
+  followHint?: string;
+  socialLabel?: string;
+  contactLabel?: string;
+  builtBy?: string;
+  rights?: string;
+  openSourceLabel?: string;
+  contributorsTitle?: string;
+  humansTemplate?: string;
+}
+
+const {
+  label,
+  title,
+  description,
+  followHint,
+  socialLabel,
+  contactLabel,
+  builtBy,
+  rights,
+  openSourceLabel,
+  contributorsTitle,
+  humansTemplate,
+} = Astro.props as Props;
+
+// Fall back to the default locale when rendered without explicit props
+const lang: Locale = (Astro.currentLocale as Locale) ?? defaultLang;
+const t = useTranslations(lang);
 
 const socialLinks = [
   {
-    label: "Social",
+    label: socialLabel ?? t("footer.social"),
     title: "Facebook",
-    hint: "Volg ons",
+    hint: followHint ?? t("footer.followHint"),
     href: "https://www.facebook.com/fenrir.antwerpen",
   },
   {
-    label: "Social",
+    label: socialLabel ?? t("footer.social"),
     title: "Instagram",
-    hint: "Volg ons",
+    hint: followHint ?? t("footer.followHint"),
     href: "https://www.instagram.com/fenrirclub",
-  }
+  },
 ];
 ---
 
@@ -28,15 +61,21 @@ const socialLinks = [
   />
   <div class="relative mx-auto flex max-w-6xl flex-col gap-12 px-6 py-16 lg:flex-row lg:items-start lg:justify-between">
     <FooterSectionTitle
-      label="Fenrir Club"
-      title="Blijf in de loop"
-      description="volg ons online voor meldingen van evenements en zo veel meer"
+      label={label ?? t("footer.label")}
+      title={title ?? t("footer.title")}
+      description={description ?? t("footer.description")}
     />
     <FooterSocialLinks links={socialLinks} />
     <div class="flex max-w lg:max-w-sm flex-col gap-6">
-      <FooterMailCard email="info@fenrirclub.be" />
-      <GitHubContributors owner="WebmasterFenrir" repo="FenrirWebsite" />
+      <FooterMailCard email="info@fenrirclub.be" label={contactLabel ?? t("footer.contact")} />
+      <GitHubContributors
+        owner="WebmasterFenrir"
+        repo="FenrirWebsite"
+        openSourceLabel={openSourceLabel ?? t("footer.openSource")}
+        title={contributorsTitle ?? t("footer.contributors")}
+        humansTemplate={humansTemplate ?? t("footer.humans")}
+      />
     </div>
   </div>
-  <FooterBottomBar />
+  <FooterBottomBar builtBy={builtBy} rights={rights} />
 </footer>

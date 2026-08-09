@@ -1,0 +1,170 @@
+---
+import { Button } from '@/components/ui/button';
+import MainLayout from '@/layouts/main.astro';
+import ContextLayout from '@/layouts/context.astro'
+import SponsorList from '@/components/SponsorList';
+import SectionHeader from '@/components/ui/sectionHeader';
+import PreasidiumPrevieuwHomePage from '@/components/PreasidiumPrevieuwHomePage';
+import Spacer from '@/components/ui/spacer';
+import { IconCard } from '@/components/IconCard';
+import { getSponsors, getPreasidiumYears } from '@/lib/pocketbase';
+import { Users, Calendar, MapPin, HeartHandshake } from 'lucide-react';
+import { defaultLang, useTranslations, partnerAdjectives, type Locale } from '@/i18n/ui';
+import { useTranslatedPath } from '@/i18n/utils';
+
+const lang: Locale = (Astro.currentLocale as Locale) ?? defaultLang;
+const translatedPath = useTranslatedPath(lang);
+const t = useTranslations(lang);
+
+const [sponsors, years] = await Promise.all([getSponsors(lang), getPreasidiumYears(lang)]);
+const previewLeden = years[0]?.PreasidiumLeden.slice(0, 2) ?? [];
+---
+<style>
+	.hero {
+		background: linear-gradient(rgba(93,63,211,0.6), rgb(12, 10, 9)), url('../../images/hero.jpg') center/cover no-repeat;
+	}
+
+	@keyframes fadeInUp {
+		from {
+			opacity: 0;
+			transform: translateY(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.hero-title {
+		opacity: 0;
+		animation: fadeInUp 0.7s ease-out forwards;
+	}
+
+	.hero-subtitle {
+		opacity: 0;
+		animation: fadeInUp 0.7s ease-out 0.15s forwards;
+	}
+
+	.hero-cta {
+		opacity: 0;
+		animation: fadeInUp 0.7s ease-out 0.3s forwards;
+	}
+
+	@keyframes heroBtnShake {
+		/* shake happens in the first ~15%, rest is a pause */
+		0%        { transform: rotate(0deg); }
+		2%        { transform: rotate(-4deg); }
+		4%        { transform: rotate(4deg); }
+		6%        { transform: rotate(-3deg); }
+		8%        { transform: rotate(3deg); }
+		10%       { transform: rotate(-1deg); }
+		12%       { transform: rotate(1deg); }
+		14%, 100% { transform: rotate(0deg); }
+	}
+
+	.hero-btn {
+		transition: transform 0.18s ease, box-shadow 0.18s ease !important;
+		animation: heroBtnShake 4s ease-in-out 1.8s infinite;
+	}
+
+	.hero-btn:hover {
+		transform: translateY(-3px) scale(1.04);
+		box-shadow: 0 8px 32px oklch(0.627 0.265 303.9 / 0.55);
+		animation-play-state: paused;
+	}
+
+	.hero-btn:active {
+		transform: translateY(0) scale(0.97);
+		box-shadow: 0 2px 8px oklch(0.627 0.265 303.9 / 0.3);
+	}
+</style>
+<MainLayout title={`Fenrir Antwerpen`}>
+		<div class="grid place-items-center h-screen content-center hero">
+			<h1 class="hero-title text-4xl sm:text-6xl lg:text-8xl text-white font-bold">Fenrir Antwerpen</h1>
+			<h2 class="hero-subtitle text-lg sm:text-2xl lg:text-4xl mt-5 text-white font-medium">{t('home.heroSubtitle')}</h2>
+			<span class="hero-cta flex flex-col sm:flex-row w-3/6 sm:w-max gap-3 sm:gap-4 mt-4">
+				<a href="https://docs.google.com/forms/d/e/1FAIpQLSdaEL-QgBllK1SMC0Ckwrr98dDxFbch5TijesD71YsS8t5g4g/viewform?usp=sharing&ouid=100528290258116040611"><Button variant="default" className='hero-btn w-full sm:w-auto p-6 sm:p-6 lg:p-8 text-2xl lg:text-4xl'>{t('home.joinCta')}</Button></a>
+				<a href={translatedPath('activiteiten')}><Button variant="secondary" className='w-full sm:w-auto p-6 sm:p-6 lg:p-8 text-2xl lg:text-4xl'>{t('home.activitiesCta')}</Button></a>
+			</span>
+		</div>
+		<ContextLayout>
+<div class="mx-auto px-6 sm:px-8 py-10">
+    <div class="flex flex-col md:flex-row md:items-stretch gap-6" id="welcomesection">
+
+        <img
+            src="../../images/schild.png"
+            alt="Fenrir schild"
+            class="
+                h-40 md:h-full
+                w-auto
+                object-contain
+                shrink-0
+                self-center md:self-auto
+            "
+        >
+
+			<div class="flex content-center place-items-center">
+      			<div class="text-center md:text-left">
+				<h1 class="font-bold text-4xl mb-4 text-accent">{t('home.welcomeTitle')}</h1>
+				<h2 class="font-medium text-2xl mb-4">{t('home.welcomeSubtitle')}</h2>
+				<p class="mb-4">{t('home.welcomeP1')}</p>
+				<p class="mb-4">{t('home.welcomeP2')}</p>
+					<p class="mb-4">{t('home.welcomeP3')}</p>
+				</div>
+			</div>
+			</div>
+
+	<Spacer/>
+
+	<SectionHeader title={t('home.whyTitle')} description={t('home.whyDescription')}/>
+
+	<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+		<IconCard
+			icon={Users}
+			title={t('home.why1Title')}
+			description={t('home.why1Desc')}
+			variant="subtle"
+		/>
+		<IconCard
+			icon={Calendar}
+			title={t('home.why2Title')}
+			description={t('home.why2Desc')}
+			variant="subtle"
+		/>
+		<IconCard
+			icon={MapPin}
+			title={t('home.why3Title')}
+			description={t('home.why3Desc')}
+			variant="subtle"
+		/>
+		<IconCard
+			icon={HeartHandshake}
+			title={t('home.why4Title')}
+			description={t('home.why4Desc')}
+			variant="subtle"
+		/>
+	</div>
+
+	<Spacer/>
+
+	<SectionHeader title={t('home.praesidiumTitle')} description={t('home.praesidiumDescription')}/>
+	<div>
+		<PreasidiumPrevieuwHomePage
+			leden={previewLeden}
+			ctaHref={lang === 'nl' ? '/praesidium' : '/en/praesidium'}
+			ctaTitle={t('home.praesidiumCtaTitle')}
+			ctaDescription={t('home.praesidiumCtaDescription')}
+			moreText={t('common.more')}
+			noDescriptionText={t('preasidiumLid.noDescription')}
+			detailedInfoTemplate={t('preasidiumLid.detailedInfo')}
+			client:load
+		/>
+	</div>
+	<Spacer/>
+    <SectionHeader title={t('home.sponsorsTitle')} description={t('home.sponsorsDescription')}/>
+    <div class="w-full">
+        <SponsorList data={sponsors} partnerLabel={t('sponsors.partnerLabel')} partnerAdjectives={partnerAdjectives[lang]} client:load/>
+    </div>
+
+		</ContextLayout>
+</MainLayout>

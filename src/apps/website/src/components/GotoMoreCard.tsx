@@ -6,12 +6,14 @@ import { Card, CardContent } from "./ui/card";
 interface PreasidiumCtaCardProps {
   title?: string;
   description?: string;
+  moreText?: string;
   icon?: ReactNode;
 }
 
 export function GotoMoreCard({
   title = "",
   description = "",
+  moreText = "Meer ontdekken",
   icon,
 }: PreasidiumCtaCardProps) {
   return (
@@ -31,7 +33,7 @@ export function GotoMoreCard({
         </p>
 
         <div className=" inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.35em] text-purple-200/80 transition-all group-hover:text-purple-100">
-          Meer ontdekken
+          {moreText}
           <ArrowBigRight className="size-4 transition-transform group-hover:translate-x-1" />
         </div>
       </CardContent>

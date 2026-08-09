@@ -4,9 +4,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 
 interface PreasidiumLidPrevieuwinterface {
   data: PreasidiumLid;
+  noDescriptionText?: string;
+  detailedInfoTemplate?: string;
 }
 
-export default function PreasidiumLidPrevieuw({ data }: PreasidiumLidPrevieuwinterface) {
+export default function PreasidiumLidPrevieuw({ data, noDescriptionText = "No description provided.", detailedInfoTemplate = "Detailed information about {name}" }: PreasidiumLidPrevieuwinterface) {
   const primaryRole = data.preasidiumRols[0];
   const roleLabel = primaryRole.role;
   const roleYear = primaryRole.year;
@@ -69,14 +71,14 @@ export default function PreasidiumLidPrevieuw({ data }: PreasidiumLidPrevieuwint
         </DialogTitle>
         
         <DialogDescription className="sr-only">
-          Detailed information about {data.firstName}
+          {detailedInfoTemplate.replace("{name}", data.firstName)}
         </DialogDescription>
       </DialogHeader>
 
       {/* Bio / Description Section */}
       <div className="space-y-4">
         <p className="text-zinc-400 text-sm md:text-base leading-relaxed">
-          {data.description || "No description provided."}
+          {data.description || noDescriptionText}
         </p>
         
         {/* <div className="pt-4 border-t border-zinc-800/50">
