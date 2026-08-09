@@ -10,9 +10,10 @@ export default function PreasidiumLidPrevieuw({ data }: PreasidiumLidPrevieuwint
   const primaryRole = data.preasidiumRols[0];
   const roleLabel = primaryRole.role;
   const roleYear = primaryRole.year;
-  const imageSrc = !data.imageUrl || data.imageUrl.trim().length === 0
-    ? `https://avatar.vercel.sh/${data.firstName}`
-    : `/images/preasidium/${data.imageUrl}`;
+  // Images are served from PocketBase (full URL) or fall back to a placeholder avatar
+  const imageSrc = data.imageUrl && data.imageUrl.startsWith('http')
+    ? data.imageUrl
+    : `https://avatar.vercel.sh/${data.firstName}`;
 
   return (
   <Dialog>

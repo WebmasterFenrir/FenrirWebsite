@@ -21,11 +21,28 @@ services:
       - VIRTUAL_HOST=fenrir.nilsmertens.dev
       - VIRTUAL_PORT=4321
       - PB_URL=http://pocketbase:3000
+      - PUBLIC_PB_URL=http://localhost:3421
       - PB_EMAIL=${PB_ADMIN_EMAIL}
       - PB_PASSWORD=${PB_ADMIN_PASSWORD}
     depends_on:
       pocketbase:
         condition: service_healthy
+    networks:
+      - proxy-net
+    restart: unless-stopped
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+      args:
+        VITE_PB_URL: http://localhost:3421
+    container_name: fenrir-dashboard
+    expose:
+      - "80"
+    environment:
+      - VIRTUAL_HOST=dashboard.fenrir.nilsmertens.dev
+      - VIRTUAL_PORT=80
     networks:
       - proxy-net
     restart: unless-stopped

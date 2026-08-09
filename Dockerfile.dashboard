@@ -1,0 +1,19 @@
+# Stage 1: Build the dashboard (Vite SPA)
+FROM oven/bun:latest AS builder
+WORKDIR /app
+
+# Vite bakes VITE_* env vars into the bundle at build time
+ARG VITE_PB_URL=http://127.0.0.1:8090
+ENV VITE_PB_URL=$VITE_PB_URL
+
+COPY ./src .
+RUN bun install
+
+# Build only the dashboard app
+RUN cd apps/dashboard && bun run build
+
+# Stage 2: Serve the static build with nginx (SPA fallback)
+FROM nginx:alpine
+COPY nginx.dashboard.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/apps/dashboard/dist /usr/share/nginx/html
+EXPOSE 80

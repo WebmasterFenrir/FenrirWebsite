@@ -7,7 +7,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "seed": "bun seed.ts"
+    "seed": "bun seed.ts",
+    "test": "bun test"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.13",
@@ -31,6 +32,7 @@
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
+    "@types/bun": "latest",
     "shadcn": "^3.8.4",
     "tw-animate-css": "^1.4.0"
   }
