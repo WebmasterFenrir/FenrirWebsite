@@ -7,11 +7,15 @@ const PUBLIC_PB_URL = import.meta.env.PUBLIC_PB_URL ?? process.env.PUBLIC_PB_URL
 const publicPb = new PocketBase(PUBLIC_PB_URL)
 
 async function createClient() {
+    const email = import.meta.env.PB_EMAIL ?? process.env.PB_EMAIL
+    const password = import.meta.env.PB_PASSWORD ?? process.env.PB_PASSWORD
+
+    if (!email || !password) {
+        throw new Error('PocketBase not configured')
+    }
+
     const pb = new PocketBase(PB_URL)
-    await pb.collection('_superusers').authWithPassword(
-        import.meta.env.PB_EMAIL ?? process.env.PB_EMAIL,
-        import.meta.env.PB_PASSWORD ?? process.env.PB_PASSWORD,
-    )
+    await pb.collection('_superusers').authWithPassword(email, password)
     return pb
 }
 
