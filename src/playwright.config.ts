@@ -21,21 +21,22 @@ export default defineConfig({
   webServer: [
     {
       command: "node ./apps/e2e/mock-pocketbase.mjs",
-      url: "http://localhost:8090/api/health",
+      url: "http://127.0.0.1:8090/api/health",
       reuseExistingServer: !process.env.CI,
       timeout: 10_000,
     },
     {
       command: process.env.CI
         ? "node ./apps/website/dist/server/entry.mjs"
-        : "bun --cwd ./apps/website run dev",
+        : "bun run --cwd ./apps/website dev",
       url: "http://localhost:4321",
       reuseExistingServer: !process.env.CI,
       timeout: 60_000,
       env: {
         PORT: "4321",
         HOST: "localhost",
-        PB_URL: "http://localhost:8090",
+        PB_URL: "http://127.0.0.1:8090",
+        PUBLIC_PB_URL: "http://127.0.0.1:8090",
         PB_EMAIL: "ci@test.com",
         PB_PASSWORD: "mock-password",
       },

@@ -16,7 +16,7 @@ interface Props {
 const { links } = Astro.props as Props;
 ---
 
-<nav class="flex flex-col max-w text-sm font-semibold text-white">
+<nav aria-label="Sociale media" class="flex flex-col max-w text-sm font-semibold text-white">
   {links.map((link) => (
     <FooterLinkCard
       label={link.label}
