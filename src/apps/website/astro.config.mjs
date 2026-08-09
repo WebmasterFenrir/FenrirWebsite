@@ -10,6 +10,15 @@ export default defineConfig({
   output: 'server',
   adapter: node({ mode: 'standalone' }),
 
+  i18n: {
+    defaultLocale: 'nl',
+    locales: ['nl', 'en'],
+    routing: {
+      prefixDefaultLocale: false,
+      redirectToDefaultLocale: true,
+    },
+  },
+
   vite: {
     plugins: [tailwindcss()],
   },

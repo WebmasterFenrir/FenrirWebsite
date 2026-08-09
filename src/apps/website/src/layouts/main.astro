@@ -2,19 +2,34 @@
 import '../styles/global.css';
 import Nav from '@/components/nav/nav.astro';
 import Footer from '@/components/footer/footer.astro';
+import { type Locale } from '@/i18n/ui';
+import { getLangFromUrl, localizePathname } from '@/i18n/utils';
+
 const { title } = Astro.props;
+
+// Derive the locale from the URL so it also matches on 404s and error pages
+const lang: Locale = getLangFromUrl(Astro.url.pathname);
+const origin = Astro.url.origin;
+const currentPath = Astro.url.pathname;
+
+// Canonical + hreflang alternates (absolute URLs required for hreflang)
+const canonical = new URL(currentPath, origin).href;
+const nlUrl = new URL(localizePathname(currentPath, 'nl'), origin).href;
+const enUrl = new URL(localizePathname(currentPath, 'en'), origin).href;
 ---
 
-<html lang="en">
+<html lang={lang}>
 	<head>
 		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="icon" type="image" href="/icon.png" />
-		<!-- <link rel="icon" href="/favicon.ico" /> -->
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@400..900&display=swap" rel="stylesheet">
+		<link rel="canonical" href={canonical} />
+		<link rel="alternate" hreflang="nl" href={nlUrl} />
+		<link rel="alternate" hreflang="en" href={enUrl} />
+		<link rel="alternate" hreflang="x-default" href={nlUrl} />
 		<title>{title}</title>
 	</head>
 <body>

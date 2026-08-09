@@ -1,13 +1,25 @@
-export default function SponsorData(){
+interface SponsorValueCard {
+  a: string;
+  w: string;
+  i: string;
+}
+
+interface SponsorPositiveDataProps {
+  items?: SponsorValueCard[];
+}
+
+const DEFAULT_ITEMS: SponsorValueCard[] = [
+  { a: "Bereik & zichtbaarheid", w: "Website, socials, vermelding op events", i: "Meer merkherkenning" },
+  { a: "Talent & instroom", w: "Intro naar leden, stage- en jobposts", i: "Snellere rekrutering" },
+  { a: "Lokale verankering", w: "Samenwerking met Antwerpse club", i: "Community-waarde" },
+  { a: "Activering op events", w: "Sampling, promo of stand opties", i: "Directe interactie" },
+  { a: "Flexibele formules", w: "Financieel of in natura, kort of jaar", i: "Efficiënte ROI" },
+  { a: "Content & storytelling", w: "Gezamenlijke posts en cases", i: "Relevante brand stories" },
+];
+
+export default function SponsorData({ items = DEFAULT_ITEMS }: SponsorPositiveDataProps) {
 return (<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 w-full">
-  {[
-    { a: "Bereik & zichtbaarheid", w: "Website, socials, vermelding op events", i: "Meer merkherkenning" },
-    { a: "Talent & instroom", w: "Intro naar leden, stage- en jobposts", i: "Snellere rekrutering" },
-    { a: "Lokale verankering", w: "Samenwerking met Antwerpse club", i: "Community-waarde" },
-    { a: "Activering op events", w: "Sampling, promo of stand opties", i: "Directe interactie" },
-    { a: "Flexibele formules", w: "Financieel of in natura, kort of jaar", i: "Efficiënte ROI" },
-    { a: "Content & storytelling", w: "Gezamenlijke posts en cases", i: "Relevante brand stories" },
-  ].map((item, index) => (
+  {items.map((item, index) => (
     <div 
       key={index} 
       className="group bg-card border-zinc-800 rounded-xl p-6 transition-all duration-300 shadow-lg"

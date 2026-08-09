@@ -8,13 +8,14 @@ test.describe("Navigation", () => {
   });
 
   test("nav is present on homepage", async ({ page }) => {
-    await expect(page.locator("nav")).toBeVisible();
+    // The footer also renders a <nav>; the main site nav is the first one.
+    await expect(page.locator("nav").first()).toBeVisible();
   });
 
   test("nav is present on all pages", async ({ page }) => {
     for (const path of ["/over-ons", "/praesidium", "/sponsors"]) {
       await page.goto(path);
-      await expect(page.locator("nav"), `nav missing on ${path}`).toBeVisible();
+      await expect(page.locator("nav").first(), `nav missing on ${path}`).toBeVisible();
     }
   });
 
@@ -48,6 +49,6 @@ test.describe("Mobile navigation (hamburger)", () => {
 
   test("hamburger menu button is visible on mobile", async ({ page }) => {
     // The sm:hidden div contains the hamburger
-    await expect(page.locator("nav")).toBeVisible();
+    await expect(page.locator("nav").first()).toBeVisible();
   });
 });

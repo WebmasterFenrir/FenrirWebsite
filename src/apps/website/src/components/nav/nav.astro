@@ -1,43 +1,52 @@
 ---
-import { Menu } from "lucide-react";
+import { getRelativeLocaleUrl } from "astro:i18n";
 import { Button } from "../ui/button";
-import HamburgerMenu from "./HamburgerMenu"
-const pages = await Astro.glob("../../pages/**/*.astro");
+import HamburgerMenu from "./HamburgerMenu";
+import LanguageSwitcher from "../LanguageSwitcher.astro";
+import { defaultLang, useTranslations, type Locale, type UiKey } from "@/i18n/ui";
+import { localizePathname } from "@/i18n/utils";
 
-// Normalize route + label
-const navItems = pages
-  // optional: filter out special files
-  .filter((p) => !p.file.endsWith("404.astro"))
-  .map((p) => {
-    const url = p.url ?? p.file
-      .replace(/^.*\/pages/, "")
-      .replace(/index\.astro$/, "")
-      .replace(/\.astro$/, "");
+const lang: Locale = (Astro.currentLocale as Locale) ?? defaultLang;
+const t = useTranslations(lang);
+const currentPath = Astro.url.pathname;
 
-    const segment = url.split("/").filter(Boolean)[0] ?? "";
-    const label = segment
-      ? segment.replace(/-/g, " ")
-      : "Home";
+const navItems: { url: string; label: string }[] = [
+  { slug: "", labelKey: "nav.home" },
+  { slug: "activiteiten", labelKey: "nav.activiteiten" },
+  { slug: "over-ons", labelKey: "nav.over-ons" },
+  { slug: "praesidium", labelKey: "nav.praesidium" },
+  { slug: "sponsors", labelKey: "nav.sponsors" },
+].map((item) => ({
+  url: getRelativeLocaleUrl(lang, item.slug),
+  label: t(item.labelKey as UiKey),
+}));
 
-    return { url: url || "/", label };
-  });
+// Language options for the mobile menu (plain data, serializable to the island)
+const languageLinks = (["nl", "en"] as const).map((locale) => ({
+  label: locale.toUpperCase(),
+  href: localizePathname(currentPath, locale),
+  active: locale === lang,
+}));
 ---
 
 <nav class="fixed top-0 inset-x-0 z-50 flex flex-row-reverse sm:flex-row">
   <div class="hidden sm:flex p-2 rounded-br-2xl gap-2 bg-card w-max">
     {navItems.map((page) => (
       <a href={page.url}>
-        <Button variant="link">{page.label.charAt(0).toUpperCase() + page.label.slice(1)}</Button>
+        <Button variant="link">{page.label}</Button>
       </a>
     ))}
+    <LanguageSwitcher lang={lang} />
   </div>
-  
-    <div class="sm:hidden p-2 rounded-bl-2xl sm:rounded-br-2xl gap-2 bg-card w-max">
-      <HamburgerMenu links={pages} client:load/>
-    <!-- {navItems.map((page) => (
-      <a href={page.url}>
-        <Button variant="link">{page.label.charAt(0).toUpperCase() + page.label.slice(1)}</Button>
-      </a>
-    ))} -->
+
+  <div class="sm:hidden p-2 rounded-bl-2xl sm:rounded-br-2xl gap-2 bg-card w-max">
+    <HamburgerMenu
+      links={navItems}
+      menuTitle={t("nav.menuTitle")}
+      menuDescription={t("nav.menuDescription")}
+      languageLabel={t("nav.language")}
+      languageLinks={languageLinks}
+      client:load
+    />
   </div>
 </nav>

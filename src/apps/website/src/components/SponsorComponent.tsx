@@ -8,21 +8,11 @@ interface SponSorInterface {
     url : string;
   };
   variant?: "default" | "reverse";
+  partnerLabel?: string;
+  partnerAdjectives?: string[];
 }
 
-export default function SponsorComponent({ data,variant = "default" }: SponSorInterface) {
-  const isReverse = variant !== "default";
-  
-  const words = data.name.split(" ");
-  const mainName = words.length > 1 ? words.slice(0, -1).join(" ") : data.name;
-  const lastName = words.length > 1 ? words[words.length - 1] : "";
-
-  // Images are served from PocketBase (full URL) or fall back to a neutral placeholder
-  const imageSrc = data.image && data.image.startsWith('http')
-    ? data.image
-    : 'data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1 1\"/>';
-
-  const partnerWords: string[] = [
+const DEFAULT_ADJECTIVES: string[] = [
   "Geweldige",
   "Uitstekende",
   "Fabuleuze",
@@ -35,6 +25,25 @@ export default function SponsorComponent({ data,variant = "default" }: SponSorIn
   "Uitzonderlijke",
   "Wonderbaarlijke"
 ];
+
+export default function SponsorComponent({ data, variant = "default", partnerLabel = "partner", partnerAdjectives = DEFAULT_ADJECTIVES }: SponSorInterface) {
+  const isReverse = variant !== "default";
+  
+  const words = data.name.split(" ");
+  const mainName = words.length > 1 ? words.slice(0, -1).join(" ") : data.name;
+  const lastName = words.length > 1 ? words[words.length - 1] : "";
+
+  // Images are served from PocketBase (full URL) or fall back to a neutral placeholder
+  const imageSrc = data.image && data.image.startsWith('http')
+    ? data.image
+    : 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"/>';
+
+  // Pick a deterministic adjective (hash of the name) so server and client render
+  // the same text during hydration, while still varying between sponsors.
+  const adjectiveIndex =
+    data.name.split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0) %
+    partnerAdjectives.length;
+  const partnerWord = partnerAdjectives[adjectiveIndex] ?? "Geweldige";
 
   return (
     <a href={data.url} target="_null">
@@ -60,7 +69,7 @@ export default function SponsorComponent({ data,variant = "default" }: SponSorIn
           */}
           <div className="flex-1 p-[2rem] md:p-[4rem] flex flex-col justify-center">
             <p className="text-yellow-400 text-[10px] md:text-xs font-black uppercase tracking-[0.4em] mb-4">
-              {partnerWords[Math.floor(Math.random() * partnerWords.length)]} partner
+              {partnerWord} {partnerLabel}
             </p>
             
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">

@@ -1,0 +1,89 @@
+---
+import MainLayout from '@/layouts/main.astro';
+import ContextLayout from '@/layouts/context.astro'
+import PreasidiumList from '@/components/PreasidiumList';
+import Spacer from '@/components/ui/spacer';
+import SectionHeader from '@/components/ui/sectionHeader';
+import { getPreasidiumYears } from '@/lib/pocketbase';
+import { defaultLang, useTranslations, type Locale } from '@/i18n/ui';
+
+const lang: Locale = (Astro.currentLocale as Locale) ?? defaultLang;
+const t = useTranslations(lang);
+
+const years = await getPreasidiumYears(lang);
+
+const roleItems = ['praesidium.item1', 'praesidium.item2', 'praesidium.item3', 'praesidium.item4', 'praesidium.item5', 'praesidium.item6'] as const;
+---
+<style>
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .page-hero {
+    background: radial-gradient(ellipse at 50% 0%, oklch(0.627 0.265 303.9 / 0.18) 0%, transparent 70%);
+  }
+
+  .page-hero-title {
+    animation: fadeInUp 0.7s ease-out both;
+  }
+
+  .page-hero-subtitle {
+    animation: fadeInUp 0.7s ease-out 0.15s both;
+  }
+
+  .page-hero-line {
+    animation: fadeInUp 0.7s ease-out 0.25s both;
+    width: 60px;
+    height: 2px;
+    background: oklch(0.627 0.265 303.9 / 0.6);
+    margin: 1.5rem auto 0;
+    border-radius: 999px;
+  }
+</style>
+<MainLayout title={t('praesidium.title')}>
+  <div class="page-hero grid place-items-center pt-30 md:pt-0 min-h-[50vh] content-center">
+    <div class="text-center px-6">
+      <h1 class="page-hero-title text-6xl md:text-8xl text-white font-bold">{t('praesidium.heading')}</h1>
+      <h2 class="page-hero-subtitle text-base sm:text-xl lg:text-2xl mt-4 text-white/90 font-medium max-w-3xl">
+        {t('praesidium.subtitle')}
+      </h2>
+      <div class="page-hero-line"></div>
+    </div>
+  </div>
+  <ContextLayout>
+    <div class="mx-auto px-6 sm:px-8 py-12 w-full">
+      <SectionHeader
+        title={t('praesidium.whatTitle')}
+        description={t('praesidium.whatDescription')}
+      />
+        <div class="grid gap-6 text-zinc-200">
+          <p>
+            {t('praesidium.intro')}
+          </p>
+          <ul class="grid sm:grid-cols-2 gap-4 text-sm md:text-base">
+            {roleItems.map((key) => (
+              <li class="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4">
+                {t(key)}
+              </li>
+            ))}
+          </ul>
+          <p>
+            {t('praesidium.outro')}
+          </p>
+        </div>
+
+      <Spacer />
+      <SectionHeader
+        title={t('praesidium.yearsTitle')}
+        description={t('praesidium.yearsDescription')}
+      />
+      <PreasidiumList
+        data={years}
+        noDescriptionText={t('preasidiumLid.noDescription')}
+        detailedInfoTemplate={t('preasidiumLid.detailedInfo')}
+        client:load
+      />
+    </div>
+  </ContextLayout>
+</MainLayout>

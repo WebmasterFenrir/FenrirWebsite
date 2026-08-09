@@ -1,0 +1,191 @@
+---
+import MainLayout from "@/layouts/main.astro";
+import ContextLayout from "@/layouts/context.astro";
+import SectionHeader from "@/components/ui/sectionHeader";
+import Spacer from "@/components/ui/spacer";
+import Sponsordata from "@/components/SponsorPositivedata";
+import SponsorList from "@/components/SponsorList";
+import { Button } from "@/components/ui/button";
+import { getSponsors } from "@/lib/pocketbase";
+import { defaultLang, useTranslations, partnerAdjectives, type Locale } from "@/i18n/ui";
+
+const lang: Locale = (Astro.currentLocale as Locale) ?? defaultLang;
+const t = useTranslations(lang);
+
+const sponsors = await getSponsors(lang);
+
+const sponsorValueCards = [
+  { a: t("sponsors.value1Title"), w: t("sponsors.value1What"), i: t("sponsors.value1Impact") },
+  { a: t("sponsors.value2Title"), w: t("sponsors.value2What"), i: t("sponsors.value2Impact") },
+  { a: t("sponsors.value3Title"), w: t("sponsors.value3What"), i: t("sponsors.value3Impact") },
+  { a: t("sponsors.value4Title"), w: t("sponsors.value4What"), i: t("sponsors.value4Impact") },
+  { a: t("sponsors.value5Title"), w: t("sponsors.value5What"), i: t("sponsors.value5Impact") },
+  { a: t("sponsors.value6Title"), w: t("sponsors.value6What"), i: t("sponsors.value6Impact") },
+];
+
+const steps = [
+  { title: t("sponsors.step1Title"), desc: t("sponsors.step1Desc") },
+  { title: t("sponsors.step2Title"), desc: t("sponsors.step2Desc") },
+  { title: t("sponsors.step3Title"), desc: t("sponsors.step3Desc") },
+];
+---
+
+<style>
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-hero {
+        background: radial-gradient(ellipse at 50% 0%, oklch(0.627 0.265 303.9 / 0.18) 0%, transparent 70%);
+    }
+
+    .page-hero-title {
+        animation: fadeInUp 0.7s ease-out both;
+    }
+
+    .page-hero-subtitle {
+        animation: fadeInUp 0.7s ease-out 0.15s both;
+    }
+
+    .page-hero-line {
+        animation: fadeInUp 0.7s ease-out 0.25s both;
+        width: 60px;
+        height: 2px;
+        background: oklch(0.627 0.265 303.9 / 0.6);
+        margin: 1.5rem auto 0;
+        border-radius: 999px;
+    }
+
+    @keyframes contactShine {
+        from { left: -80%; }
+        to { left: 130%; }
+    }
+
+    .contact-btn {
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, letter-spacing 0.2s ease !important;
+    }
+
+    .contact-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -80%;
+        width: 55%;
+        height: 100%;
+        background: linear-gradient(
+            to right,
+            transparent 0%,
+            oklch(1 0 0 / 0.2) 50%,
+            transparent 100%
+        );
+        transform: skewX(-15deg);
+        pointer-events: none;
+    }
+
+    .contact-btn:hover::before {
+        animation: contactShine 0.55s ease forwards;
+    }
+
+    .contact-btn:hover {
+        transform: translateY(-4px) scale(1.04);
+        box-shadow: 0 12px 40px oklch(0.879 0.169 91.6 / 0.45);
+        letter-spacing: 0.02em;
+    }
+
+    .contact-btn:active {
+        transform: translateY(0) scale(0.97);
+        box-shadow: 0 2px 10px oklch(0.879 0.169 91.6 / 0.25);
+    }
+</style>
+<MainLayout title={t("sponsors.title")}>
+    <div
+        class="page-hero grid place-items-center pt-30 md:pt-0 min-h-[50vh] content-center"
+    >
+        <div class="text-center px-6">
+            <h1 class="page-hero-title text-6xl md:text-8xl text-white font-bold">
+                {t("sponsors.heading")}
+            </h1>
+            <h2
+                class="page-hero-subtitle text-base sm:text-xl lg:text-2xl mt-4 text-white/90 font-medium max-w-3xl"
+            >
+                {t("sponsors.subtitle")}
+            </h2>
+            <div class="page-hero-line"></div>
+        </div>
+    </div>
+    <ContextLayout>
+        <div class="mx-auto px-6 sm:px-8 py-12 w-full">
+            <SectionHeader
+                title={t("sponsors.partnersTitle")}
+                description={t("sponsors.partnersDescription")}
+            />
+            <div class="w-full">
+                <SponsorList
+                    data={sponsors}
+                    partnerLabel={t("sponsors.partnerLabel")}
+                    partnerAdjectives={partnerAdjectives[lang]}
+                    client:load
+                />
+            </div>
+
+            <Spacer />
+            <SectionHeader
+                title={t("sponsors.whyTitle")}
+                description={t("sponsors.whyDescription")}
+            />
+            <div class="overflow-x-auto rounded-">
+                <Sponsordata items={sponsorValueCards} />
+            </div>
+
+            <Spacer />
+            <SectionHeader
+                title={t("sponsors.becomeTitle")}
+                description={t("sponsors.becomeDescription")}
+            />
+            <div class="grid gap-12">
+                <p class="text-lg md:text-xl leading-relaxed">
+                    {t("sponsors.intro")}
+                </p>
+
+                <ol class="grid gap-4 sm:grid-cols-3">
+                    {steps.map((step) => (
+                        <li class="bg-card border rounded-xl p-6">
+                            <h4 class="font-bold text-accent tracking-tight">
+                                {step.title}
+                            </h4>
+
+                            <p class="text-sm leading-relaxed font-light">
+                                {step.desc}
+                            </p>
+                        </li>
+                    ))}
+                </ol>
+                <div
+                    class="flex flex-col items-center justify-center text-center gap-8 mt-24 mb-12 w-full"
+                >
+                    <div class="space-y-4">
+                        <h3
+                            class="text-4xl md:text-6xl font-bold text-white tracking-tighter leading-none"
+                        >
+                            {t("sponsors.contactTitle")}
+                        </h3>
+                    </div>
+
+                    <div class="flex flex-col items-center">
+                        <a href="mailto:pr@fenrirclub.be" class="group">
+                            <Button
+                                variant="secondary"
+                                className="contact-btn p-6 sm:p-6 lg:p-8 text-2xl lg:text-4xl"
+                            >
+                                {t("sponsors.contactCta")}
+                            </Button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ContextLayout>
+</MainLayout>

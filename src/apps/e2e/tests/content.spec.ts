@@ -31,7 +31,9 @@ test.describe("Over ons page content", () => {
   });
 
   test("shows history section", async ({ page }) => {
-    await expect(page.getByText("Onze Geschiedenis")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Onze Geschiedenis", exact: true })
+    ).toBeVisible();
   });
 
   test("shows Fenrir Antwerpen section", async ({ page }) => {
@@ -47,11 +49,15 @@ test.describe("Over ons page content", () => {
   });
 
   test("shows name explanation section", async ({ page }) => {
-    await expect(page.getByText("De naam Fenrir")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "De naam Fenrir", exact: true })
+    ).toBeVisible();
   });
 
   test("shows club song section", async ({ page }) => {
-    await expect(page.getByText("Ons Clublied")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Ons Clublied", exact: true })
+    ).toBeVisible();
   });
 });
 

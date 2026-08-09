@@ -54,12 +54,14 @@ services:
       PB_PORT: 3000
       PB_ADMIN_EMAIL: webmaster@fenrirclub.be
       PB_ADMIN_PASSWORD: Fenrir123456789!
+      DEEPL_API_KEY: ${DEEPL_API_KEY}
       TZ: Europe/Berlin
     expose:
       - "3000"
     volumes:
       - ./pb_data:/pb_data
       - ./src/apps/pocketbase/pb_migrations:/pb_migrations
+      - ./src/apps/pocketbase/pb_hooks:/pb_hooks
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
       interval: 10s

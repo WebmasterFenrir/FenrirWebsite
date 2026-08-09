@@ -8,29 +8,33 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "../ui/dialog";
-import type { AstroInstance } from "astro";
 
-interface MenuInterface {
-    links: AstroInstance[];
+interface NavLink {
+    url: string;
+    label: string;
 }
 
-export default function HamburgerMenu({ links }: MenuInterface) {
-    const navItems = links
-        // optional: filter out special files
-        .filter((p) => !p.file.endsWith("404.astro"))
-        .map((p) => {
-            const url =
-                p.url ??
-                p.file
-                    .replace(/^.*\/pages/, "")
-                    .replace(/index\.astro$/, "")
-                    .replace(/\.astro$/, "");
+interface LanguageLink {
+    label: string;
+    href: string;
+    active: boolean;
+}
 
-            const segment = url.split("/").filter(Boolean)[0] ?? "";
-            const label = segment ? segment.replace(/-/g, " ") : "Home";
+interface MenuProps {
+    links: NavLink[];
+    menuTitle: string;
+    menuDescription: string;
+    languageLabel?: string;
+    languageLinks?: LanguageLink[];
+}
 
-            return { url: url || "/", label };
-        });
+export default function HamburgerMenu({
+    links,
+    menuTitle,
+    menuDescription,
+    languageLabel = "Language",
+    languageLinks = [],
+}: MenuProps) {
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -40,17 +44,39 @@ export default function HamburgerMenu({ links }: MenuInterface) {
             </DialogTrigger>
             <DialogContent className="bg-card">
                 <DialogHeader className="mt-4 text-left">
-                    <DialogTitle>Menu</DialogTitle>
-                    <DialogDescription>Verken onze website!</DialogDescription>
+                    <DialogTitle>{menuTitle}</DialogTitle>
+                    <DialogDescription>{menuDescription}</DialogDescription>
                 </DialogHeader>
-                {navItems.map((page) => (
-                    <a href={page.url}>
+                {links.map((page) => (
+                    <a href={page.url} key={page.url}>
                         <Button variant="link" className="pl-0">
-                            {page.label.charAt(0).toUpperCase() +
-                                page.label.slice(1)}
+                            {page.label}
                         </Button>
                     </a>
                 ))}
+                {languageLinks.length > 0 && (
+                    <div className="mt-4 border-t border-zinc-800 pt-4">
+                        <p className="mb-2 text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">
+                            {languageLabel}
+                        </p>
+                        <div className="flex gap-2">
+                            {languageLinks.map((lang) => (
+                                <a
+                                    href={lang.href}
+                                    key={lang.href}
+                                    aria-current={lang.active ? "true" : undefined}
+                                    className={
+                                        lang.active
+                                            ? "rounded-lg bg-purple-500/80 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-white"
+                                            : "rounded-lg bg-white/5 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
+                                    }
+                                >
+                                    {lang.label}
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </DialogContent>
         </Dialog>
     );
