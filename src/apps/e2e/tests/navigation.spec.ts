@@ -1,4 +1,9 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+// The header nav has an aria-label; the footer social-links <nav> has a
+// different one, so we can target the main navigation unambiguously.
+const mainNav = (page: Page) =>
+  page.getByRole("navigation", { name: "Hoofdnavigatie" });
 
 test.describe("Navigation", () => {
   test.beforeEach(async ({ page }) => {
@@ -8,35 +13,34 @@ test.describe("Navigation", () => {
   });
 
   test("nav is present on homepage", async ({ page }) => {
-    // The footer also renders a <nav>; the main site nav is the first one.
-    await expect(page.locator("nav").first()).toBeVisible();
+    await expect(mainNav(page)).toBeVisible();
   });
 
   test("nav is present on all pages", async ({ page }) => {
     for (const path of ["/over-ons", "/praesidium", "/sponsors"]) {
       await page.goto(path);
-      await expect(page.locator("nav").first(), `nav missing on ${path}`).toBeVisible();
+      await expect(mainNav(page), `nav missing on ${path}`).toBeVisible();
     }
   });
 
   test("clicking 'Over ons' navigates to /over-ons", async ({ page }) => {
-    await page.locator("nav").getByRole("link", { name: /over ons/i }).click();
+    await mainNav(page).getByRole("link", { name: /over ons/i }).click();
     await expect(page).toHaveURL(/\/over-ons/);
   });
 
   test("clicking 'Praesidium' navigates to /praesidium", async ({ page }) => {
-    await page.locator("nav").getByRole("link", { name: /praesidium/i }).click();
+    await mainNav(page).getByRole("link", { name: /praesidium/i }).click();
     await expect(page).toHaveURL(/\/praesidium/);
   });
 
   test("clicking 'Sponsors' navigates to /sponsors", async ({ page }) => {
-    await page.locator("nav").getByRole("link", { name: /sponsors/i }).click();
+    await mainNav(page).getByRole("link", { name: /sponsors/i }).click();
     await expect(page).toHaveURL(/\/sponsors/);
   });
 
   test("clicking 'Home' navigates to /", async ({ page }) => {
     await page.goto("/over-ons");
-    await page.locator("nav").getByRole("link", { name: /home/i }).click();
+    await mainNav(page).getByRole("link", { name: /home/i }).click();
     await expect(page).toHaveURL(/\/$/);
   });
 });
@@ -48,7 +52,8 @@ test.describe("Mobile navigation (hamburger)", () => {
   });
 
   test("hamburger menu button is visible on mobile", async ({ page }) => {
-    // The sm:hidden div contains the hamburger
-    await expect(page.locator("nav").first()).toBeVisible();
+    // On mobile the desktop links are hidden, so the only visible button in
+    // the main nav is the hamburger trigger.
+    await expect(mainNav(page).getByRole("button")).toBeVisible();
   });
 });

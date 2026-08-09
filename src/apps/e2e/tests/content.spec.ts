@@ -17,11 +17,15 @@ test.describe("Homepage content", () => {
   });
 
   test("shows praesidium section", async ({ page }) => {
-    await expect(page.getByText("Huidig Praesidium")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Huidig Praesidium", exact: true })
+    ).toBeVisible();
   });
 
   test("shows sponsors section", async ({ page }) => {
-    await expect(page.getByText("Onze Sponsors")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Onze Sponsors", exact: true })
+    ).toBeVisible();
   });
 });
 
@@ -38,13 +42,13 @@ test.describe("Over ons page content", () => {
 
   test("shows Fenrir Antwerpen section", async ({ page }) => {
     await expect(
-      page.getByRole("heading", { name: "Fenrir Antwerpen" })
+      page.getByRole("heading", { name: "Fenrir Antwerpen", exact: true })
     ).toBeVisible();
   });
 
   test("shows Fenrir Brugge section", async ({ page }) => {
     await expect(
-      page.getByRole("heading", { name: "Fenrir Brugge" })
+      page.getByRole("heading", { name: "Fenrir Brugge", exact: true })
     ).toBeVisible();
   });
 
@@ -67,7 +71,9 @@ test.describe("Praesidium page content", () => {
   });
 
   test("shows 'Wat Doet Het Praesidium' section", async ({ page }) => {
-    await expect(page.getByText("Wat Doet Het Praesidium")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Wat Doet Het Praesidium", exact: true })
+    ).toBeVisible();
   });
 
   test("shows role descriptions", async ({ page }) => {
@@ -77,7 +83,9 @@ test.describe("Praesidium page content", () => {
   });
 
   test("shows 'Praesidium Per Jaar' section", async ({ page }) => {
-    await expect(page.getByText("Praesidium Per Jaar")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Praesidium Per Jaar", exact: true })
+    ).toBeVisible();
   });
 });
 
@@ -87,15 +95,21 @@ test.describe("Sponsors page content", () => {
   });
 
   test("shows partners section", async ({ page }) => {
-    await expect(page.getByText("Partners Van Fenrir")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Partners Van Fenrir", exact: true })
+    ).toBeVisible();
   });
 
   test("shows 'Waarom Fenrir Sponsoren?' section", async ({ page }) => {
-    await expect(page.getByText("Waarom Fenrir Sponsoren?")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Waarom Fenrir Sponsoren?", exact: true })
+    ).toBeVisible();
   });
 
   test("shows 'Sponsor Worden?' section", async ({ page }) => {
-    await expect(page.getByText("Sponsor Worden?")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Sponsor Worden?", exact: true })
+    ).toBeVisible();
   });
 
   test("shows contact button", async ({ page }) => {

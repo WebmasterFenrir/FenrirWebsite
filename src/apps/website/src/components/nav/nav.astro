@@ -29,7 +29,7 @@ const languageLinks = (["nl", "en"] as const).map((locale) => ({
 }));
 ---
 
-<nav class="fixed top-0 inset-x-0 z-50 flex flex-row-reverse sm:flex-row">
+<nav aria-label="Hoofdnavigatie" class="fixed top-0 inset-x-0 z-50 flex flex-row-reverse sm:flex-row">
   <div class="hidden sm:flex p-2 rounded-br-2xl gap-2 bg-card w-max">
     {navItems.map((page) => (
       <a href={page.url}>
