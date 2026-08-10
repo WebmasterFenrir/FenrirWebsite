@@ -4,16 +4,44 @@ import ContextLayout from '@/layouts/context.astro';
 import SectionHeader from '@/components/ui/sectionHeader';
 import Spacer from '@/components/ui/spacer';
 import { Button } from '@/components/ui/button';
-import { IconCard } from '@/components/IconCard';
-import { Music, PartyPopper, Trophy, Film, Tent } from 'lucide-react';
-import { getActiviteiten } from '@/lib/pocketbase';
+import { getActiviteiten, getEventCategories } from '@/lib/pocketbase';
 import EventGrid from '@/components/EventGrid.astro';
+import { IconCard } from '@/components/IconCard';
+import {
+  PartyPopper,
+  Music,
+  Trophy,
+  Film,
+  Tent,
+  CalendarDays,
+  Beer,
+  MapPin,
+  HeartHandshake,
+  Sparkles,
+  type LucideIcon,
+} from 'lucide-react';
 import { defaultLang, useTranslations, type Locale } from '@/i18n/ui';
 
 const lang: Locale = (Astro.currentLocale as Locale) ?? defaultLang;
 const t = useTranslations(lang);
 
-const events = await getActiviteiten();
+const [events, categories] = await Promise.all([getActiviteiten(lang), getEventCategories(lang)]);
+
+/** Curated lucide icons editors can pick for a category (mirrors the dashboard list). */
+const categoryIcons: Record<string, LucideIcon> = {
+  PartyPopper,
+  Music,
+  Trophy,
+  Film,
+  Tent,
+  CalendarDays,
+  Beer,
+  MapPin,
+  HeartHandshake,
+  Sparkles,
+};
+const getCategoryIcon = (name?: string): LucideIcon =>
+  (name && categoryIcons[name]) || Sparkles;
 ---
 
 <style>
@@ -46,6 +74,7 @@ const events = await getActiviteiten();
   .membership-glow {
     background: radial-gradient(ellipse at 50% 0%, oklch(0.627 0.265 303.9 / 0.14) 0%, transparent 70%);
   }
+
 </style>
 
 <MainLayout title={t('activities.title')}>
@@ -66,33 +95,23 @@ const events = await getActiviteiten();
         description={t('activities.whatDescription')}
       />
 
-      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <IconCard
-          icon={PartyPopper}
-          title={t('activities.card1Title')}
-          description={t('activities.card1Desc')}
-        />
-        <IconCard
-          icon={Music}
-          title={t('activities.card2Title')}
-          description={t('activities.card2Desc')}
-        />
-        <IconCard
-          icon={Trophy}
-          title={t('activities.card3Title')}
-          description={t('activities.card3Desc')}
-        />
-        <IconCard
-          icon={Film}
-          title={t('activities.card4Title')}
-          description={t('activities.card4Desc')}
-        />
-        <IconCard
-          icon={Tent}
-          title={t('activities.card5Title')}
-          description={t('activities.card5Desc')}
-        />
-      </div>
+      {categories.length > 0 && (
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {categories.map((cat) => (
+            (() => {
+              const Icon = getCategoryIcon(cat.icon)
+              return (
+                <IconCard
+                  icon={Icon}
+                  title={cat.name}
+                  description={cat.description ?? ''}
+                  variant="subtle"
+                />
+              )
+            })()
+          ))}
+        </div>
+      )}
 
       <Spacer />
 

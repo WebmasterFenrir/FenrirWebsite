@@ -17,7 +17,7 @@ const lang: Locale = (Astro.currentLocale as Locale) ?? defaultLang;
 const translatedPath = useTranslatedPath(lang);
 const t = useTranslations(lang);
 
-const [sponsors, years, events] = await Promise.all([getSponsors(lang), getPreasidiumYears(lang), getActiviteiten()]);
+const [sponsors, years, events] = await Promise.all([getSponsors(lang), getPreasidiumYears(lang), getActiviteiten(lang)]);
 const previewLeden = years[0]?.PreasidiumLeden.slice(0, 2) ?? [];
 const previewEvents = events.slice(0, 3);
 ---

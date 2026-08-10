@@ -2,7 +2,8 @@ import pb from '@/lib/pocketbase'
 
 export interface Activiteit {
   id: string
-  fbEventId: string
+  /** Facebook event id — synced events have one, manual events don't. */
+  fbEventId?: string
   name: string
   startTime?: string
   endTime?: string
@@ -12,6 +13,13 @@ export interface Activiteit {
   fbUrl?: string
   /** True when the event has already started — kept as history, hidden from "upcoming". */
   past?: boolean
+  /** False hides the event from the public site without deleting it. */
+  active?: boolean
+  imageFile?: string
+  /** Category relation id. */
+  category?: string
+  /** Resolved category name for display (from expand). */
+  categoryName?: string
   created?: string
   updated?: string
 }
@@ -29,7 +37,24 @@ export interface FacebookSettings {
 }
 
 export async function getActiviteiten(): Promise<Activiteit[]> {
-  return pb.collection('activiteiten').getFullList<Activiteit>({ sort: 'startTime', requestKey: null })
+  const records = await pb.collection('activiteiten').getFullList<Activiteit & { expand?: { category?: { name?: string } } }>({
+    sort: 'startTime',
+    expand: 'category',
+    requestKey: null,
+  })
+  return records.map((r) => ({
+    ...r,
+    category: r.category || undefined,
+    categoryName: r.expand?.category?.name,
+  }))
+}
+
+export async function createActiviteit(data: FormData): Promise<Activiteit> {
+  return pb.collection('activiteiten').create<Activiteit>(data)
+}
+
+export async function updateActiviteit(id: string, data: FormData): Promise<Activiteit> {
+  return pb.collection('activiteiten').update<Activiteit>(id, data)
 }
 
 export async function deleteActiviteit(id: string): Promise<void> {

@@ -150,6 +150,32 @@ function translateHook(e) {
           if (translated) e.record.set("description_en", translated[0]);
         }
       }
+    } else if (col === "event_categories") {
+      // Translate category name + description so the website can render both
+      // languages without double data entry (same pattern as sponsors).
+      const dutchName = e.record.getString("name");
+      const existingName = e.record.getString("name_en");
+
+      if (!existingName || fieldChanged((r) => r.getString("name"))) {
+        if (!dutchName || dutchName.trim().length === 0) {
+          e.record.set("name_en", "");
+        } else {
+          const translated = translateTexts([dutchName]);
+          if (translated) e.record.set("name_en", translated[0]);
+        }
+      }
+
+      const dutchDesc = e.record.getString("description");
+      const existingDesc = e.record.getString("description_en");
+
+      if (!existingDesc || fieldChanged((r) => r.getString("description"))) {
+        if (!dutchDesc || dutchDesc.trim().length === 0) {
+          e.record.set("description_en", "");
+        } else {
+          const translated = translateTexts([dutchDesc]);
+          if (translated) e.record.set("description_en", translated[0]);
+        }
+      }
     }
   } catch (err) {
     // Never break the save because of a failed translation
@@ -160,5 +186,5 @@ function translateHook(e) {
   e.next();
 }
 
-onRecordCreateRequest(translateHook, "sponsors", "preasidium_leden");
-onRecordUpdateRequest(translateHook, "sponsors", "preasidium_leden");
+onRecordCreateRequest(translateHook, "sponsors", "preasidium_leden", "event_categories");
+onRecordUpdateRequest(translateHook, "sponsors", "preasidium_leden", "event_categories");

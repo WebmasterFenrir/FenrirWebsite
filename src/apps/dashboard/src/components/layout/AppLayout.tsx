@@ -26,6 +26,7 @@ import {
   Users,
   UserPlus,
   CalendarDays,
+  Tag,
   LogOut,
 } from 'lucide-react'
 
@@ -40,6 +41,7 @@ const mainNav: NavItem[] = [
   { label: 'Years', to: '/years', icon: CalendarRange },
   { label: 'Sponsors', to: '/sponsors', icon: Building2 },
   { label: 'Activiteiten', to: '/activiteiten', icon: CalendarDays },
+  { label: 'Categories', to: '/categories', icon: Tag },
   { label: 'People', to: '/people', icon: Users },
 ]
 
@@ -208,6 +210,7 @@ function BreadcrumbTitle() {
     '/years': 'Years',
     '/sponsors': 'Sponsors',
     '/activiteiten': 'Activiteiten',
+    '/categories': 'Categories',
     '/people': 'People',
     '/admin/users': 'Add User',
   }

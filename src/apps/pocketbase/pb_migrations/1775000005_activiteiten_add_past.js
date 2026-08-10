@@ -24,7 +24,8 @@ migrate((app) => {
       }
     }
   }
-  if (toSave.length > 0) app.saveAll(toSave)
+  // NOTE: app.saveAll() does not exist in this PocketBase version — loop save().
+  for (const r of toSave) app.save(r)
 }, (app) => {
   const col = app.findCollectionByNameOrId("activiteiten")
   if (col) {

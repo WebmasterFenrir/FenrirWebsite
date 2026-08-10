@@ -495,6 +495,9 @@ export async function runSync(opts: SyncOptions): Promise<SyncResult> {
     )
     const byKey = new Map<string, { id: string; fbEventId: string }>()
     for (const r of existing) {
+      // Manual events (no FB id) are never matched/adopted by the sync — an
+      // admin-created event must not be converted into a synced one.
+      if (!r.fbEventId) continue
       const k = eventKey(r.name, r.startTime)
       if (!byKey.has(k)) byKey.set(k, { id: r.id, fbEventId: r.fbEventId })
     }
@@ -543,6 +546,9 @@ export async function runSync(opts: SyncOptions): Promise<SyncResult> {
       const seen = new Map<string, (typeof all)[number]>()
       let removed = 0
       for (const rec of all) {
+        // Never touch manual events (no FB id) — they are admin-created and
+        // must not be removed because they happen to share a date + title.
+        if (!rec.fbEventId) continue
         const k = eventKey(rec.name, rec.startTime)
         const prev = seen.get(k)
         if (!prev) {
@@ -574,7 +580,8 @@ export async function runSync(opts: SyncOptions): Promise<SyncResult> {
       const scrapedIds = new Set(events.map((e) => e.fbEventId))
       const scrapedKeys = new Set(events.map((e) => eventKey(e.name, e.startTime)))
       for (const rec of fresh) {
-        if (rec.past) continue
+        // Manual events have no FB id and are never touched by the sync.
+        if (!rec.fbEventId || rec.past) continue
         if (!scrapedIds.has(rec.fbEventId) && !scrapedKeys.has(eventKey(rec.name, rec.startTime))) {
           await pb.collection("activiteiten").delete(rec.id)
         }

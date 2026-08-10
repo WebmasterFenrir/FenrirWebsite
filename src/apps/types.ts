@@ -7,7 +7,8 @@ export interface Sponsor {
 
 export interface Activiteit {
     id: string
-    fbEventId: string
+    /** Facebook event id — only synced events have one; manual events don't. */
+    fbEventId?: string
     name: string
     startTime: string
     endTime?: string
@@ -17,6 +18,21 @@ export interface Activiteit {
     fbUrl?: string
     /** True when the event has already started — kept as history, hidden from "upcoming". */
     past?: boolean
+    /** False hides the event from the public site without deleting it. */
+    active?: boolean
+    /** Resolved category name (locale-aware). */
+    category?: string
+    /** Resolved public file URL for a manually uploaded cover image. */
+    image?: string
+}
+
+export interface EventCategory {
+    id: string
+    name: string
+    description?: string
+    /** Lucide icon name (e.g. "PartyPopper") shown on the activity cards. */
+    icon?: string
+    sortOrder: number
 }
 
 export interface Sponsors {
