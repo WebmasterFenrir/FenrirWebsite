@@ -7,8 +7,9 @@ import SectionHeader from '@/components/ui/sectionHeader';
 import PreasidiumPrevieuwHomePage from '@/components/PreasidiumPrevieuwHomePage';
 import Spacer from '@/components/ui/spacer';
 import { IconCard } from '@/components/IconCard';
-import { getSponsors, getPreasidiumYears } from '@/lib/pocketbase';
-import { Users, Calendar, MapPin, HeartHandshake } from 'lucide-react';
+import { getSponsors, getPreasidiumYears, getActiviteiten } from '@/lib/pocketbase';
+import { Users, Calendar, MapPin, HeartHandshake, ArrowRight } from 'lucide-react';
+import EventGrid from '@/components/EventGrid.astro';
 import { defaultLang, useTranslations, partnerAdjectives, type Locale } from '@/i18n/ui';
 import { useTranslatedPath } from '@/i18n/utils';
 
@@ -16,8 +17,9 @@ const lang: Locale = (Astro.currentLocale as Locale) ?? defaultLang;
 const translatedPath = useTranslatedPath(lang);
 const t = useTranslations(lang);
 
-const [sponsors, years] = await Promise.all([getSponsors(lang), getPreasidiumYears(lang)]);
+const [sponsors, years, events] = await Promise.all([getSponsors(lang), getPreasidiumYears(lang), getActiviteiten()]);
 const previewLeden = years[0]?.PreasidiumLeden.slice(0, 2) ?? [];
+const previewEvents = events.slice(0, 3);
 ---
 <style>
 	.hero {
@@ -143,6 +145,21 @@ const previewLeden = years[0]?.PreasidiumLeden.slice(0, 2) ?? [];
 			description={t('home.why4Desc')}
 			variant="subtle"
 		/>
+	</div>
+
+	<Spacer/>
+
+	<SectionHeader title={t('home.activitiesTitle')} description={t('home.activitiesDescription')}/>
+
+	<EventGrid events={previewEvents} />
+
+	<div class="mt-10 flex justify-center">
+		<a href={translatedPath('activiteiten')}>
+			<Button variant="outline" className="border-zinc-700 text-white hover:bg-zinc-800 hover:text-white">
+				{t('home.activitiesViewAll')}
+				<ArrowRight class="size-4" />
+			</Button>
+		</a>
 	</div>
 
 	<Spacer/>

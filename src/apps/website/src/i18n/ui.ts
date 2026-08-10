@@ -64,6 +64,10 @@ const nl = {
   "home.sponsorsTitle": "Onze Sponsors",
   "home.sponsorsDescription":
     "Dankzij deze partners kunnen we onze werking verder uitbouwen en onze studenten blijven ondersteunen.",
+  "home.activitiesTitle": "Komende activiteiten",
+  "home.activitiesDescription":
+    "Ontdek hieronder wat er bij Fenrir op de planning staat. Zin om mee te doen? Iedereen is welkom!",
+  "home.activitiesViewAll": "Bekijk alle activiteiten",
   "home.praesidiumCtaTitle": "Ontdek ons volledige praesidium",
   "home.praesidiumCtaDescription":
     "Bekijk alle leden, rollen en verhalen van onze vereniging.",
@@ -108,6 +112,12 @@ const nl = {
     "Volg ons op Facebook en Instagram voor de laatste data en foto's, of word direct lid en geniet van voordeelprijzen op al onze activiteiten.",
   "activities.joinCta": "Word lid!",
   "activities.facebookCta": "Facebook",
+  "activities.upcomingTitle": "Komende activiteiten",
+  "activities.upcomingDescription":
+    "Dit zijn de aankomende activiteiten van Fenrir, rechtstreeks van onze Facebook-pagina. Volg ons daar voor de allerlaatste updates.",
+  "activities.noEvents":
+    "Er staan momenteel geen activiteiten gepland. Kijk binnenkort nog eens terug!",
+  "activities.viewOnFacebook": "Bekijk op Facebook",
 
   // Over ons page
   "about.title": "Over ons",
@@ -306,6 +316,10 @@ const en: Ui = {
   "home.sponsorsTitle": "Our Sponsors",
   "home.sponsorsDescription":
     "Thanks to these partners we can keep growing our organisation and supporting our students.",
+  "home.activitiesTitle": "Upcoming activities",
+  "home.activitiesDescription":
+    "Check out what's coming up at Fenrir below. Fancy joining? Everyone is welcome!",
+  "home.activitiesViewAll": "View all activities",
   "home.praesidiumCtaTitle": "Discover our full praesidium",
   "home.praesidiumCtaDescription":
     "See all the members, roles and stories of our club.",
@@ -350,6 +364,12 @@ const en: Ui = {
     "Follow us on Facebook and Instagram for the latest dates and photos, or become a member right away and enjoy discounted prices on all our activities.",
   "activities.joinCta": "Join us!",
   "activities.facebookCta": "Facebook",
+  "activities.upcomingTitle": "Upcoming activities",
+  "activities.upcomingDescription":
+    "These are Fenrir's upcoming activities, straight from our Facebook page. Follow us there for the very latest updates.",
+  "activities.noEvents":
+    "No activities are currently scheduled. Check back soon!",
+  "activities.viewOnFacebook": "View on Facebook",
 
   // Over ons page
   "about.title": "About us",

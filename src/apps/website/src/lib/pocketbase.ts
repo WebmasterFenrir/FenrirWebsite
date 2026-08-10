@@ -1,5 +1,5 @@
 import PocketBase, { type RecordModel } from 'pocketbase'
-import type { PreasidiumLid, PreasidiumYear, Sponsors } from '../../../types'
+import type { PreasidiumLid, PreasidiumYear, Sponsors, Activiteit } from '../../../types'
 import { translateRole, type Locale } from '@/i18n/ui'
 
 const PB_URL = import.meta.env.PB_URL ?? process.env.PB_URL ?? 'http://127.0.0.1:8090'
@@ -47,6 +47,38 @@ export async function getSponsors(locale: Locale = 'nl'): Promise<Sponsors[]> {
         return [...map.values()]
     } catch (err) {
         console.error('getSponsors failed:', err)
+        return []
+    }
+}
+
+export async function getActiviteiten(): Promise<Activiteit[]> {
+    try {
+        const pb = await createClient()
+        const records = await pb.collection('activiteiten').getFullList({ sort: 'startTime' })
+        // Only show future events. The `past` flag is authoritative when set,
+        // but we also hard-check the start date so no past event ever leaks
+        // onto the public site (e.g. records created before the flag existed).
+        const now = new Date()
+        return records
+            .filter((r) => {
+                if (r.past) return false
+                const start = r.startTime ? new Date(r.startTime).getTime() : NaN
+                return !Number.isNaN(start) && start > now.getTime()
+            })
+            .map((r) => ({
+                id:        r.id,
+                fbEventId: r.fbEventId,
+                name:      r.name,
+                startTime: r.startTime ?? '',
+                endTime:   r.endTime ?? undefined,
+                description: r.description ?? undefined,
+                placeName: r.placeName ?? undefined,
+                coverUrl:  r.coverUrl ?? undefined,
+                fbUrl:     r.fbUrl ?? undefined,
+                past:      !!r.past,
+            }))
+    } catch (err) {
+        console.error('getActiviteiten failed:', err)
         return []
     }
 }

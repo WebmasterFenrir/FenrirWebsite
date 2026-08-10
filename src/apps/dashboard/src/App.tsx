@@ -10,6 +10,7 @@ import { YearsPage } from './components/pages/YearsPage'
 import { SponsorsPage } from './components/pages/SponsorsPage'
 import { PeoplePage } from './components/pages/PeoplePage'
 import { AdminUsersPage } from './components/pages/AdminUsersPage'
+import { ActiviteitenPage } from './components/pages/ActiviteitenPage'
 import { RoleContext } from './lib/RoleContext'
 import { can, type Role } from './lib/roles'
 
@@ -64,6 +65,7 @@ export function App() {
             <Route index element={<OverviewPage />} />
             <Route path="years" element={<YearsPage />} />
             <Route path="sponsors" element={<SponsorsPage />} />
+            <Route path="activiteiten" element={<ActiviteitenPage />} />
             <Route path="people" element={<PeoplePage />} />
             <Route
               path="admin/users"

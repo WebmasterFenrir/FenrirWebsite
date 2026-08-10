@@ -1,0 +1,98 @@
+---
+import { ArrowRight, CalendarDays } from 'lucide-react';
+import { defaultLang, useTranslations, type Locale } from '@/i18n/ui';
+import type { Activiteit } from '../../../types';
+
+interface Props {
+  events: Activiteit[];
+}
+
+const { events } = Astro.props;
+
+const lang: Locale = (Astro.currentLocale as Locale) ?? defaultLang;
+const t = useTranslations(lang);
+
+const fmtDate = (iso: string, locale: Locale) => {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'nl-BE', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(d);
+};
+---
+
+<style>
+  .event-card {
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+  .event-card:hover {
+    transform: translateY(-4px);
+    border-color: oklch(0.627 0.265 303.9 / 0.45);
+    box-shadow: 0 12px 40px oklch(0 0 0 / 0.45);
+  }
+  .event-card:hover .event-cover img {
+    transform: scale(1.05);
+  }
+  .event-cover img {
+    transition: transform 0.5s ease;
+  }
+  .event-date {
+    letter-spacing: 0.08em;
+  }
+</style>
+
+{
+  events.length === 0 ? (
+    <div class="flex flex-col items-center justify-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/40 py-16 text-center">
+      <CalendarDays class="size-10 text-purple-400/50" />
+      <p class="max-w-md text-sm text-zinc-400">{t('activities.noEvents')}</p>
+    </div>
+  ) : (
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        events.map((event) => (
+          <a
+            href={event.fbUrl ?? '#'}
+            target={event.fbUrl ? '_blank' : undefined}
+            rel={event.fbUrl ? 'noopener noreferrer' : undefined}
+            class="event-card group flex flex-col overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/40"
+          >
+            <div class="event-cover aspect-[16/9] overflow-hidden bg-zinc-800/60">
+              {event.coverUrl ? (
+                <img
+                  src={event.coverUrl}
+                  alt={event.name}
+                  class="size-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div class="grid size-full place-items-center">
+                  <CalendarDays class="size-10 text-purple-400/40" />
+                </div>
+              )}
+            </div>
+            <div class="flex flex-1 flex-col gap-2 p-5">
+              <p class="event-date text-xs font-semibold uppercase text-purple-400">
+                {fmtDate(event.startTime, lang)}
+              </p>
+              <h3 class="text-lg font-bold text-white leading-snug">{event.name}</h3>
+              {event.placeName && (
+                <p class="text-sm text-zinc-400">{event.placeName}</p>
+              )}
+              <div class="mt-auto pt-3">
+                <span class="inline-flex items-center gap-1.5 text-sm font-medium text-purple-400 transition-colors group-hover:text-purple-300">
+                  {t('activities.viewOnFacebook')}
+                  <ArrowRight class="size-4 transition-transform group-hover:translate-x-0.5" />
+                </span>
+              </div>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+  )
+}

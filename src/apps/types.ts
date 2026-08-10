@@ -5,6 +5,20 @@ export interface Sponsor {
     url : string
 }
 
+export interface Activiteit {
+    id: string
+    fbEventId: string
+    name: string
+    startTime: string
+    endTime?: string
+    description?: string
+    placeName?: string
+    coverUrl?: string
+    fbUrl?: string
+    /** True when the event has already started — kept as history, hidden from "upcoming". */
+    past?: boolean
+}
+
 export interface Sponsors {
     list : Sponsor[]
     startYear : number
