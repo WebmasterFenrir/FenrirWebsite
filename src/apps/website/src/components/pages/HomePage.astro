@@ -147,20 +147,26 @@ const previewEvents = events.slice(0, 3);
 		/>
 	</div>
 
-	<Spacer/>
+	{
+		previewEvents.length > 0 && (
+			<>
+				<Spacer/>
 
-	<SectionHeader title={t('home.activitiesTitle')} description={t('home.activitiesDescription')}/>
+				<SectionHeader title={t('home.activitiesTitle')} description={t('home.activitiesDescription')}/>
 
-	<EventGrid events={previewEvents} />
+				<EventGrid events={previewEvents} />
 
-	<div class="mt-10 flex justify-center">
-		<a href={translatedPath('activiteiten')}>
-			<Button variant="outline" className="border-zinc-700 text-white hover:bg-zinc-800 hover:text-white">
-				{t('home.activitiesViewAll')}
-				<ArrowRight class="size-4" />
-			</Button>
-		</a>
-	</div>
+				<div class="mt-10 flex justify-center">
+					<a href={translatedPath('activiteiten')}>
+						<Button variant="outline" className="border-zinc-700 text-white hover:bg-zinc-800 hover:text-white">
+							{t('home.activitiesViewAll')}
+							<ArrowRight class="size-4" />
+						</Button>
+					</a>
+				</div>
+			</>
+		)
+	}
 
 	<Spacer/>
 

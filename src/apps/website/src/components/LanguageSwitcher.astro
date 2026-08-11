@@ -16,7 +16,10 @@ const currentPath = Astro.url.pathname;
 
 <div class="flex items-center gap-1 rounded-xl bg-black/30 p-1 text-xs font-semibold uppercase tracking-widest">
   {locales.map((locale) => {
-    const href = localizePathname(currentPath, locale);
+    // ?lang= tells the middleware this was an explicit choice, so it can
+    // remember it in a cookie (even when switching back to the default locale,
+    // which has no URL prefix).
+    const href = `${localizePathname(currentPath, locale)}?lang=${locale}`;
     const active = locale === lang;
     return (
       <a

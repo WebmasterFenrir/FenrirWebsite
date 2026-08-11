@@ -1,13 +1,10 @@
-import { defaultLang, showDefaultLang, type Locale } from "./ui";
+import { defaultLang, isSupportedLocale, showDefaultLang, type Locale } from "./ui";
 
 /** Extract the locale from a URL pathname ("/en/...", "/en" → "en", otherwise default). */
 export function getLangFromUrl(url: URL | string): Locale {
   const pathname = typeof url === "string" ? url : url.pathname;
   const [, lang] = pathname.split("/");
-  if (lang && lang in { nl: 1, en: 1 }) {
-    return lang as Locale;
-  }
-  return defaultLang;
+  return isSupportedLocale(lang) ? lang : defaultLang;
 }
 
 /** Locale-aware path, mirroring Astro's `prefixDefaultLocale` behaviour. */
