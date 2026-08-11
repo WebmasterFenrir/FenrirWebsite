@@ -50,6 +50,12 @@ function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+// PB only returns `email` for the requester's own record — for other users fall
+// back to name, then to a placeholder so the UI never crashes on undefined.
+function displayName(user: DashboardUser): string {
+  return user.name || user.email || 'Unnamed user'
+}
+
 export function AdminUsersPage() {
   const currentUserId = pb.authStore.record?.id
   const [users, setUsers] = useState<DashboardUser[]>([])
@@ -57,7 +63,9 @@ export function AdminUsersPage() {
   const [error, setError] = useState('')
   const [updatingId, setUpdatingId] = useState<string | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState('')
   const [addOpen, setAddOpen] = useState(false)
+  const [addName, setAddName] = useState('')
   const [addEmail, setAddEmail] = useState('')
   const [addPassword, setAddPassword] = useState('')
   const [addRole, setAddRole] = useState<Role>('viewer')
@@ -83,11 +91,13 @@ export function AdminUsersPage() {
 
   const handleDelete = async () => {
     if (!deleteId) return
+    setDeleteError('')
     try {
       await deleteUser(deleteId)
       setUsers(u => u.filter(x => x.id !== deleteId))
-    } finally {
       setDeleteId(null)
+    } catch (err) {
+      setDeleteError(`Could not delete user: ${err instanceof Error ? err.message : String(err)}`)
     }
   }
 
@@ -96,9 +106,10 @@ export function AdminUsersPage() {
     setAddSaving(true)
     setAddError('')
     try {
-      const created = await createUser(addEmail, addPassword, addRole)
-      setUsers(u => [...u, created].sort((a, b) => a.email.localeCompare(b.email)))
+      const created = await createUser(addEmail, addPassword, addRole, addName)
+      setUsers(u => [...u, created].sort((a, b) => displayName(a).localeCompare(displayName(b))))
       setAddOpen(false)
+      setAddName('')
       setAddEmail('')
       setAddPassword('')
       setAddRole('viewer')
@@ -149,12 +160,12 @@ export function AdminUsersPage() {
                       <TableCell>
                         <div className="flex items-center gap-2.5">
                           <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary">
-                            {(user.name || user.email)[0].toUpperCase()}
+                            {displayName(user)[0].toUpperCase()}
                           </div>
                           <div className="min-w-0">
                             {user.name && <p className="text-sm font-medium truncate">{user.name}</p>}
                             <p className={`truncate ${user.name ? 'text-xs text-muted-foreground' : 'text-sm font-medium'}`}>
-                              {user.email}
+                              {user.email ?? (user.name ? 'No email' : 'Unnamed user')}
                             </p>
                           </div>
                           {isMe && <Badge variant="outline" className="text-[10px] px-1.5 py-0">you</Badge>}
@@ -254,6 +265,16 @@ export function AdminUsersPage() {
           </DialogHeader>
           <form onSubmit={handleAddUser} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
+              <Label htmlFor="add-name">Name</Label>
+              <Input
+                id="add-name"
+                type="text"
+                placeholder="e.g. Jan Peeters"
+                value={addName}
+                onChange={e => setAddName(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
               <Label htmlFor="add-email">Email</Label>
               <Input
                 id="add-email"
@@ -307,6 +328,7 @@ export function AdminUsersPage() {
               This will permanently delete the user account. They will lose all access immediately.
             </AlertDialogDescription>
           </AlertDialogHeader>
+          {deleteError && <p className="text-xs text-destructive">{deleteError}</p>}
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>

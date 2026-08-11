@@ -1,0 +1,5 @@
+# Facebook session cookies — never commit these!
+facebook-cookies.json
+
+# Debug HTML dumps from FB_SYNC_DUMP=1
+facebook-events-dump.html

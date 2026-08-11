@@ -1,0 +1,22 @@
+{
+  "name": "events-sync",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "dev": "bun run src/index.ts",
+    "sync": "bun run src/index.ts --once",
+    "export:cookies": "bun run scripts/export-cookies.ts",
+    "check-types": "tsc --noEmit",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "pocketbase": "^0.26.8",
+    "puppeteer-core": "^24.0.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "~5.9.3"
+  }
+}

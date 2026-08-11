@@ -15,6 +15,13 @@ export type Locale = keyof typeof languages;
 
 export const defaultLang: Locale = "nl";
 
+/** All locales the site supports (mirrors astro.config.mjs `i18n.locales`). */
+export const SUPPORTED_LOCALES = Object.keys(languages) as Locale[];
+
+export function isSupportedLocale(value: string | undefined | null): value is Locale {
+  return (SUPPORTED_LOCALES as string[]).includes(value ?? "");
+}
+
 /** When false, the default locale ("nl") gets no URL prefix: /activiteiten */
 export const showDefaultLang = false;
 
@@ -64,6 +71,10 @@ const nl = {
   "home.sponsorsTitle": "Onze Sponsors",
   "home.sponsorsDescription":
     "Dankzij deze partners kunnen we onze werking verder uitbouwen en onze studenten blijven ondersteunen.",
+  "home.activitiesTitle": "Komende activiteiten",
+  "home.activitiesDescription":
+    "Ontdek hieronder wat er bij Fenrir op de planning staat. Zin om mee te doen? Iedereen is welkom!",
+  "home.activitiesViewAll": "Bekijk alle activiteiten",
   "home.praesidiumCtaTitle": "Ontdek ons volledige praesidium",
   "home.praesidiumCtaDescription":
     "Bekijk alle leden, rollen en verhalen van onze vereniging.",
@@ -76,21 +87,6 @@ const nl = {
   "activities.whatTitle": "Wat doen wij",
   "activities.whatDescription":
     "Als studentenclub organiseren we het hele jaar door activiteiten. Sommige zijn exclusief voor leden, andere open voor iedereen die gezelligheid zoekt.",
-  "activities.card1Title": "TD's & feestjes",
-  "activities.card1Desc":
-    "Themafeestjes in ons stamcafé Den Echo en samenwerkingen met andere Antwerpse studentenverenigingen. Elke twee weken iets te vieren.",
-  "activities.card2Title": "Cantussen",
-  "activities.card2Desc":
-    "Samen zingen en drinken in De Wagetol. Van klassieke cantusliederen tot ons eigen clublied: er is altijd sfeer.",
-  "activities.card3Title": "Sport",
-  "activities.card3Desc":
-    "Blijf fit en sport mee. We doen mee aan voetbal- en basketbaltoernooien in Wilrijk en organiseren sportieve uitstapjes.",
-  "activities.card4Title": "Cultuur & ontspanning",
-  "activities.card4Desc":
-    "Filmavonden, spelletjesavonden en jeneverwandelingen. Ideaal om even te onthaasten tussen de lessen door.",
-  "activities.card5Title": "Ledenweekend",
-  "activities.card5Desc":
-    "Een weekend in de Ardennen vol cantussen, kwissen, sport en goed eten. Vriendschap en plezier gegarandeerd.",
   "activities.howTitle": "Hoe werkt het",
   "activities.howDescription":
     "Iedereen is welkom om een activiteit mee te maken. Wil je voordeelprijzen en mee naar het ledenweekend? Dan wordt je lid.",
@@ -108,6 +104,12 @@ const nl = {
     "Volg ons op Facebook en Instagram voor de laatste data en foto's, of word direct lid en geniet van voordeelprijzen op al onze activiteiten.",
   "activities.joinCta": "Word lid!",
   "activities.facebookCta": "Facebook",
+  "activities.upcomingTitle": "Komende activiteiten",
+  "activities.upcomingDescription":
+    "Dit zijn de aankomende activiteiten van Fenrir. Volg ons op Facebook en Instagram voor de allerlaatste updates.",
+  "activities.noEvents":
+    "Er staan momenteel geen activiteiten gepland. Kijk binnenkort nog eens terug!",
+  "activities.viewOnFacebook": "Bekijk op Facebook",
 
   // Over ons page
   "about.title": "Over ons",
@@ -306,6 +308,10 @@ const en: Ui = {
   "home.sponsorsTitle": "Our Sponsors",
   "home.sponsorsDescription":
     "Thanks to these partners we can keep growing our organisation and supporting our students.",
+  "home.activitiesTitle": "Upcoming activities",
+  "home.activitiesDescription":
+    "Check out what's coming up at Fenrir below. Fancy joining? Everyone is welcome!",
+  "home.activitiesViewAll": "View all activities",
   "home.praesidiumCtaTitle": "Discover our full praesidium",
   "home.praesidiumCtaDescription":
     "See all the members, roles and stories of our club.",
@@ -318,21 +324,6 @@ const en: Ui = {
   "activities.whatTitle": "What we do",
   "activities.whatDescription":
     "As a student club we organise activities all year round. Some are exclusive to members, others are open to everyone looking for a good time.",
-  "activities.card1Title": "TDs & parties",
-  "activities.card1Desc":
-    "Theme parties in our home café Den Echo and collaborations with other Antwerp student associations. Something to celebrate every two weeks.",
-  "activities.card2Title": "Cantuses",
-  "activities.card2Desc":
-    "Singing and drinking together in De Wagetol. From classic cantus songs to our own club song: there's always a great atmosphere.",
-  "activities.card3Title": "Sports",
-  "activities.card3Desc":
-    "Stay fit and join in. We take part in football and basketball tournaments in Wilrijk and organise sporting trips.",
-  "activities.card4Title": "Culture & relaxation",
-  "activities.card4Desc":
-    "Movie nights, games nights and jenever (Dutch gin) walks. Perfect for unwinding between classes.",
-  "activities.card5Title": "Members' weekend",
-  "activities.card5Desc":
-    "A weekend in the Ardennes full of cantuses, quizzes, sports and good food. Friendship and fun guaranteed.",
   "activities.howTitle": "How it works",
   "activities.howDescription":
     "Everyone is welcome to join an activity. Want discounted prices and a spot on the members' weekend? Then become a member.",
@@ -350,6 +341,12 @@ const en: Ui = {
     "Follow us on Facebook and Instagram for the latest dates and photos, or become a member right away and enjoy discounted prices on all our activities.",
   "activities.joinCta": "Join us!",
   "activities.facebookCta": "Facebook",
+  "activities.upcomingTitle": "Upcoming activities",
+  "activities.upcomingDescription":
+    "These are Fenrir's upcoming activities. Follow us on Facebook and Instagram for the very latest updates.",
+  "activities.noEvents":
+    "No activities are currently scheduled. Check back soon!",
+  "activities.viewOnFacebook": "View on Facebook",
 
   // Over ons page
   "about.title": "About us",

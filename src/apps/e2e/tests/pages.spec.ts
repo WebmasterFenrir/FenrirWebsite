@@ -36,8 +36,16 @@ test.describe("Pages load correctly", () => {
     ).toBeVisible();
   });
 
+  test("activiteiten page has correct title and heading", async ({ page }) => {
+    await page.goto("/activiteiten");
+    await expect(page).toHaveTitle(/Activiteiten/);
+    await expect(
+      page.getByRole("heading", { name: "Activiteiten", level: 1 })
+    ).toBeVisible();
+  });
+
   test("all pages return 200", async ({ page }) => {
-    for (const path of ["/", "/over-ons", "/praesidium", "/sponsors"]) {
+    for (const path of ["/", "/over-ons", "/praesidium", "/sponsors", "/activiteiten"]) {
       const response = await page.goto(path);
       expect(response?.status(), `${path} should return 200`).toBe(200);
     }

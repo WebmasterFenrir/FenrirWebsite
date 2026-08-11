@@ -15,7 +15,9 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      // Dutch browser locale: the language middleware redirects non-Dutch
+      // visitors to /en, which would break assertions on Dutch content.
+      use: { ...devices["Desktop Chrome"], locale: "nl-NL" },
     },
   ],
   webServer: [

@@ -1,5 +1,5 @@
 import PocketBase, { type RecordModel } from 'pocketbase'
-import type { PreasidiumLid, PreasidiumYear, Sponsors } from '../../../types'
+import type { PreasidiumLid, PreasidiumYear, Sponsors, Activiteit, EventCategory } from '../../../types'
 import { translateRole, type Locale } from '@/i18n/ui'
 
 const PB_URL = import.meta.env.PB_URL ?? process.env.PB_URL ?? 'http://127.0.0.1:8090'
@@ -25,6 +25,11 @@ function getFileUrl(record: RecordModel, filename: string | undefined) {
     return publicPb.files.getUrl(record, filename)
 }
 
+/** Locale-aware text picker: prefer the English value on EN pages, else the Dutch source. */
+function pickLocale(locale: Locale, nl?: string, en?: string): string | undefined {
+    return locale === 'en' && en ? en : nl || undefined
+}
+
 export async function getSponsors(locale: Locale = 'nl'): Promise<Sponsors[]> {
     try {
         const pb = await createClient()
@@ -47,6 +52,66 @@ export async function getSponsors(locale: Locale = 'nl'): Promise<Sponsors[]> {
         return [...map.values()]
     } catch (err) {
         console.error('getSponsors failed:', err)
+        return []
+    }
+}
+
+export async function getEventCategories(locale: Locale = 'nl'): Promise<EventCategory[]> {
+    try {
+        const pb = await createClient()
+        const records = await pb.collection('event_categories').getFullList({ sort: 'sortOrder,name' })
+        return records
+            .filter((r) => r.active !== false)
+            .map((r) => ({
+                id:          r.id,
+                name:        pickLocale(locale, r.name, r.name_en) ?? r.name,
+                description: pickLocale(locale, r.description, r.description_en),
+                icon:        r.icon || undefined,
+                sortOrder:   r.sortOrder ?? 0,
+            }))
+    } catch (err) {
+        console.error('getEventCategories failed:', err)
+        return []
+    }
+}
+
+export async function getActiviteiten(locale: Locale = 'nl'): Promise<Activiteit[]> {
+    try {
+        const pb = await createClient()
+        const records = await pb.collection('activiteiten').getFullList({ sort: 'startTime', expand: 'category' })
+        // Only show future events. The `past` flag is authoritative when set,
+        // but we also hard-check the start date so no past event ever leaks
+        // onto the public site (e.g. records created before the flag existed).
+        // Manual events can additionally be hidden with `active = false`.
+        const now = new Date()
+        return records
+            .filter((r) => {
+                if (r.active === false) return false
+                if (r.past) return false
+                const start = r.startTime ? new Date(r.startTime).getTime() : NaN
+                return !Number.isNaN(start) && start > now.getTime()
+            })
+            .map((r) => {
+                const cat = r.expand?.category as RecordModel | undefined
+                return {
+                    id:            r.id,
+                    fbEventId:     r.fbEventId || undefined,
+                    name:          r.name,
+                    startTime:     r.startTime ?? '',
+                    endTime:       r.endTime ?? undefined,
+                    description:   r.description ?? undefined,
+                    placeName:     r.placeName ?? undefined,
+                    coverUrl:      r.coverUrl ?? undefined,
+                    fbUrl:         r.fbUrl ?? undefined,
+                    past:          !!r.past,
+                    category:      cat
+                        ? (locale === 'en' && cat.name_en ? cat.name_en : cat.name)
+                        : undefined,
+                    image:         getFileUrl(r, r.imageFile),
+                }
+            })
+    } catch (err) {
+        console.error('getActiviteiten failed:', err)
         return []
     }
 }

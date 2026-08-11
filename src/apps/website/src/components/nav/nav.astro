@@ -24,7 +24,8 @@ const navItems: { url: string; label: string }[] = [
 // Language options for the mobile menu (plain data, serializable to the island)
 const languageLinks = (["nl", "en"] as const).map((locale) => ({
   label: locale.toUpperCase(),
-  href: localizePathname(currentPath, locale),
+  // ?lang= lets the middleware persist the explicit choice in a cookie.
+  href: `${localizePathname(currentPath, locale)}?lang=${locale}`,
   active: locale === lang,
 }));
 ---
