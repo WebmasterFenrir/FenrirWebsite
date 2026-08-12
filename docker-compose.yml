@@ -77,6 +77,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.form-site
+      args:
+        # Inlined into the browser bundle at build time (Astro PUBLIC_* vars) —
+        # runtime env alone would leave submissions hitting 127.0.0.1:8090.
+        PUBLIC_PB_URL: https://pb.fenrirclub.be
     container_name: fenrir-form-site
     expose:
       - "4321"

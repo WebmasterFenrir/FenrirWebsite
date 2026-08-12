@@ -51,6 +51,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.form-site
+      args:
+        # Inlined into the browser bundle at build time (Astro PUBLIC_* vars) —
+        # must match the PUBLIC_PB_URL the browser should reach.
+        PUBLIC_PB_URL: http://localhost:3421
     container_name: fenrir-form-site
     expose:
       - "4321"

@@ -2,6 +2,13 @@
 FROM oven/bun:latest AS builder
 WORKDIR /app
 
+# The browser-side form submission targets the public PocketBase URL. Astro
+# inlines PUBLIC_* env vars into the client bundle at BUILD time, so this must
+# arrive as a docker build arg (compose `args:`) — a runtime env var alone
+# leaves the client hitting http://127.0.0.1:8090.
+ARG PUBLIC_PB_URL=http://127.0.0.1:8090
+ENV PUBLIC_PB_URL=$PUBLIC_PB_URL
+
 COPY ./src .
 RUN bun install
 
