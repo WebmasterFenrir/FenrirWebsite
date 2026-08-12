@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, Trash2, Shield, Eye, Pencil, Check } from 'lucide-react'
+import { Plus, Trash2, Shield, Eye, Pencil, Check, ClipboardList } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -28,22 +28,25 @@ import type { Role } from '@/lib/roles'
 import pb from '@/lib/pocketbase'
 
 const ROLES: { value: Role; label: string }[] = [
-  { value: 'admin',  label: 'Admin' },
-  { value: 'media',  label: 'Media' },
-  { value: 'viewer', label: 'Viewer' },
+  { value: 'admin',        label: 'Admin' },
+  { value: 'media',        label: 'Media' },
+  { value: 'viewer',       label: 'Viewer' },
+  { value: 'formmanager',  label: 'Formmanager' },
 ]
 
 const ROLE_BADGES: Record<Role, string> = {
-  admin:  'bg-primary/15 text-primary border-primary/20',
-  media:  'bg-blue-500/15 text-blue-400 border-blue-500/20',
-  viewer: 'bg-muted text-muted-foreground border-border',
+  admin:       'bg-primary/15 text-primary border-primary/20',
+  media:       'bg-blue-500/15 text-blue-400 border-blue-500/20',
+  viewer:      'bg-muted text-muted-foreground border-border',
+  formmanager: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
 }
 
 const PERMISSIONS = [
-  { action: 'Read',         icon: Eye,    admin: true,  media: true,  viewer: true  },
-  { action: 'Write',        icon: Pencil, admin: true,  media: true,  viewer: false },
-  { action: 'Delete',       icon: Trash2, admin: true,  media: false, viewer: false },
-  { action: 'Manage Users', icon: Shield, admin: true,  media: false, viewer: false },
+  { action: 'Read',         icon: Eye,          admin: true,  media: true,  viewer: true,  formmanager: true  },
+  { action: 'Write',        icon: Pencil,       admin: true,  media: true,  viewer: false, formmanager: false },
+  { action: 'Delete',       icon: Trash2,       admin: true,  media: false, viewer: false, formmanager: false },
+  { action: 'Manage Users', icon: Shield,       admin: true,  media: false, viewer: false, formmanager: false },
+  { action: 'Manage Forms', icon: ClipboardList, admin: true, media: true,  viewer: false, formmanager: true  },
 ]
 
 function fmtDate(iso: string) {
@@ -228,10 +231,11 @@ export function AdminUsersPage() {
                 <TableHead>Admin</TableHead>
                 <TableHead>Media</TableHead>
                 <TableHead>Viewer</TableHead>
+                <TableHead>Formmanager</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {PERMISSIONS.map(({ action, icon: Icon, admin, media, viewer }) => (
+              {PERMISSIONS.map(({ action, icon: Icon, admin, media, viewer, formmanager }) => (
                 <TableRow key={action}>
                   <TableCell>
                     <div className="flex items-center gap-2 text-sm">
@@ -239,7 +243,7 @@ export function AdminUsersPage() {
                       {action}
                     </div>
                   </TableCell>
-                  {[admin, media, viewer].map((allowed, i) => (
+                  {[admin, media, viewer, formmanager].map((allowed, i) => (
                     <TableCell key={i}>
                       {allowed
                         ? <Check className="size-4 text-primary" />
@@ -252,8 +256,9 @@ export function AdminUsersPage() {
           </Table>
         </div>
         <p className="text-xs text-muted-foreground">
-          These permissions apply to all resources: Years, Sponsors, and People.
-          Manage Users is exclusive to the Admin role.
+          Write applies to Years, Sponsors, Activiteiten, Categories and People;
+          Manage Forms (build + view responses) is available to Admin, Media and
+          Formmanager. Manage Users is exclusive to the Admin role.
         </p>
       </div>
 

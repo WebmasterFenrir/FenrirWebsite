@@ -71,6 +71,31 @@ services:
       - proxy-net
     restart: unless-stopped
 
+  # Public form site: form.fenrirclub.be/{code}. DNS: add an A record
+  # form.fenrirclub.be -> server IP (one-time, manual).
+  form-site:
+    build:
+      context: .
+      dockerfile: Dockerfile.form-site
+    container_name: fenrir-form-site
+    expose:
+      - "4321"
+    environment:
+      - VIRTUAL_HOST=form.fenrirclub.be
+      - VIRTUAL_PORT=4321
+      - LETSENCRYPT_HOST=form.fenrirclub.be
+      - LETSENCRYPT_EMAIL=webmaster@fenrirclub.be
+      - PB_URL=http://pocketbase:3000
+      - PUBLIC_PB_URL=https://pb.fenrirclub.be
+      - PB_EMAIL=${PB_ADMIN_EMAIL}
+      - PB_PASSWORD=${PB_ADMIN_PASSWORD}
+    depends_on:
+      pocketbase:
+        condition: service_healthy
+    networks:
+      - proxy-net
+    restart: unless-stopped
+
   events-sync:
     build:
       context: .
@@ -95,6 +120,8 @@ services:
       PB_ADMIN_EMAIL: ${PB_ADMIN_EMAIL}
       PB_ADMIN_PASSWORD: ${PB_ADMIN_PASSWORD}
       DEEPL_API_KEY: ${DEEPL_API_KEY}
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      GITHUB_REPO: ${GITHUB_REPO}
       EVENTS_SYNC_URL: http://events-sync:3000
       TZ: Europe/Berlin
       VIRTUAL_HOST: pb.fenrirclub.be

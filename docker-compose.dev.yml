@@ -47,6 +47,27 @@ services:
       - proxy-net
     restart: unless-stopped
 
+  form-site:
+    build:
+      context: .
+      dockerfile: Dockerfile.form-site
+    container_name: fenrir-form-site
+    expose:
+      - "4321"
+    environment:
+      - VIRTUAL_HOST=form.fenrir.nilsmertens.dev
+      - VIRTUAL_PORT=4321
+      - PB_URL=http://pocketbase:3000
+      - PUBLIC_PB_URL=http://localhost:3421
+      - PB_EMAIL=${PB_ADMIN_EMAIL}
+      - PB_PASSWORD=${PB_ADMIN_PASSWORD}
+    depends_on:
+      pocketbase:
+        condition: service_healthy
+    networks:
+      - proxy-net
+    restart: unless-stopped
+
   pocketbase:
     image: ghcr.io/muchobien/pocketbase:latest
     container_name: pocketbase
@@ -55,6 +76,8 @@ services:
       PB_ADMIN_EMAIL: webmaster@fenrirclub.be
       PB_ADMIN_PASSWORD: Fenrir123456789!
       DEEPL_API_KEY: ${DEEPL_API_KEY}
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      GITHUB_REPO: ${GITHUB_REPO}
       TZ: Europe/Berlin
     expose:
       - "3000"

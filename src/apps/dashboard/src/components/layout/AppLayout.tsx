@@ -27,13 +27,17 @@ import {
   UserPlus,
   CalendarDays,
   Tag,
+  ClipboardList,
   LogOut,
 } from 'lucide-react'
+import type { Action } from '@/lib/roles'
 
 interface NavItem {
   label: string
   to: string
   icon: React.ElementType
+  /** Optional role gate — item is hidden when the action is denied. */
+  requires?: Action
 }
 
 const mainNav: NavItem[] = [
@@ -42,6 +46,7 @@ const mainNav: NavItem[] = [
   { label: 'Sponsors', to: '/sponsors', icon: Building2 },
   { label: 'Activiteiten', to: '/activiteiten', icon: CalendarDays },
   { label: 'Categories', to: '/categories', icon: Tag },
+  { label: 'Forms', to: '/forms', icon: ClipboardList, requires: 'manageForms' },
   { label: 'People', to: '/people', icon: Users },
 ]
 
@@ -90,7 +95,7 @@ export function AppLayout() {
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu className="gap-0.5">
-                {mainNav.map((item) => {
+                {mainNav.filter((item) => !item.requires || can(item.requires)).map((item) => {
                   const Icon = item.icon
                   const active = isActive(item.to)
                   return (
@@ -211,6 +216,7 @@ function BreadcrumbTitle() {
     '/sponsors': 'Sponsors',
     '/activiteiten': 'Activiteiten',
     '/categories': 'Categories',
+    '/forms': 'Forms',
     '/people': 'People',
     '/admin/users': 'Add User',
   }

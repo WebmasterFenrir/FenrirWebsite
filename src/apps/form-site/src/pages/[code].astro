@@ -1,0 +1,35 @@
+---
+import FormLayout from '@/layouts/form-layout.astro';
+import { FormRenderer } from '@/components/FormRenderer';
+import StateMessage from '@/components/StateMessage.astro';
+import { getFormByCode } from '@/lib/pocketbase';
+import { ui, pickLocale, type Locale } from '@/i18n/ui';
+
+const code = (Astro.params.code ?? '').toLowerCase();
+const lang: Locale = pickLocale(Astro.url.searchParams.get('lang'));
+const t = ui[lang];
+
+const form = await getFormByCode(code);
+---
+
+{
+  form ? (
+    form.active ? (
+      <FormLayout title={`${form.title} · Fenrir`}>
+        <main class="flex min-h-dvh items-center justify-center px-4 py-12">
+          <div class="w-full max-w-2xl">
+            <FormRenderer form={form} client:load />
+          </div>
+        </main>
+      </FormLayout>
+    ) : (
+      <FormLayout title={t.closedTitle}>
+        <StateMessage status={form.title} title={t.closedTitle} text={t.closedText} />
+      </FormLayout>
+    )
+  ) : (
+    <FormLayout title={t.notFoundTitle}>
+      <StateMessage status={`/${code}`} title={t.notFoundTitle} text={t.notFoundText} />
+    </FormLayout>
+  )
+}
