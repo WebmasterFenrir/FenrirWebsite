@@ -90,8 +90,11 @@ export function generateFormCode(): string {
  */
 export const FORM_HOOKS: { value: string; label: string; description: string }[] = [
   { value: 'none', label: 'None', description: 'Just collect and store the answers.' },
-  // Example — a processor branch exists (commented) in forms.pb.js:
-  // { value: 'bugticket', label: 'Bug ticket', description: 'Also creates a bug-ticket record.' },
+{
+    value: 'bugticket',
+    label: 'Bug ticket',
+    description: 'Creates a GitHub issue in the Fenrir repo from the answers (needs GITHUB_TOKEN).',
+  },
 ]
 
 export async function getForms(): Promise<Form[]> {

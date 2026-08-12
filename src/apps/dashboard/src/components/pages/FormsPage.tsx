@@ -49,13 +49,20 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
-import { PieChart, Pie, Cell, Label as RechartsLabel } from 'recharts'
+import { PieChart, Pie, Cell } from 'recharts'
 import ReactMarkdown from 'react-markdown'
 import {
   DropdownMenu,
@@ -69,6 +76,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog'
 import {
   AlertDialog,
@@ -80,13 +88,6 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from '@/components/ui/sheet'
 import {
   getForms,
   createForm,
@@ -170,6 +171,59 @@ const emptyForm: FormDraft = {
   active: true,
   hook: 'none',
   fields: [],
+}
+
+// Options that map to GitHub issue labels — mirrors the knownLabels allowlist
+// in pb_hooks/forms.pb.js. Used for the bugticket panel preview.
+const ISSUE_LABEL_OPTIONS = [
+  'bug', 'enhancement', 'improvement', 'urgent', 'question',
+  'documentation', 'spelling mistake', 'breaking bug',
+]
+
+/**
+ * The standard fields the bugticket hook needs. Each gets a fresh id; the
+ * caller decides which ones to actually add (skip ones that already exist).
+ */
+function bugticketDefaultFields(): FieldDraft[] {
+  const base = (): FieldDraft => ({
+    id: newFieldId(),
+    label: '',
+    label_en: '',
+    type: 'text',
+    required: false,
+    options: [],
+    placeholder: '',
+    content: '',
+    content_en: '',
+    imageUrl: '',
+    imageFile: null,
+    imageOldRecordId: null,
+  })
+  return [
+    {
+      ...base(),
+      label: 'Titel',
+      label_en: 'Title',
+      type: 'text',
+      required: true,
+      placeholder: 'Korte titel van het probleem',
+    },
+    {
+      ...base(),
+      label: 'Beschrijf de issue',
+      label_en: 'Describe the issue',
+      type: 'textarea',
+      required: true,
+      placeholder: 'Wat ging er mis? Wat had je verwacht?',
+    },
+    {
+      ...base(),
+      label: 'Type',
+      label_en: 'Type',
+      type: 'select',
+      options: [...ISSUE_LABEL_OPTIONS],
+    },
+  ]
 }
 
 let fieldCounter = 0
@@ -550,8 +604,67 @@ export function FormsPage() {
   // and collect no answer — they have no label/options/required semantics.
   const isDisplayField = (f: FieldDraft) => f.type === 'section' || f.type === 'image'
 
-  // Tallies for the responses sheet's Counts tab.
+  // Selected processing hook — used to show what inputs it needs.
+  const selectedHook = FORM_HOOKS.find((h) => h.value === draft.hook)
+
+  // ── bugticket panel: what the created GitHub issue would look like ───────
+  // Title source: the first text/textarea question (its answer becomes the title).
+  const bugticketTitleField = draft.fields.find(
+    (f) => f.type === 'text' || f.type === 'textarea',
+  )
+  // Options across select/radio/checkbox questions that match repo labels.
+  const bugticketLabelOptions = [
+    ...new Set(
+      draft.fields
+        .filter((f) => f.type === 'select' || f.type === 'radio' || f.type === 'checkbox')
+        .flatMap((f) =>
+          f.options.map((o) => o.trim()).filter((o) => ISSUE_LABEL_OPTIONS.includes(o.toLowerCase())),
+        ),
+    ),
+  ]
+  const bugticketAnswerCount = draft.fields.filter(
+    (f) => f.type !== 'section' && f.type !== 'image',
+  ).length
+  const bugticketDefaultsMissing = () => {
+    const has = (t: FormFieldType) => draft.fields.some((f) => f.type === t)
+    // A textarea covers the title slot, so only those two are strictly needed.
+    return !has('textarea') || !has('select')
+  }
+
+  /** Insert the hook's standard fields, skipping any that already exist. */
+  const addHookDefaultFields = () => {
+    if (selectedHook?.value !== 'bugticket') return
+    // Generate the drafts up front — newFieldId() mutates a module counter, and
+    // the setDraft updater must stay pure (React may invoke it twice in dev).
+    const [titleDef, descDef, typeDef] = bugticketDefaultFields()
+    setDraft((d) => {
+      const fields = [...d.fields]
+      const has = (t: FormFieldType) => fields.some((f) => f.type === t)
+      if (!has('text') && !has('textarea')) fields.push(titleDef)
+      if (!has('textarea')) fields.push(descDef)
+      if (!has('select')) fields.push(typeDef)
+      return { ...d, fields }
+    })
+  }
+
+  // Tallies for the responses sheet's donut cards.
   const sheetTallies = responsesForm ? computeTallies(responsesForm, responses) : []
+
+  // Answer columns for the responses table — one per answer field, plus any
+  // answers whose field id no longer exists (form edited after responses came in).
+  const sheetAnswerFields =
+    responsesForm?.fields.filter((f) => f.type !== 'section' && f.type !== 'image') ?? []
+  const knownFieldIds = new Set(sheetAnswerFields.map((f) => f.id))
+  const sheetColumnIds = [
+    ...sheetAnswerFields.map((f) => f.id),
+    ...new Set(
+      responses.flatMap((sub) =>
+        Object.keys(sub.answers ?? {}).filter((id) => !knownFieldIds.has(id)),
+      ),
+    ),
+  ]
+  const sheetColumnLabel = (id: string) =>
+    sheetAnswerFields.find((f) => f.id === id)?.label ?? id
 
   return (
     <div className="flex flex-col gap-6">
@@ -764,7 +877,7 @@ export function FormsPage() {
                   )}
                 </CardContent>
 
-                <CardFooter className="justify-between gap-2">
+                <CardFooter className="mt-auto justify-between gap-2">
                   <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">/{form.code}</code>
                   <div className="flex items-center gap-1">
                     <Button variant="ghost" size="icon-sm" title="Copy public link" onClick={() => copyCode(form.code)}>
@@ -837,9 +950,59 @@ export function FormsPage() {
                     ))}
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-muted-foreground">
-                  {FORM_HOOKS.find((h) => h.value === draft.hook)?.description}
-                </p>
+                {selectedHook && selectedHook.value !== 'none' && (
+                  <div className="flex flex-col gap-2 rounded-md border bg-muted/40 p-2.5">
+                    <p className="text-xs text-muted-foreground">{selectedHook.description}</p>
+
+                    {selectedHook.value === 'bugticket' && (
+                      <>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="w-fit gap-1.5"
+                          disabled={!bugticketDefaultsMissing()}
+                          onClick={addHookDefaultFields}
+                        >
+                          <Sparkles className="size-3.5" />
+                          {bugticketDefaultsMissing()
+                            ? 'Add the fields this hook needs'
+                            : 'Default fields added'}
+                        </Button>
+
+                        {/* Live preview of the GitHub issue that would be created */}
+                        <div className="flex flex-col gap-1 rounded border bg-background/60 p-2 text-xs">
+                          <p className="font-medium text-foreground">
+                            GitHub issue that will be created
+                          </p>
+                          <p className="break-words text-muted-foreground">
+                            <span className="font-medium text-foreground">Title:</span>{' '}
+                            {bugticketTitleField
+                              ? `answer of “${bugticketTitleField.label || 'the first text question'}”`
+                              : `fallback “Form submission: ${draft.title.trim() || '…'}”`}
+                          </p>
+                          <p className="text-muted-foreground">
+                            <span className="font-medium text-foreground">Body:</span>{' '}
+                            all answers ({bugticketAnswerCount} question
+                            {bugticketAnswerCount === 1 ? '' : 's'})
+                          </p>
+                          <p className="text-muted-foreground">
+                            <span className="font-medium text-foreground">Possible labels:</span>{' '}
+                            {bugticketLabelOptions.length > 0
+                              ? bugticketLabelOptions.join(', ')
+                              : 'bug (default)'}
+                          </p>
+                        </div>
+                      </>
+                    )}
+
+                    {selectedHook.value === 'bugticket' && !bugticketTitleField && (
+                      <p className="rounded border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-700 dark:text-amber-300">
+                        No text question yet — click “Add the fields this hook needs” to create one.
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1132,15 +1295,17 @@ export function FormsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Responses sheet — tabs: list + counts */}
-      <Sheet open={!!responsesForm} onOpenChange={(o) => !o && setResponsesForm(null)}>
-        <SheetContent className="w-full sm:max-w-3xl">
-          <SheetHeader>
-            <SheetTitle>{responsesForm?.title}</SheetTitle>
-            <SheetDescription>
-              {responses.length} response{responses.length === 1 ? '' : 's'} · latest first
-            </SheetDescription>
-          </SheetHeader>
+      {/* Responses — full-screen results view: donut charts + table */}
+      <Dialog open={!!responsesForm} onOpenChange={(o) => !o && setResponsesForm(null)}>
+        <DialogContent className="flex h-[92vh] w-[95vw] max-w-[95vw] flex-col overflow-hidden sm:max-w-[95vw]">
+          <DialogHeader className="flex-row items-center justify-between gap-4 pr-9">
+            <div className="min-w-0">
+              <DialogTitle className="text-lg">{responsesForm?.title}</DialogTitle>
+              <DialogDescription className="mt-1">
+                {responses.length} response{responses.length === 1 ? '' : 's'} · latest first
+              </DialogDescription>
+            </div>
+          </DialogHeader>
           <div className="flex-1 overflow-y-auto px-4 pb-6">
             {responsesLoading ? (
               <div className="py-12 text-center text-sm text-muted-foreground">Loading…</div>
@@ -1150,119 +1315,115 @@ export function FormsPage() {
                 <p className="text-sm">No responses yet.</p>
               </div>
             ) : (
-              <Tabs defaultValue="responses">
-                <TabsList>
-                  <TabsTrigger value="responses">Responses</TabsTrigger>
-                  <TabsTrigger value="counts">Counts</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="responses" className="flex flex-col gap-4 pt-1">
-                  {responses.map((sub) => (
-                    <div key={sub.id} className="rounded-lg border p-4">
-                      <p className="mb-3 text-xs text-muted-foreground">
-                        {fmtDateTime(sub.created)}
+              <div className="flex flex-col gap-6">
+                {/* Donut charts — one compact card per option field with data */}
+                {sheetTallies.length > 0 && (
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <h3 className="text-sm font-semibold">Answers per question</h3>
+                      <p className="text-xs text-muted-foreground">
+                        {sheetTallies.length} question{sheetTallies.length === 1 ? '' : 's'} with options
                       </p>
-                      <dl className="flex flex-col gap-2">
-                        {responsesForm?.fields
-                          .filter((f) => f.type !== 'section' && f.type !== 'image')
-                          .map((f) => {
-                          const value = (sub.answers ?? {})[f.id]
-                          return (
-                            <div key={f.id} className="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-3 text-sm">
-                              <dt className="font-medium">{f.label}</dt>
-                              <dd className="text-muted-foreground break-words">{fmtValue(value)}</dd>
-                            </div>
-                          )
-                        })}
-                        {/* answers that don't map to a known field (schema changed) */}
-                        {Object.entries(sub.answers ?? {})
-                          .filter(([id]) => !(responsesForm?.fields.some((f) => f.id === id)))
-                          .map(([id, value]) => (
-                            <div key={id} className="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-3 text-sm">
-                              <dt className="font-medium">{id}</dt>
-                              <dd className="text-muted-foreground break-words">{fmtValue(value)}</dd>
-                            </div>
-                          ))}
-                      </dl>
                     </div>
-                  ))}
-                </TabsContent>
-
-                <TabsContent value="counts" className="flex flex-col gap-6 pt-1">
-                  {sheetTallies.length === 0 && (
-                    <p className="text-sm text-muted-foreground">
-                      This form has no select, radio or checkbox fields to tally.
-                    </p>
-                  )}
-                  {sheetTallies.map((t) => {
-                    const data = toDonutData(t)
-                    return (
-                      <div key={t.field.id} className="flex flex-col gap-3 rounded-lg border p-4">
-                        <div className="flex flex-wrap items-baseline justify-between gap-2">
-                          <p className="text-sm font-medium">{t.field.label}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {t.field.type === 'checkbox'
-                              ? `${t.total} ticks · one person can tick several`
-                              : `${t.total} answer${t.total === 1 ? '' : 's'}`}
-                          </p>
-                        </div>
-                        <ChartContainer config={{}} className="mx-auto aspect-square w-full max-w-60">
-                          <PieChart>
-                            <ChartTooltip
-                              cursor={false}
-                              content={<ChartTooltipContent hideLabel />}
-                            />
-                            <Pie
-                              data={data}
-                              dataKey="count"
-                              nameKey="label"
-                              innerRadius={64}
-                              outerRadius={90}
-                              strokeWidth={4}
-                            >
-                              {data.map((d, i) => (
-                                <Cell key={`${i}-${d.label}`} fill={d.fill} />
-                              ))}
-                              <RechartsLabel
-                                content={({ viewBox }) => {
-                                  if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
-                                    return (
-                                      <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle">
-                                        <tspan x={viewBox.cx} y={viewBox.cy} className="fill-foreground text-2xl font-bold">
-                                          {t.total}
-                                        </tspan>
-                                        <tspan x={viewBox.cx} y={(viewBox.cy ?? 0) + 22} className="fill-muted-foreground text-xs">
-                                          {t.field.type === 'checkbox' ? 'ticks' : 'answers'}
-                                        </tspan>
-                                      </text>
-                                    )
-                                  }
-                                }}
-                              />
-                            </Pie>
-                          </PieChart>
-                        </ChartContainer>
-                        <div className="flex flex-wrap justify-center gap-x-5 gap-y-1.5">
-                          {data.map((d, i) => (
-                            <div key={`${i}-${d.label}`} className="flex items-center gap-1.5 text-sm">
-                              <span
-                                className="size-2.5 rounded-full"
-                                style={{ backgroundColor: d.fill }}
-                              />
-                              <span className="text-muted-foreground">{d.label}</span>
-                              <span className="font-medium tabular-nums">{d.count}</span>
+                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                      {sheetTallies.map((t) => {
+                        const data = toDonutData(t)
+                        return (
+                          <div key={t.field.id} className="flex flex-col gap-3 rounded-lg border p-4">
+                            <div className="flex items-baseline justify-between gap-2">
+                              <p className="truncate text-sm font-medium">{t.field.label}</p>
+                              <p className="shrink-0 text-xs text-muted-foreground">
+                                {t.field.type === 'checkbox'
+                                  ? `${t.total} ticks`
+                                  : `${t.total} answer${t.total === 1 ? '' : 's'}`}
+                              </p>
                             </div>
+                            <div className="flex items-center gap-4">
+                              <ChartContainer config={{}} className="h-28 w-28 shrink-0">
+                                <PieChart>
+                                  <ChartTooltip
+                                    cursor={false}
+                                    content={<ChartTooltipContent hideLabel />}
+                                  />
+                                  <Pie
+                                    data={data}
+                                    dataKey="count"
+                                    nameKey="label"
+                                    innerRadius={31}
+                                    outerRadius={45}
+                                    strokeWidth={3}
+                                  >
+                                    {data.map((d, i) => (
+                                      <Cell key={`${i}-${d.label}`} fill={d.fill} />
+                                    ))}
+                                  </Pie>
+                                </PieChart>
+                              </ChartContainer>
+                              <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                                {data.map((d, i) => (
+                                  <div key={`${i}-${d.label}`} className="flex items-center gap-2 text-xs">
+                                    <span
+                                      className="size-2 shrink-0 rounded-full"
+                                      style={{ backgroundColor: d.fill }}
+                                    />
+                                    <span className="truncate text-muted-foreground">{d.label}</span>
+                                    <span className="ml-auto font-medium tabular-nums">{d.count}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Table of all submissions — row per response, column per field */}
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <h3 className="text-sm font-semibold">All responses</h3>
+                  </div>
+                  {sheetColumnIds.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      This form has no answer fields to display.
+                    </p>
+                  ) : (
+                    <div className="overflow-hidden rounded-lg border">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-44">Submitted</TableHead>
+                            {sheetColumnIds.map((id) => (
+                              <TableHead key={id} className="max-w-64 truncate">
+                                {sheetColumnLabel(id)}
+                              </TableHead>
+                            ))}
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {responses.map((sub, i) => (
+                            <TableRow key={sub.id} className={i % 2 === 1 ? 'bg-muted/30' : undefined}>
+                              <TableCell className="whitespace-nowrap text-muted-foreground">
+                                {fmtDateTime(sub.created)}
+                              </TableCell>
+                              {sheetColumnIds.map((id) => (
+                                <TableCell key={id} className="whitespace-normal break-words align-top">
+                                  {fmtValue((sub.answers ?? {})[id])}
+                                </TableCell>
+                              ))}
+                            </TableRow>
                           ))}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </TabsContent>
-              </Tabs>
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
           </div>
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete confirmation */}
       <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>

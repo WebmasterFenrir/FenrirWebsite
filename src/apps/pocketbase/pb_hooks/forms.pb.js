@@ -28,7 +28,10 @@
 // in-memory map: rows expire after 1h and cascade-delete with their form.
 // ─────────────────────────────────────────────────────────────────────────────
 
-console.log("[forms] hook loaded — code gen, submission validation + rate limit ready");
+console.log(
+  "[forms] hook loaded — code gen, submission validation + rate limit ready" +
+    ($os.getenv("GITHUB_TOKEN") ? " (GITHUB_TOKEN set)" : " (WARNING: GITHUB_TOKEN is not set)")
+);
 
 // ── TODO (later): auto-translate empty English fields ───────────────────────
 // When a multiLanguage form is saved with label_en / content_en left empty,
@@ -267,6 +270,145 @@ function formsHook(e) {
         console.error("[forms] rate limiter failed (ignoring):", err);
       }
 
+      // 5.5 Helper for the "bugticket" processor — turn this submission into a
+      //     GitHub issue and POST it via the GitHub Issues API. Self-contained
+      //     (JSVM — no module-level state) and fire-and-forget: a failure is
+      //     logged but never rejects the submission (the submission is saved
+      //     regardless, per section 6).
+      //     Env: GITHUB_TOKEN (required), GITHUB_REPO (default
+      //     WebmasterFenrir/FenrirWebsite), GITHUB_API_URL (default
+      //     https://api.github.com — also used to point tests at a mock).
+      const createGithubIssue = (form, answers, fields) => {
+        const token = $os.getenv("GITHUB_TOKEN") || "";
+        const repo = $os.getenv("GITHUB_REPO") || "WebmasterFenrir/FenrirWebsite";
+        const apiBase = $os.getenv("GITHUB_API_URL") || "https://api.github.com";
+
+        if (!token) {
+          console.error(
+            "[forms] bugticket: GITHUB_TOKEN is not set — skipping GitHub issue creation"
+          );
+          return;
+        }
+
+        // Labels a form answer may map to — mirrors the labels that exist in
+        // the WebmasterFenrir/FenrirWebsite repo. Unknown labels make the API
+        // reject the issue with 422, so candidates are filtered against this.
+        const knownLabels = [
+          "bug", "enhancement", "improvement", "urgent", "question",
+          "documentation", "spelling mistake", "breaking bug", "duplicate",
+          "invalid", "wontfix", "help wanted", "good first issue",
+        ];
+
+        let title = "";
+        const bodyParts = [];
+        const labelCandidates = [];
+
+        for (const f of fields) {
+          if (!f || f.id === undefined) continue;
+          const ftype = f.type || "text";
+          if (ftype === "section" || ftype === "image") continue;
+          const id = String(f.id);
+          const val = answers[id];
+          const label = f.label || id;
+
+          // select / radio / checkbox answers that match a known repo label
+          // become issue labels (deduped, lowercased — GitHub matches by name).
+          if (ftype === "select" || ftype === "radio" || ftype === "checkbox") {
+            const vals = Array.isArray(val)
+              ? val
+              : val === undefined || val === null
+                ? []
+                : [val];
+            for (const v of vals) {
+              const s = String(v).trim();
+              if (!s) continue;
+              const lower = s.toLowerCase();
+              if (
+                knownLabels.indexOf(lower) !== -1 &&
+                labelCandidates.indexOf(lower) === -1
+              ) {
+                labelCandidates.push(lower);
+              }
+            }
+          }
+
+          // The first free-text answer doubles as the issue title.
+          if (!title && (ftype === "text" || ftype === "textarea")) {
+            const s = typeof val === "string" ? val.trim() : "";
+            if (s.length > 0) title = s;
+          }
+
+          // Render every answer into the issue body (markdown).
+          let display;
+          if (Array.isArray(val)) {
+            display = val.length > 0 ? val.join(", ") : "—";
+          } else if (val === undefined || val === null || val === "") {
+            display = "—";
+          } else {
+            display = String(val);
+          }
+          bodyParts.push("**" + label + "**\n" + display);
+        }
+
+        const formTitle = form.getString("title") || "Untitled form";
+        const formCode = form.getString("code") || "";
+        if (title.length === 0) title = "Form submission: " + formTitle;
+        if (title.length > 72) title = title.slice(0, 72);
+
+        // Labels are the bare minimum alongside title+body: option answers that
+        // matched known labels win, otherwise fall back to "bug".
+        const labels = labelCandidates.length > 0 ? labelCandidates : ["bug"];
+        const body =
+          "Submitted via the **" + formTitle + "** form (`/" + formCode + "`).\n\n" +
+          bodyParts.join("\n\n");
+
+        const postIssue = (labelsToSend) =>
+          $http.send({
+            url: apiBase + "/repos/" + repo + "/issues",
+            method: "POST",
+            headers: {
+              Authorization: "Bearer " + token,
+              Accept: "application/vnd.github+json",
+              "Content-Type": "application/json",
+              "X-GitHub-Api-Version": "2022-11-28",
+            },
+            body: JSON.stringify({ title: title, body: body, labels: labelsToSend }),
+            timeout: 10,
+          });
+
+        let res = postIssue(labels);
+        // A label that no longer exists in the repo makes GitHub reject the
+        // issue with 422 — retry once without labels so it still gets created.
+        if (res.statusCode === 422) {
+          res = postIssue([]);
+        }
+
+        if (res.statusCode === 201) {
+          let htmlUrl = "";
+          try {
+            htmlUrl = res.json && res.json.html_url ? res.json.html_url : "";
+          } catch (err) {
+            htmlUrl = "";
+          }
+          console.log(
+            "[forms] bugticket: created GitHub issue" +
+              (htmlUrl ? " " + htmlUrl : " (" + repo + ")")
+          );
+        } else {
+          let detail = "";
+          try {
+            detail = JSON.stringify(res.json);
+          } catch (err) {
+            detail = "";
+          }
+          console.error(
+            "[forms] bugticket: GitHub API " +
+              res.statusCode +
+              (detail ? " — " + detail : "")
+          );
+        }
+      };
+
       // 6. Processing-hook dispatch — "I need this hook for that form".
       //    Form managers pick a key in the dashboard builder (FORM_HOOKS);
       //    devs add a new branch here (and the matching FORM_HOOKS entry).
@@ -276,14 +418,7 @@ function formsHook(e) {
       if (hookKey && hookKey !== "none") {
         try {
           if (hookKey === "bugticket") {
-            // Example processor: create a bug-ticket record in another
-            // collection (replace with the real collection + mapping).
-            // const tickets = $app.findCollectionByNameOrId("bug_tickets");
-            // $app.save(new Record(tickets, {
-            //   "title": (answers.title || "No title") + " (via " + form.getString("title") + ")",
-            //   "details": JSON.stringify(answers),
-            // }));
-            console.log("[forms] bugticket processor would run for form " + form.id);
+            createGithubIssue(form, answers, fields);
           } else {
             console.warn("[forms] unknown processing hook '" + hookKey + "' (form " + form.id + ") — skipping");
           }

@@ -76,6 +76,8 @@ services:
       PB_ADMIN_EMAIL: webmaster@fenrirclub.be
       PB_ADMIN_PASSWORD: Fenrir123456789!
       DEEPL_API_KEY: ${DEEPL_API_KEY}
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      GITHUB_REPO: ${GITHUB_REPO}
       TZ: Europe/Berlin
     expose:
       - "3000"

@@ -120,6 +120,8 @@ services:
       PB_ADMIN_EMAIL: ${PB_ADMIN_EMAIL}
       PB_ADMIN_PASSWORD: ${PB_ADMIN_PASSWORD}
       DEEPL_API_KEY: ${DEEPL_API_KEY}
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      GITHUB_REPO: ${GITHUB_REPO}
       EVENTS_SYNC_URL: http://events-sync:3000
       TZ: Europe/Berlin
       VIRTUAL_HOST: pb.fenrirclub.be
