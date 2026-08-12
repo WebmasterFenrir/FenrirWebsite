@@ -15,6 +15,13 @@ export type Locale = keyof typeof languages;
 
 export const defaultLang: Locale = "nl";
 
+/** All locales the site supports (mirrors astro.config.mjs `i18n.locales`). */
+export const SUPPORTED_LOCALES = Object.keys(languages) as Locale[];
+
+export function isSupportedLocale(value: string | undefined | null): value is Locale {
+  return (SUPPORTED_LOCALES as string[]).includes(value ?? "");
+}
+
 /** When false, the default locale ("nl") gets no URL prefix: /activiteiten */
 export const showDefaultLang = false;
 
