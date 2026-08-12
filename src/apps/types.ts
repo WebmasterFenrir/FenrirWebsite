@@ -71,3 +71,54 @@ interface PreasidiumRolInWhatYear {
 type StartandEndYear = `${number} - ${number}`;
 
 type PreasidiumRol = string
+
+// ─── Forms (form.fenrirclub.be + dashboard form builder) ─────────────────────
+
+export type FormFieldType =
+  | 'text'
+  | 'textarea'
+  | 'email'
+  | 'number'
+  | 'select'
+  | 'radio'
+  | 'checkbox'
+  | 'date'
+  // Display-only fields — render content between questions, collect no answer.
+  | 'section'
+  | 'image'
+
+export interface FormField {
+  /** Stable id generated when the field is added (e.g. "fld_ab12"). */
+  id: string
+  /** Dutch label — the source of truth. */
+  label: string
+  /** English label — only used when the form has multiLanguage = true. */
+  label_en?: string
+  type: FormFieldType
+  /** Only meaningful for answer fields (text…date); false for display fields. */
+  required: boolean
+  /** select / radio / checkbox only. */
+  options?: string[]
+  /** Optional placeholder for text-ish inputs. */
+  placeholder?: string
+  /** section only: markdown body (Dutch). */
+  content?: string
+  /** section only: markdown body in English (multiLanguage forms). */
+  content_en?: string
+  /** image only: URL of the image shown between questions. */
+  imageUrl?: string
+}
+
+export interface FenrirForm {
+  id: string
+  /** Random URL-safe code the public form lives at: form.fenrirclub.be/{code}. */
+  code: string
+  title: string
+  description?: string
+  /** When true the form site shows a NL/EN toggle and uses label_en. */
+  multiLanguage: boolean
+  /** Closed forms reject new submissions (still viewable as "closed"). */
+  active: boolean
+  /** The form's field schema. */
+  fields: FormField[]
+}

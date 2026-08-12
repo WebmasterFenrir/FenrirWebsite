@@ -1,0 +1,23 @@
+---
+import { ui, pickLocale, type Locale } from '@/i18n/ui';
+
+const { status, title, text } = Astro.props;
+const lang: Locale = pickLocale(Astro.url.searchParams.get('lang'));
+const t = ui[lang];
+---
+
+<main class="flex min-h-dvh items-center justify-center px-4 py-12">
+	<div class="w-full max-w-md">
+		<div class="flex flex-col items-center gap-5 rounded-2xl border border-border bg-card p-8 text-center shadow-lg">
+			<img src="/schild.png" alt="Fenrir" class="size-16 shrink-0 object-contain" />
+			<div>
+				<h1 class="text-xl font-bold tracking-tight">{title}</h1>
+				<p class="mt-2 text-sm text-muted-foreground">{text}</p>
+			</div>
+			<span class="inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-xs font-medium text-secondary-foreground transition-colors hover:bg-secondary/80">
+				<a href="https://fenrirclub.be">{t.backToSite}</a>
+			</span>
+		</div>
+		<p class="mt-6 text-center text-xs text-muted-foreground/70">{status}</p>
+	</div>
+</main>

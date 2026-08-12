@@ -165,3 +165,91 @@
     @apply bg-background text-foreground font-sans antialiased;
   }
 }
+
+/* ── Rendered markdown (form descriptions + section fields) ───────────────── */
+.markdown-body {
+  line-height: 1.6;
+}
+.markdown-body > :first-child {
+  margin-top: 0;
+}
+.markdown-body > :last-child {
+  margin-bottom: 0;
+}
+.markdown-body p {
+  margin: 0.5em 0;
+}
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4 {
+  margin: 1em 0 0.4em;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.markdown-body h1 {
+  font-size: 1.35em;
+}
+.markdown-body h2 {
+  font-size: 1.2em;
+}
+.markdown-body h3 {
+  font-size: 1.05em;
+}
+.markdown-body ul,
+.markdown-body ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+.markdown-body ul {
+  list-style: disc;
+}
+.markdown-body ol {
+  list-style: decimal;
+}
+.markdown-body li {
+  margin: 0.2em 0;
+}
+.markdown-body a {
+  /* Brightened brand tint — keeps the purple identity but lifts contrast above AA
+     on dark cards (plain --primary is ~2.6:1 there). */
+  color: color-mix(in oklab, var(--primary) 70%, var(--foreground));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.markdown-body strong {
+  font-weight: 700;
+}
+.markdown-body code {
+  border-radius: 4px;
+  background: var(--muted);
+  padding: 0.1em 0.35em;
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+.markdown-body pre {
+  margin: 0.6em 0;
+  overflow-x: auto;
+  border-radius: 8px;
+  background: var(--muted);
+  padding: 0.75em;
+}
+.markdown-body pre code {
+  background: transparent;
+  padding: 0;
+}
+.markdown-body blockquote {
+  margin: 0.6em 0;
+  border-left: 3px solid var(--border);
+  padding-left: 1em;
+  color: var(--muted-foreground);
+}
+.markdown-body hr {
+  margin: 1em 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+.markdown-body img {
+  max-width: 100%;
+  border-radius: 8px;
+}
