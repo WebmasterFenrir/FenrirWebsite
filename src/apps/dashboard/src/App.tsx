@@ -13,6 +13,7 @@ import { AdminUsersPage } from './components/pages/AdminUsersPage'
 import { ActiviteitenPage } from './components/pages/ActiviteitenPage'
 import { CategoriesPage } from './components/pages/CategoriesPage'
 import { FormsPage } from './components/pages/FormsPage'
+import { InvitePage } from './components/pages/InvitePage'
 import { RoleContext } from './lib/RoleContext'
 import { can, type Role } from './lib/roles'
 
@@ -45,6 +46,8 @@ export function App() {
             path="/login"
             element={redirectIfAuth ?? <Login onLoginSuccess={setUser} />}
           />
+
+          <Route path="/invite" element={<InvitePage />} />
 
           <Route
             path="/setup"

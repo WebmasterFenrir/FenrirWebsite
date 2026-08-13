@@ -173,10 +173,16 @@ export function FormRenderer({ form }: FormRendererProps) {
             </div>
           )}
         </div>
-        <h1 className="mt-4 text-2xl font-bold tracking-tight">{form.title}</h1>
-        {form.description && (
+        <h1 className="mt-4 text-2xl font-bold tracking-tight">
+          {form.multiLanguage && lang === 'en' && form.title_en ? form.title_en : form.title}
+        </h1>
+        {(form.description || (form.multiLanguage && lang === 'en' && form.description_en)) && (
           <div className="markdown-body mt-1.5 text-sm text-foreground/90">
-            <ReactMarkdown>{form.description}</ReactMarkdown>
+            <ReactMarkdown>
+              {form.multiLanguage && lang === 'en' && form.description_en
+                ? form.description_en
+                : form.description}
+            </ReactMarkdown>
           </div>
         )}
       </div>

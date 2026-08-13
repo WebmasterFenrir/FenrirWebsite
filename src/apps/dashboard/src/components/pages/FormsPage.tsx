@@ -100,6 +100,7 @@ import {
   formUrl,
   FORM_HOOKS,
   type Form,
+  type FormCreate,
   type FormSubmission,
   type FormFieldType,
   type FormField,
@@ -128,7 +129,9 @@ interface FieldDraft {
 
 interface FormDraft {
   title: string
+  title_en: string
   description: string
+  description_en: string
   multiLanguage: boolean
   active: boolean
   hook: string
@@ -166,7 +169,9 @@ const FIELD_TYPE_META: Record<FormFieldType, { label: string; icon: LucideIcon; 
 
 const emptyForm: FormDraft = {
   title: '',
+  title_en: '',
   description: '',
+  description_en: '',
   multiLanguage: false,
   active: true,
   hook: 'none',
@@ -235,7 +240,9 @@ function newFieldId(): string {
 function draftFromForm(form: Form): FormDraft {
   return {
     title: form.title,
+    title_en: form.title_en ?? '',
     description: form.description ?? '',
+    description_en: form.description_en ?? '',
     multiLanguage: form.multiLanguage,
     active: form.active,
     hook: form.hook || 'none',
@@ -467,13 +474,21 @@ export function FormsPage() {
       }
     })
 
-    const payload = {
+    const payload: FormCreate = {
       title: draft.title.trim(),
       description: draft.description.trim() || undefined,
       multiLanguage: draft.multiLanguage,
       active: draft.active,
       hook: draft.hook,
       fields,
+      ...(draft.multiLanguage
+        ? {
+            // Send custom EN title/description when provided; the DeepL hook
+            // fills the gaps server-side when left empty.
+            title_en: draft.title_en.trim() || undefined,
+            description_en: draft.description_en.trim() || undefined,
+          }
+        : {}),
     }
 
     setSaving(true)
@@ -753,7 +768,7 @@ export function FormsPage() {
                         </Badge>
                       )}
                     </CardTitle>
-                    {(can('manageForms') || can('delete')) && (
+                    {(can('viewResponses') || can('manageForms') || can('delete')) && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon-sm" title="Actions">
@@ -761,7 +776,7 @@ export function FormsPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          {can('manageForms') && (
+                          {can('viewResponses') && (
                             <DropdownMenuItem onClick={() => openResponses(form)}>
                               <Eye className="size-3.5" /> View responses
                             </DropdownMenuItem>
@@ -935,6 +950,13 @@ export function FormsPage() {
                   placeholder="Ledenweekend inschrijving"
                   required
                 />
+                {draft.multiLanguage && (
+                  <Input
+                    value={draft.title_en}
+                    onChange={(e) => setDraft({ ...draft, title_en: e.target.value })}
+                    placeholder="Title (English)"
+                  />
+                )}
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label>Processing hook</Label>
@@ -1015,6 +1037,14 @@ export function FormsPage() {
                 placeholder="Short intro shown above the fields — markdown supported"
                 rows={3}
               />
+              {draft.multiLanguage && (
+                <Textarea
+                  value={draft.description_en}
+                  onChange={(e) => setDraft({ ...draft, description_en: e.target.value })}
+                  placeholder="Description (English) — markdown supported"
+                  rows={3}
+                />
+              )}
               <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-muted-foreground">
                 <Sparkles className="size-3.5 shrink-0" />
                 <span className="mr-0.5">Markdown:</span>
@@ -1129,9 +1159,12 @@ export function FormsPage() {
                         placeholder="Label (English)"
                       />
                     )}
-                    {/* TODO (later): auto-translate label_en/content_en when empty —
-                        DeepL hook pattern exists in translate.pb.js; the Dutch
-                        label is required and serves as the translation source. */}
+                    {draft.multiLanguage && (
+                      <p className="text-[10px] text-muted-foreground">
+                        <Sparkles className="mr-0.5 inline size-3 align-[-2px]" />
+                        Leave empty to auto-translate the Dutch label on save (DeepL).
+                      </p>
+                    )}
 
                     {f.type === 'section' && (
                       <div className="flex flex-col gap-1.5">
@@ -1578,10 +1611,18 @@ function FormPreview({ draft }: { draft: FormDraft }) {
             </div>
           )}
         </div>
-        <h2 className="mt-4 text-2xl font-bold tracking-tight">{draft.title || 'Untitled form'}</h2>
-        {draft.description && (
+        <h2 className="mt-4 text-2xl font-bold tracking-tight">
+          {draft.multiLanguage && lang === 'en' && draft.title_en
+            ? draft.title_en
+            : draft.title || 'Untitled form'}
+        </h2>
+        {(draft.description || (draft.multiLanguage && lang === 'en' && draft.description_en)) && (
           <div className="markdown-body mt-1.5 text-sm text-foreground/90">
-            <ReactMarkdown>{draft.description}</ReactMarkdown>
+            <ReactMarkdown>
+              {draft.multiLanguage && lang === 'en' && draft.description_en
+                ? draft.description_en
+                : draft.description}
+            </ReactMarkdown>
           </div>
         )}
         {draft.active === false && (
