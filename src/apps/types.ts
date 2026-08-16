@@ -114,7 +114,11 @@ export interface FenrirForm {
   /** Random URL-safe code the public form lives at: form.fenrirclub.be/{code}. */
   code: string
   title: string
+  /** English title — only used when the form has multiLanguage = true. */
+  title_en?: string
   description?: string
+  /** English description — only used when the form has multiLanguage = true. */
+  description_en?: string
   /** When true the form site shows a NL/EN toggle and uses label_en. */
   multiLanguage: boolean
   /** Closed forms reject new submissions (still viewable as "closed"). */

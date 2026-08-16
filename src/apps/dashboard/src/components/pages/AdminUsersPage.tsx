@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, Trash2, Shield, Eye, Pencil, Check, ClipboardList } from 'lucide-react'
+import { Plus, Trash2, Shield, Eye, Pencil, Check, ClipboardList, FileText, Copy, Link2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -23,7 +23,7 @@ import {
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { getUsers, updateUserRole, createUser, deleteUser, type DashboardUser } from '@/lib/db/users'
+import { getUsers, updateUserRole, createUser, deleteUser, inviteUrl, type DashboardUser } from '@/lib/db/users'
 import type { Role } from '@/lib/roles'
 import pb from '@/lib/pocketbase'
 
@@ -42,11 +42,13 @@ const ROLE_BADGES: Record<Role, string> = {
 }
 
 const PERMISSIONS = [
-  { action: 'Read',         icon: Eye,          admin: true,  media: true,  viewer: true,  formmanager: true  },
-  { action: 'Write',        icon: Pencil,       admin: true,  media: true,  viewer: false, formmanager: false },
-  { action: 'Delete',       icon: Trash2,       admin: true,  media: false, viewer: false, formmanager: false },
-  { action: 'Manage Users', icon: Shield,       admin: true,  media: false, viewer: false, formmanager: false },
-  { action: 'Manage Forms', icon: ClipboardList, admin: true, media: true,  viewer: false, formmanager: true  },
+  { action: 'Read',         icon: Eye,           admin: true,  media: true,  viewer: true,  formmanager: true  },
+  { action: 'View Forms',   icon: FileText,      admin: true,  media: true,  viewer: true,  formmanager: true  },
+  { action: 'View Responses', icon: Eye,        admin: true,  media: true,  viewer: true,  formmanager: true  },
+  { action: 'Write',        icon: Pencil,        admin: true,  media: true,  viewer: false, formmanager: false },
+  { action: 'Delete',       icon: Trash2,        admin: true,  media: false, viewer: false, formmanager: false },
+  { action: 'Manage Users', icon: Shield,        admin: true,  media: false, viewer: false, formmanager: false },
+  { action: 'Manage Forms', icon: ClipboardList, admin: true,  media: true,  viewer: false, formmanager: true  },
 ]
 
 function fmtDate(iso: string) {
@@ -70,10 +72,11 @@ export function AdminUsersPage() {
   const [addOpen, setAddOpen] = useState(false)
   const [addName, setAddName] = useState('')
   const [addEmail, setAddEmail] = useState('')
-  const [addPassword, setAddPassword] = useState('')
   const [addRole, setAddRole] = useState<Role>('viewer')
   const [addSaving, setAddSaving] = useState(false)
   const [addError, setAddError] = useState('')
+  const [inviteUser, setInviteUser] = useState<DashboardUser | null>(null)
+  const [inviteCopied, setInviteCopied] = useState(false)
 
   useEffect(() => {
     getUsers()
@@ -109,17 +112,32 @@ export function AdminUsersPage() {
     setAddSaving(true)
     setAddError('')
     try {
-      const created = await createUser(addEmail, addPassword, addRole, addName)
+      const created = await createUser(addEmail, addRole, addName)
       setUsers(u => [...u, created].sort((a, b) => displayName(a).localeCompare(displayName(b))))
       setAddOpen(false)
       setAddName('')
       setAddEmail('')
-      setAddPassword('')
       setAddRole('viewer')
+      if (created.inviteToken) {
+        setInviteUser(created)
+      } else {
+        setAddError('User created, but no invite link was generated.')
+      }
     } catch {
       setAddError('Failed to create user. Email may already be in use.')
     } finally {
       setAddSaving(false)
+    }
+  }
+
+  const copyInvite = async (user: DashboardUser) => {
+    try {
+      await navigator.clipboard.writeText(inviteUrl(user))
+      setInviteCopied(true)
+      setTimeout(() => setInviteCopied(false), 2000)
+    } catch {
+      // Clipboard unavailable (non-secure context) — the dialog input is
+      // selectable, so the admin can still copy manually.
     }
   }
 
@@ -200,6 +218,17 @@ export function AdminUsersPage() {
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">{fmtDate(user.created)}</TableCell>
                       <TableCell className="text-right">
+                        {!isMe && user.inviteToken && (
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            title="Copy invite link"
+                            className="text-muted-foreground hover:text-foreground"
+                            onClick={() => setInviteUser(user)}
+                          >
+                            <Link2 className="size-3.5" />
+                          </Button>
+                        )}
                         {!isMe && (
                           <Button
                             variant="ghost"
@@ -257,8 +286,9 @@ export function AdminUsersPage() {
         </div>
         <p className="text-xs text-muted-foreground">
           Write applies to Years, Sponsors, Activiteiten, Categories and People;
-          Manage Forms (build + view responses) is available to Admin, Media and
-          Formmanager. Manage Users is exclusive to the Admin role.
+          every role (incl. Viewer) can view the form list and its responses,
+          but building/editing forms requires Manage Forms (Admin, Media,
+          Formmanager). Manage Users is exclusive to the Admin role.
         </p>
       </div>
 
@@ -291,18 +321,6 @@ export function AdminUsersPage() {
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="add-password">Password</Label>
-              <Input
-                id="add-password"
-                type="password"
-                placeholder="Min. 8 characters"
-                value={addPassword}
-                onChange={e => setAddPassword(e.target.value)}
-                required
-                minLength={8}
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
               <Label htmlFor="add-role">Role</Label>
               <Select value={addRole} onValueChange={v => setAddRole(v as Role)}>
                 <SelectTrigger id="add-role">
@@ -315,12 +333,50 @@ export function AdminUsersPage() {
                 </SelectContent>
               </Select>
             </div>
+            <p className="text-xs text-muted-foreground">
+              No password needed — the user will set their own via an invite link.
+            </p>
             {addError && <p className="text-xs text-destructive">{addError}</p>}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setAddOpen(false)}>Cancel</Button>
               <Button type="submit" disabled={addSaving}>{addSaving ? 'Creating…' : 'Create User'}</Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Invite link dialog */}
+      <Dialog open={!!inviteUser} onOpenChange={o => !o && setInviteUser(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Invite link created</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-muted-foreground">
+              Send this link to <span className="font-medium text-foreground">{inviteUser?.email}</span>{' '}
+              — they'll pick their own display name and password. The link only works once.
+            </p>
+            <div className="flex items-center gap-2">
+              <Input
+                readOnly
+                value={inviteUser ? inviteUrl(inviteUser) : ''}
+                className="font-mono text-xs"
+                onFocus={e => e.currentTarget.select()}
+              />
+              <Button
+                type="button"
+                size="sm"
+                className="shrink-0 gap-1.5"
+                onClick={() => inviteUser && copyInvite(inviteUser)}
+              >
+                {inviteCopied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+                {inviteCopied ? 'Copied' : 'Copy'}
+              </Button>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setInviteUser(null)}>Close</Button>
+            </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
 

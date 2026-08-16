@@ -50,3 +50,4 @@ pb_data/
 # Test
 test-results/
 playwright-report/
+.flowlane

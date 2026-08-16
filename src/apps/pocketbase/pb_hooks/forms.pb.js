@@ -8,6 +8,11 @@
 //   onRecordCreateRequest("forms")             → generates a random `code`
 //                                                (backstop for the
 //                                                dashboard-generated codes).
+//   onRecordCreateRequest("forms") + onRecordUpdateRequest("forms")
+//                                              → DeepL auto-translate for
+//                                                multiLanguage forms (title_en,
+//                                                description_en, label_en,
+//                                                content_en).
 //   onRecordCreateRequest("form_submissions")  → the real guard:
 //                                                1. form must exist + be active
 //                                                2. answers only reference known
@@ -33,14 +38,32 @@ console.log(
     ($os.getenv("GITHUB_TOKEN") ? " (GITHUB_TOKEN set)" : " (WARNING: GITHUB_TOKEN is not set)")
 );
 
-// ── TODO (later): auto-translate empty English fields ───────────────────────
-// When a multiLanguage form is saved with label_en / content_en left empty,
-// translate the Dutch label/content automatically with DeepL — same pattern as
-// translate.pb.js (sponsors/preasidium). The Dutch label is required (that is
-// the translation source), which the dashboard builder already enforces.
-
 function formsHook(e) {
   const col = e.collection && e.collection.name;
+
+  // Decode a JSON field, tolerating raw-byte arrays (PB v0.36 JSVM exposes
+  // json values as arrays of char codes), strings and real objects.
+  const parseJson = (value) => {
+    if (value === null || value === undefined) return null;
+    if (typeof value === "string") {
+      try {
+        return JSON.parse(value);
+      } catch (err) {
+        return null;
+      }
+    }
+    if (Array.isArray(value) && value.length > 0 && typeof value[0] === "number") {
+      let str = "";
+      for (let i = 0; i < value.length; i++) str += String.fromCharCode(value[i]);
+      try {
+        return JSON.parse(str);
+      } catch (err) {
+        return null;
+      }
+    }
+    if (Array.isArray(value) || typeof value === "object") return value;
+    return null;
+  };
 
   try {
     if (col === "forms") {
@@ -72,6 +95,172 @@ function formsHook(e) {
           candidate = generate();
         }
         e.record.set("code", candidate);
+      }
+
+      // ── Auto-translate empty English fields (multiLanguage forms only) ──
+      // DeepL NL → EN, same self-contained pattern as translate.pb.js. Fills
+      // title_en / description_en and each field's label_en / content_en — but
+      // ONLY when the English input is missing: a manually typed (custom)
+      // translation is never overwritten. Rendered by the form site via the
+      // NL/EN toggle. Never breaks the save when DeepL is missing/down.
+      const translateTexts = (texts) => {
+        const apiKey = $os.getenv("DEEPL_API_KEY") || "";
+        const apiUrl =
+          $os.getenv("DEEPL_API_URL") || "https://api-free.deepl.com/v2/translate";
+        const chunks = texts.map((t) => ({ text: t ?? "" }));
+        const toSend = chunks
+          .filter((c) => c.text.trim().length > 0)
+          .map((c) => c.text);
+
+        if (toSend.length === 0) return texts;
+        if (!apiKey) return null;
+
+        const res = $http.send({
+          url: apiUrl,
+          method: "POST",
+          headers: {
+            Authorization: "DeepL-Auth-Key " + apiKey,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            text: toSend,
+            source_lang: "NL",
+            target_lang: "EN",
+          }),
+          timeout: 10,
+        });
+
+        if (res.statusCode !== 200) {
+          console.error("[forms] DeepL error " + res.statusCode);
+          return null;
+        }
+        const json = res.json;
+        if (!json || !Array.isArray(json.translations)) {
+          console.error("[forms] Unexpected DeepL response");
+          return null;
+        }
+        let idx = 0;
+        return chunks.map((c) =>
+          c.text.trim().length === 0 || !json.translations[idx]
+            ? c.text
+            : json.translations[idx++].text
+        );
+      };
+
+      try {
+        let isMulti = false;
+        try {
+          isMulti = e.record.getBool("multiLanguage");
+        } catch (err) {
+          isMulti = false;
+        }
+        if (isMulti) {
+          // Persisted state (null on create) — lets us detect what actually
+          // changed in this save so we never clobber manual edits and only
+          // re-translate when the Dutch source changed (same fieldChanged
+          // pattern as translate.pb.js).
+          let original = null;
+          try {
+            original = e.record.original();
+          } catch (err) {
+            original = null;
+          }
+          const getStr = (rec, name) => {
+            if (!rec) return "";
+            try {
+              const v = rec.getString(name);
+              return typeof v === "string" ? v : "";
+            } catch (err) {
+              return "";
+            }
+          };
+
+          // Decide the English value for one text:
+          //   • Dutch empty → nothing to translate (EN cleared).
+          //   • EN edited in THIS save (differs from persisted) → keep as-is:
+          //     a manually typed translation is never overwritten.
+          //   • EN filled + Dutch unchanged → keep (no DeepL call).
+          //   • EN filled + Dutch changed → re-translate, refreshing stale
+          //     auto-translations when the admin edits the Dutch text.
+          //   • EN empty → translate (also retries after a previous DeepL
+          //     failure, since an empty EN is retried on the next save).
+          // On failure the old value is kept — a missing/down DeepL never
+          // breaks the save (the empty-fill case stays empty and is retried).
+          const resolveEn = (dutch, en, dutchWas, enWas) => {
+            const nl = String(dutch || "").trim();
+            const cur = String(en || "");
+            if (nl.length === 0) return "";
+            if (cur.length > 0) {
+              if (cur !== enWas) return cur; // manual edit now — keep
+              if (nl === dutchWas) return cur; // nothing changed — keep
+              const out = translateTexts([nl]);
+              return out ? out[0] : cur; // refresh stale translation
+            }
+            const out = translateTexts([nl]);
+            return out ? out[0] : ""; // fill when empty
+          };
+
+          // Title + description.
+          e.record.set(
+            "title_en",
+            resolveEn(
+              getStr(e.record, "title"),
+              getStr(e.record, "title_en"),
+              getStr(original, "title"),
+              getStr(original, "title_en")
+            )
+          );
+          e.record.set(
+            "description_en",
+            resolveEn(
+              getStr(e.record, "description"),
+              getStr(e.record, "description_en"),
+              getStr(original, "description"),
+              getStr(original, "description_en")
+            )
+          );
+
+          // Field labels (all types) + section content.
+          const fields = parseJson(e.record.get("fields"));
+          if (Array.isArray(fields)) {
+            // Persisted fields by id, to compare each field's NL/EN state.
+            const wasFields = parseJson(
+              original && original.get ? original.get("fields") : null
+            );
+            const wasById = {};
+            if (Array.isArray(wasFields)) {
+              for (const wf of wasFields) {
+                if (wf && wf.id !== undefined) wasById[String(wf.id)] = wf;
+              }
+            }
+            const translated = fields.map((f) => {
+              if (!f || typeof f !== "object") return f;
+              const prev = wasById[String(f.id)] || {};
+              const next = Object.assign({}, f);
+              if (typeof next.label === "string") {
+                next.label_en = resolveEn(
+                  next.label,
+                  typeof next.label_en === "string" ? next.label_en : "",
+                  typeof prev.label === "string" ? prev.label : "",
+                  typeof prev.label_en === "string" ? prev.label_en : ""
+                );
+              }
+              if (typeof next.content === "string") {
+                next.content_en = resolveEn(
+                  next.content,
+                  typeof next.content_en === "string" ? next.content_en : "",
+                  typeof prev.content === "string" ? prev.content : "",
+                  typeof prev.content_en === "string" ? prev.content_en : ""
+                );
+              }
+              return next;
+            });
+            e.record.set("fields", translated);
+          }
+        }
+      } catch (err) {
+        // Never break the save because of a failed translation.
+        console.error("[forms] auto-translate failed (continuing):", err);
       }
     } else if (col === "form_submissions") {
       // ── Submission guard ────────────────────────────────────────────────
@@ -124,28 +313,7 @@ function formsHook(e) {
       // 2. Field schema of the form.
       // NOTE: in the JSVM, json fields are exposed as raw JSON BYTES (an array
       // of char codes) rather than parsed objects — decode before using.
-      const parseJson = (value) => {
-        if (value === null || value === undefined) return null;
-        if (typeof value === "string") {
-          try {
-            return JSON.parse(value);
-          } catch (err) {
-            return null;
-          }
-        }
-        if (Array.isArray(value) && value.length > 0 && typeof value[0] === "number") {
-          let str = "";
-          for (let i = 0; i < value.length; i++) str += String.fromCharCode(value[i]);
-          try {
-            return JSON.parse(str);
-          } catch (err) {
-            return null;
-          }
-        }
-        if (Array.isArray(value) || typeof value === "object") return value;
-        return null;
-      };
-
+      // (parseJson is shared from the top of formsHook.)
       let fields = parseJson(form.get("fields"));
       if (!Array.isArray(fields)) fields = [];
       const fieldById = {};
@@ -437,3 +605,4 @@ function formsHook(e) {
 }
 
 onRecordCreateRequest(formsHook, "forms", "form_submissions");
+onRecordUpdateRequest(formsHook, "forms");

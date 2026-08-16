@@ -38,7 +38,11 @@ export interface Form {
   /** Random URL-safe code — the public form lives at formUrl(code). */
   code: string
   title: string
+  /** English title — only used when the form has multiLanguage = true. */
+  title_en?: string
   description?: string
+  /** English description — only used when the form has multiLanguage = true. */
+  description_en?: string
   multiLanguage: boolean
   active: boolean
   fields: FormField[]
@@ -98,9 +102,10 @@ export const FORM_HOOKS: { value: string; label: string; description: string }[]
 ]
 
 export async function getForms(): Promise<Form[]> {
+  // No expand — viewers can't read the users collection, and nothing in the
+  // UI consumes createdBy anyway.
   return pb.collection('forms').getFullList<Form>({
     sort: '-created',
-    expand: 'createdBy',
     requestKey: null,
   })
 }

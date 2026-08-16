@@ -15,7 +15,7 @@ const form = await getFormByCode(code);
 {
   form ? (
     form.active ? (
-      <FormLayout title={`${form.title} · Fenrir`}>
+      <FormLayout title={`${form.multiLanguage && lang === 'en' && form.title_en ? form.title_en : form.title} · Fenrir`}>
         <main class="flex min-h-dvh items-center justify-center px-4 py-12">
           <div class="w-full max-w-2xl">
             <FormRenderer form={form} client:load />
@@ -24,7 +24,11 @@ const form = await getFormByCode(code);
       </FormLayout>
     ) : (
       <FormLayout title={t.closedTitle}>
-        <StateMessage status={form.title} title={t.closedTitle} text={t.closedText} />
+        <StateMessage
+          status={form.multiLanguage && lang === 'en' && form.title_en ? form.title_en : form.title}
+          title={t.closedTitle}
+          text={t.closedText}
+        />
       </FormLayout>
     )
   ) : (
