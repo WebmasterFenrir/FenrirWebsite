@@ -28,6 +28,7 @@ import {
   CalendarDays,
   Tag,
   ClipboardList,
+  Contact,
   LogOut,
 } from 'lucide-react'
 import type { Action } from '@/lib/roles'
@@ -49,6 +50,8 @@ const mainNav: NavItem[] = [
   // Every role sees Forms — viewers get a read-only list, the page gates
   // the actions (build/edit/responses/delete) via can('manageForms').
   { label: 'Forms', to: '/forms', icon: ClipboardList },
+  // Personal data (phone, email, student number) — board only.
+  { label: 'Leden', to: '/leden', icon: Contact, requires: 'write' },
   { label: 'People', to: '/people', icon: Users },
 ]
 
@@ -219,6 +222,7 @@ function BreadcrumbTitle() {
     '/activiteiten': 'Activiteiten',
     '/categories': 'Categories',
     '/forms': 'Forms',
+    '/leden': 'Leden',
     '/people': 'People',
     '/admin/users': 'Add User',
   }

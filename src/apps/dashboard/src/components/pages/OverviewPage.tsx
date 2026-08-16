@@ -3,12 +3,15 @@ import { Link } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { CalendarRange, Building2, Users, ArrowRight } from 'lucide-react'
+import { CalendarRange, Building2, Users, UserPlus, ArrowRight } from 'lucide-react'
 import { getYears, getYearFuncties, type Year, type YearFunctie } from '@/lib/db/years'
 import { getSponsors, type Sponsor } from '@/lib/db/sponsors'
 import { getPeople } from '@/lib/db/people'
+import { getLeden } from '@/lib/db/leden'
+import { useRole } from '@/lib/RoleContext'
 
 const CURRENT_YEAR = new Date().getFullYear()
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000
 
 function fmtDate(d: string) {
   if (!d) return '—'
@@ -19,10 +22,14 @@ function fmtDate(d: string) {
 }
 
 export function OverviewPage() {
+  const { can } = useRole()
+  const canWrite = can('write')
+
   const [loading, setLoading] = useState(true)
   const [yearCount, setYearCount] = useState(0)
   const [peopleCount, setPeopleCount] = useState(0)
   const [sponsorCount, setSponsorCount] = useState(0)
+  const [newMemberCount, setNewMemberCount] = useState(0)
   const [latestYear, setLatestYear] = useState<Year | null>(null)
   const [functies, setFuncties] = useState<YearFunctie[]>([])
   const [activeSponsors, setActiveSponsors] = useState<Sponsor[]>([])
@@ -41,6 +48,21 @@ export function OverviewPage() {
           const f = await getYearFuncties(latest.id)
           setFuncties(f)
         }
+
+        // New members this week — `leden` is board-only, so only fetch it for
+        // roles that can read it (viewers/formmanager see no member data).
+        if (canWrite) {
+          try {
+            const leden = await getLeden()
+            const cutoff = Date.now() - WEEK_MS
+            setNewMemberCount(leden.filter((l) => {
+              const t = l.created ? new Date(l.created).getTime() : NaN
+              return !Number.isNaN(t) && t >= cutoff
+            }).length)
+          } catch {
+            setNewMemberCount(0)
+          }
+        }
       })
       .finally(() => setLoading(false))
   }, [])
@@ -49,6 +71,9 @@ export function OverviewPage() {
     { label: 'Presidium Years', value: yearCount, icon: CalendarRange, to: '/years' },
     { label: 'People', value: peopleCount, icon: Users, to: '/people' },
     { label: 'Sponsors', value: sponsorCount, icon: Building2, to: '/sponsors' },
+    ...(canWrite
+      ? [{ label: 'New members (7d)', value: newMemberCount, icon: UserPlus, to: '/leden' }]
+      : []),
   ]
 
   return (
@@ -60,7 +85,7 @@ export function OverviewPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className={`grid grid-cols-1 gap-4 ${canWrite ? 'sm:grid-cols-2 lg:grid-cols-4' : 'sm:grid-cols-3'}`}>
         {stats.map(({ label, value, icon: Icon, to }) => (
           <Card key={label}>
             <CardHeader className="pb-2">
