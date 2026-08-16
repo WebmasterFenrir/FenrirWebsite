@@ -587,6 +587,10 @@ function formsHook(e) {
         try {
           if (hookKey === "bugticket") {
             createGithubIssue(form, answers, fields);
+          } else if (hookKey === "inschrijvingen") {
+            // The leden mapping needs the saved submission's id (for the
+            // `source` relation), so it runs in formsAfterCreateHook below —
+            // recognized here so it isn't logged as unknown.
           } else {
             console.warn("[forms] unknown processing hook '" + hookKey + "' (form " + form.id + ") — skipping");
           }
@@ -604,5 +608,214 @@ function formsHook(e) {
   e.next();
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// inschrijvingen processing hook (member registry — see PLAN-members.md)
+// -----------------------------------------------------
+// Runs AFTER a "Lid worden" form submission is saved so the new submission's
+// id is available for the `leden.source` relation (cascadeDelete). Maps the
+// validated answers onto a `leden` record by field LABEL (normalized,
+// case-insensitive `includes`) — the same convention the bugticket hook uses
+// for option labels. Fire-and-forget: a failure is logged but never loses user
+// input (the submission is already saved by this point).
+function formsAfterCreateHook(e) {
+  if (!e.record) return e.next();
+
+  try {
+    const parseJson = (value) => {
+      if (value === null || value === undefined) return null;
+      if (typeof value === "string") {
+        try {
+          return JSON.parse(value);
+        } catch (err) {
+          return null;
+        }
+      }
+      if (Array.isArray(value) && value.length > 0 && typeof value[0] === "number") {
+        let str = "";
+        for (let i = 0; i < value.length; i++) str += String.fromCharCode(value[i]);
+        try {
+          return JSON.parse(str);
+        } catch (err) {
+          return null;
+        }
+      }
+      if (Array.isArray(value) || typeof value === "object") return value;
+      return null;
+    };
+
+    // Resolve the form; only continue for the inschrijvingen hook.
+    const formId = e.record.getString("form");
+    let form = null;
+    try {
+      form = $app.findRecordById("forms", formId);
+    } catch (err) {
+      return e.next();
+    }
+    if ((form.getString("hook") || "none") !== "inschrijvingen") return e.next();
+
+    let fields = parseJson(form.get("fields"));
+    if (!Array.isArray(fields)) fields = [];
+    let answers = parseJson(e.record.get("answers"));
+    if (!answers || Array.isArray(answers)) answers = {};
+
+    // Normalized label matching (lowercase, collapsed whitespace).
+    const norm = (s) => String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
+
+    // First answer whose field label contains one of the given keys.
+    const fieldValue = (keys) => {
+      for (const f of fields) {
+        if (!f || f.id === undefined) continue;
+        const t = f.type || "text";
+        if (t === "section" || t === "image") continue;
+        const label = norm(f.label || "");
+        if (!label) continue;
+        for (const k of keys) {
+          if (label.indexOf(norm(k)) !== -1) {
+            const raw = answers[String(f.id)];
+            if (Array.isArray(raw)) return raw.length > 0 ? raw.join(", ") : "";
+            return raw === null || raw === undefined ? "" : String(raw).trim();
+          }
+        }
+      }
+      return undefined;
+    };
+
+    // name: matched label first, fallback to the first non-empty text answer.
+    let name = fieldValue(["voornaam + achternaam", "voornaam", "naam"]);
+    if (!name) {
+      for (const f of fields) {
+        const t = f.type || "text";
+        if (t !== "text" && t !== "textarea") continue;
+        const raw = answers[String(f.id)];
+        if (raw !== undefined && raw !== null) {
+          const s = Array.isArray(raw) ? raw.join(", ") : String(raw).trim();
+          if (s) {
+            name = s;
+            break;
+          }
+        }
+      }
+    }
+    if (!name) {
+      console.warn("[forms] inschrijvingen: no name matched — skipping leden row (submission kept)");
+      return e.next();
+    }
+
+    // Current active club year = newest preasidium_years (same source of truth
+    // as the preasidium pages: sorted by -yearId).
+    let yearId = "";
+    try {
+      const years = $app.findRecordsByFilter("preasidium_years", "", "-yearId", 1, 0, {});
+      if (years.length > 0) yearId = years[0].id;
+    } catch (err) {
+      console.error("[forms] inschrijvingen: could not resolve club year:", err);
+    }
+    if (!yearId) {
+      console.warn("[forms] inschrijvingen: no club year found — skipping leden row (submission kept)");
+      return e.next();
+    }
+
+    // language: raw radio answer → NL / EN.
+    const langRaw = fieldValue(["taal", "language"]);
+    let language = "";
+    if (langRaw !== undefined) {
+      const l = norm(langRaw);
+      language = l.indexOf("engels") !== -1 || l.indexOf("english") !== -1 ? "EN" : "NL";
+    }
+
+    const mapped = {
+      name: name,
+      email: fieldValue(["e-mailadres", "e-mail", "emailadres", "email"]) || "",
+      phone: fieldValue(["telefoonnummer", "telefoon", "gsm"]) || "",
+      birthdate: fieldValue(["geboortedatum", "geboorte"]) || "",
+      language: language,
+      kdg_student: fieldValue(["kdg-student", "kdg student", "kdg"]) || "",
+      student_number: fieldValue(["studentennummer", "studentnummer"]) || "",
+      richting: fieldValue(["richting", "studierichting"]) || "",
+      sport_event: fieldValue(["wil je mee badmintonnen", "badminton"]) || "",
+      student_doop: fieldValue(["neem je deel met de teambuilding", "teambuilding", "studentendoop", "doop"]) || "",
+      payment_method: fieldValue(["betalingswijze", "betaal", "betalen"]) || "",
+    };
+
+    // Warn about answer fields that map to no leden column (never fatal — the
+    // answer still lives in the raw submission).
+    const knownKeys = [
+      "voornaam", "naam", "geboortedatum", "geboorte", "taal", "language",
+      "kdg", "studentennummer", "studentnummer", "richting", "e-mail",
+      "email", "telefoon", "gsm", "badminton", "teambuilding",
+      "studentendoop", "doop", "betalingswijze", "betaal", "betalen",
+    ];
+    for (const f of fields) {
+      if (!f || f.id === undefined) continue;
+      const t = f.type || "text";
+      if (t === "section" || t === "image") continue;
+      const label = norm(f.label || "");
+      if (!label) continue;
+      let matched = false;
+      for (const k of knownKeys) {
+        if (label.indexOf(k) !== -1) {
+          matched = true;
+          break;
+        }
+      }
+      if (!matched) {
+        console.warn(
+          "[forms] inschrijvingen: unmatched field '" + (f.label || String(f.id)) + "' (stored in submission only)"
+        );
+      }
+    }
+
+    // Upsert: same email + same year → update the existing row instead of
+    // creating a duplicate (resubmission / correction). No email → new row.
+    const ledenCol = $app.findCollectionByNameOrId("leden");
+    let existing = null;
+    if (mapped.email) {
+      const found = $app.findRecordsByFilter(
+        "leden",
+        "email = {:email} && year = {:year}",
+        "",
+        1,
+        0,
+        { email: mapped.email, year: yearId }
+      );
+      if (found.length > 0) existing = found[0];
+    }
+
+    const data = {
+      year: yearId,
+      name: mapped.name,
+      email: mapped.email,
+      phone: mapped.phone,
+      birthdate: mapped.birthdate,
+      language: mapped.language,
+      kdg_student: mapped.kdg_student,
+      student_number: mapped.student_number,
+      richting: mapped.richting,
+      sport_event: mapped.sport_event,
+      student_doop: mapped.student_doop,
+      payment_method: mapped.payment_method,
+      source: e.record.id,
+    };
+
+    let rec;
+    if (existing) {
+      rec = existing;
+      for (const key of Object.keys(data)) rec.set(key, data[key]);
+    } else {
+      rec = new Record(ledenCol, data);
+    }
+    $app.save(rec);
+    console.log(
+      "[forms] inschrijvingen: " + (existing ? "updated" : "created") + " leden row for " + mapped.name
+    );
+  } catch (err) {
+    // Never break the (already-saved) submission because of a mapping bug.
+    console.error("[forms] inschrijvingen hook failed (submission kept):", err);
+  }
+
+  e.next();
+}
+
 onRecordCreateRequest(formsHook, "forms", "form_submissions");
 onRecordUpdateRequest(formsHook, "forms");
+onRecordAfterCreateSuccess(formsAfterCreateHook, "form_submissions");

@@ -126,20 +126,68 @@ export function FormRenderer({ form }: FormRendererProps) {
   }
 
   if (success) {
+    // A read-only recap of what was actually recorded — seeing their answers
+    // back makes it tangible that the response went through and was useful.
+    const summary = form.fields
+      .filter((f) => !isDisplayField(f))
+      .map((f) => {
+        const v = answers[f.id]
+        const value = Array.isArray(v)
+          ? v.length > 0
+            ? v.join(', ')
+            : '—'
+          : isEmpty(v)
+            ? '—'
+            : String(v)
+        return { id: f.id, label: label(f), value }
+      })
+
     return (
-      <div className="flex flex-col items-center gap-5 rounded-2xl border border-border bg-card p-10 text-center shadow-lg">
-        <CheckCircle2 className="size-12 text-primary" />
-        <div>
-          <h1 className="text-xl font-bold tracking-tight">{t.successTitle}</h1>
-          <p className="mt-2 text-sm text-foreground/90">{t.successText}</p>
+      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-xl">
+        {/* Success hero */}
+        <div className="flex flex-col items-center gap-4 px-6 py-10 text-center">
+          <div className="flex size-16 items-center justify-center rounded-full bg-primary/10 ring-8 ring-primary/5">
+            <CheckCircle2 className="size-9 text-primary" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <h1 className="text-2xl font-bold tracking-tight">{t.successTitle}</h1>
+            <p className="mx-auto max-w-md text-sm text-foreground/80">{t.successText}</p>
+          </div>
         </div>
-        <button
-          type="button"
-          onClick={reset}
-          className="inline-flex h-9 items-center justify-center rounded-md border border-border bg-background/60 px-4 text-xs font-medium text-foreground transition-colors hover:bg-accent"
-        >
-          {t.successAgain}
-        </button>
+
+        {/* What was submitted — makes the response feel recorded and necessary */}
+        {summary.length > 0 && (
+          <div className="border-t border-border px-6 py-5">
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {t.successSummaryTitle}
+            </h2>
+            <dl className="max-h-72 divide-y divide-border overflow-y-auto pr-1">
+              {summary.map((s) => (
+                <div key={s.id} className="flex items-start justify-between gap-4 py-2.5">
+                  <dt className="shrink-0 text-sm text-muted-foreground">{s.label}</dt>
+                  <dd className="max-w-[65%] break-words text-right text-sm font-medium">{s.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex flex-col gap-2 border-t border-border bg-background/40 px-6 py-5 sm:flex-row sm:items-center sm:justify-center">
+          <button
+            type="button"
+            onClick={reset}
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none active:scale-[0.99]"
+          >
+            {t.successAgain}
+          </button>
+          <a
+            href="https://fenrirclub.be"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md px-4 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {t.backToSite}
+          </a>
+        </div>
       </div>
     )
   }

@@ -99,6 +99,12 @@ export const FORM_HOOKS: { value: string; label: string; description: string }[]
     label: 'Bug ticket',
     description: 'Creates a GitHub issue in the Fenrir repo from the answers (needs GITHUB_TOKEN).',
   },
+  {
+    value: 'inschrijvingen',
+    label: 'Lid worden (inschrijvingen)',
+    description:
+      'Maps the answers onto a member row in the Leden table (name, phone, email, study, …) under the current club year.',
+  },
 ]
 
 export async function getForms(): Promise<Form[]> {
