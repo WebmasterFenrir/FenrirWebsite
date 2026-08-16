@@ -46,7 +46,9 @@ const mainNav: NavItem[] = [
   { label: 'Sponsors', to: '/sponsors', icon: Building2 },
   { label: 'Activiteiten', to: '/activiteiten', icon: CalendarDays },
   { label: 'Categories', to: '/categories', icon: Tag },
-  { label: 'Forms', to: '/forms', icon: ClipboardList, requires: 'manageForms' },
+  // Every role sees Forms — viewers get a read-only list, the page gates
+  // the actions (build/edit/responses/delete) via can('manageForms').
+  { label: 'Forms', to: '/forms', icon: ClipboardList },
   { label: 'People', to: '/people', icon: Users },
 ]
 

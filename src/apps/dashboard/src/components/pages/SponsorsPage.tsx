@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Plus, Pencil, Trash2, Building2 } from 'lucide-react'
+import { useRole } from '@/lib/RoleContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -49,6 +50,7 @@ const emptyForm: FormState = {
 }
 
 export function SponsorsPage() {
+  const { can } = useRole()
   const [sponsors, setSponsors] = useState<Sponsor[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -142,9 +144,11 @@ export function SponsorsPage() {
           <h1 className="text-2xl font-bold tracking-tight">Sponsors</h1>
           <p className="text-sm text-muted-foreground mt-1">Manage Fenrir's sponsors.</p>
         </div>
-        <Button onClick={openCreate} size="sm" className="gap-1.5">
-          <Plus className="size-4" /> Add Sponsor
-        </Button>
+        {can('write') && (
+          <Button onClick={openCreate} size="sm" className="gap-1.5">
+            <Plus className="size-4" /> Add Sponsor
+          </Button>
+        )}
       </div>
 
       <div className="rounded-lg overflow-hidden">
@@ -179,21 +183,25 @@ export function SponsorsPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => openEdit(sponsor)}
-                      >
-                        <Pencil className="size-3.5" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        className="text-destructive hover:text-destructive"
-                        onClick={() => setDeleteId(sponsor.id)}
-                      >
-                        <Trash2 className="size-3.5" />
-                      </Button>
+                      {can('write') && (
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => openEdit(sponsor)}
+                        >
+                          <Pencil className="size-3.5" />
+                        </Button>
+                      )}
+                      {can('delete') && (
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => setDeleteId(sponsor.id)}
+                        >
+                          <Trash2 className="size-3.5" />
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
