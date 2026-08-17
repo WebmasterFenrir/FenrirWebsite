@@ -28,22 +28,26 @@ export default function PreasidiumLidPrevieuw({ data, noDescriptionText = "No de
           className="aspect-square w-full rounded-t-xl object-cover"
         />
       </div>
-      <CardContent className="relative space-y-5 pb-[2rem] md:pb-[2rem]">
-        <div className="space-y-1">
+      <CardContent className="relative px-6 pb-[2rem] md:pb-[2rem]">
+        {/* Functions sit directly above the name, stacked one per line */}
+        <div className="flex flex-col gap-1">
           {roleLabels.map((label, i) => (
             <p key={i} className="text-yellow-400 text-[10px] md:text-xs font-black uppercase tracking-[0.4em]">
               {label}
             </p>
           ))}
         </div>
-        <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
-          {data.firstName} <span className="text-purple-400">{data.lastName}</span>
-        </h2>
-        {roleYear && (
-          <p className="text-zinc-400 text-xs md:text-sm uppercase tracking-[0.2em]">
-            {roleYear}
-          </p>
-        )}
+        {/* Divider between the functions and the name block */}
+        <div className="mt-4 border-t border-zinc-800/60 pt-4">
+          <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
+            {data.firstName} <span className="text-purple-400">{data.lastName}</span>
+          </h2>
+          {roleYear && (
+            <p className="mt-2 text-zinc-400 text-xs md:text-sm uppercase tracking-[0.2em]">
+              {roleYear}
+            </p>
+          )}
+        </div>
       </CardContent>
 </Card>
   </DialogTrigger>
