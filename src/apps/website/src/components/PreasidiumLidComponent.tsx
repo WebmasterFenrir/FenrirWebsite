@@ -9,9 +9,8 @@ interface PreasidiumLidPrevieuwinterface {
 }
 
 export default function PreasidiumLidPrevieuw({ data, noDescriptionText = "No description provided.", detailedInfoTemplate = "Detailed information about {name}" }: PreasidiumLidPrevieuwinterface) {
-  const primaryRole = data.preasidiumRols[0];
-  const roleLabel = primaryRole.role;
-  const roleYear = primaryRole.year;
+  const roleLabels = data.preasidiumRols.map(r => r.role);
+  const roleYear = data.preasidiumRols[0]?.year;
   // Images are served from PocketBase (full URL) or fall back to a placeholder avatar
   const imageSrc = data.imageUrl && data.imageUrl.startsWith('http')
     ? data.imageUrl
@@ -28,16 +27,21 @@ export default function PreasidiumLidPrevieuw({ data, noDescriptionText = "No de
           alt={`${data.firstName} ${data.lastName}`}
           className="aspect-square w-full rounded-t-xl object-cover"
         />
+        {/* Functions overlaid on the image, stacked one per line */}
+        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 bg-gradient-to-t from-black/85 via-black/50 to-transparent p-4 pt-10">
+          {roleLabels.map((label, i) => (
+            <p key={i} className="text-yellow-400 text-[10px] md:text-xs font-black uppercase tracking-[0.4em]">
+              {label}
+            </p>
+          ))}
+        </div>
       </div>
-      <CardContent className="relative space-y-5 pb-[2rem] md:pb-[2rem]">
-        <p className="text-yellow-400 text-[10px] md:text-xs font-black uppercase tracking-[0.4em]">
-          {roleLabel}
-        </p>
+      <CardContent className="relative px-6 pb-[2rem] md:pb-[2rem]">
         <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
           {data.firstName} <span className="text-purple-400">{data.lastName}</span>
         </h2>
         {roleYear && (
-          <p className="text-zinc-400 text-xs md:text-sm uppercase tracking-[0.2em]">
+          <p className="mt-2 text-zinc-400 text-xs md:text-sm uppercase tracking-[0.2em]">
             {roleYear}
           </p>
         )}
@@ -60,10 +64,14 @@ export default function PreasidiumLidPrevieuw({ data, noDescriptionText = "No de
     {/* RIGHT SECTION: Content */}
     <div className="flex-1 p-[2rem] md:p-[3rem] flex flex-col justify-center">
       <DialogHeader className="text-left">
-        {/* Role Label with Yellow Accent */}
-        <p className="text-yellow-400 text-[10px] md:text-xs font-black uppercase tracking-[0.4em] mb-4">
-          {roleLabel}
-        </p>
+        {/* Role Labels with Yellow Accent — show every function the member holds */}
+        <div className="space-y-1 mb-4">
+          {roleLabels.map((label, i) => (
+            <p key={i} className="text-yellow-400 text-[10px] md:text-xs font-black uppercase tracking-[0.4em]">
+              {label}
+            </p>
+          ))}
+        </div>
         
         {/* Name with Purple Split */}
         <DialogTitle className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">
