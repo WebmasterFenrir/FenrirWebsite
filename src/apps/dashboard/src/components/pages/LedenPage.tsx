@@ -443,7 +443,7 @@ export function LedenPage() {
 
       {/* Edit member dialog — fill in or correct any field later */}
       <Dialog open={!!editLid} onOpenChange={(o) => !o && setEditLid(null)}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit lid</DialogTitle>
           </DialogHeader>
