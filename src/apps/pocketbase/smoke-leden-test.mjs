@@ -242,6 +242,41 @@ try {
   check("no leden row for no-name submission", (afterNoName.body.items || []).length === 1, "rows:" + (afterNoName.body.items || []).length);
   check("no-name warning logged", pbLog.includes("no name matched"), pbLog.slice(-500));
 
+  // 7b. Manual add from the dashboard: admin/media may create a row with only
+  //     a name + year (no `source` relation); viewer/formmanager may not.
+  const manualRow = await api("/api/collections/leden/records", {
+    method: "POST",
+    headers: suHeaders,
+    body: JSON.stringify({ name: "Handmatig Lid", year: activeYearId }),
+  });
+  check("manual add as admin → 201", manualRow.status === 201 || manualRow.status === 200, manualRow.status + " " + JSON.stringify(manualRow.body));
+  check("manual row has no source", manualRow.body && !manualRow.body.source, JSON.stringify(manualRow.body && manualRow.body.source));
+
+  const manualMedia = await api("/api/collections/leden/records", {
+    method: "POST",
+    headers: mediaH,
+    body: JSON.stringify({ name: "Media Lid", year: activeYearId }),
+  });
+  check("manual add as media → 201", manualMedia.status === 201 || manualMedia.status === 200, manualMedia.status + " " + JSON.stringify(manualMedia.body));
+
+  const manualViewer = await api("/api/collections/leden/records", {
+    method: "POST",
+    headers: viewerH,
+    body: JSON.stringify({ name: "Viewer Lid", year: activeYearId }),
+  });
+  check("manual add as viewer forbidden", manualViewer.status === 403 || manualViewer.status === 400, manualViewer.status + " " + JSON.stringify(manualViewer.body));
+
+  const manualFm = await api("/api/collections/leden/records", {
+    method: "POST",
+    headers: fmH,
+    body: JSON.stringify({ name: "FM Lid", year: activeYearId }),
+  });
+  check("manual add as formmanager forbidden", manualFm.status === 403 || manualFm.status === 400, manualFm.status + " " + JSON.stringify(manualFm.body));
+
+  const afterManual = await api("/api/collections/leden/records", { headers: suHeaders });
+  const manualNames = (afterManual.body.items || []).map((r) => r.name);
+  check("manual rows listed", manualNames.includes("Handmatig Lid") && manualNames.includes("Media Lid"), JSON.stringify(manualNames));
+
   // 8. A hook failure never loses the submission — delete the leden collection
   //    so the hook's save throws, then submit: it must still be persisted.
   const delCol = await api("/api/collections/leden", { method: "DELETE", headers: suHeaders });

@@ -43,3 +43,12 @@ export async function getCurrentYear(): Promise<Year | null> {
 export async function deleteLid(id: string): Promise<void> {
   await pb.collection('leden').delete(id)
 }
+
+/**
+ * Manually add a member from the dashboard. Only the name is required; all
+ * other fields stay empty (unlike form-derived rows). The member is stamped
+ * with the given club year.
+ */
+export async function createLid(data: { name: string; year: string }): Promise<Lid> {
+  return pb.collection('leden').create<Lid>(data)
+}

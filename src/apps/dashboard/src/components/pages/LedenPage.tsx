@@ -1,7 +1,16 @@
 import { useEffect, useState } from 'react'
-import { Users, Trash2, Download } from 'lucide-react'
+import { Users, Trash2, Download, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import {
   Table,
   TableBody,
@@ -27,7 +36,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
-import { getLeden, deleteLid, type Lid } from '@/lib/db/leden'
+import { getLeden, createLid, deleteLid, type Lid } from '@/lib/db/leden'
 import { getYears, type Year } from '@/lib/db/years'
 import { useRole } from '@/lib/RoleContext'
 
@@ -76,6 +85,11 @@ export function LedenPage() {
   const [leden, setLeden] = useState<Lid[]>([])
   const [loading, setLoading] = useState(true)
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [addOpen, setAddOpen] = useState(false)
+  const [newName, setNewName] = useState('')
+  const [addYearId, setAddYearId] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [addError, setAddError] = useState('')
 
   const load = async (yearId?: string) => {
     setLoading(true)
@@ -109,13 +123,45 @@ export function LedenPage() {
     }
   }
 
+  const openAdd = () => {
+    // Default to the club year currently shown in the table.
+    setNewName('')
+    setAddYearId(selectedYearId || years[0]?.id || '')
+    setAddError('')
+    setAddOpen(true)
+  }
+
+  const handleAdd = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const name = newName.trim()
+    if (!name) {
+      setAddError('Name is required.')
+      return
+    }
+    if (!addYearId) {
+      setAddError('Pick a club year.')
+      return
+    }
+    setSaving(true)
+    setAddError('')
+    try {
+      await createLid({ name, year: addYearId })
+      setAddOpen(false)
+      load(addYearId)
+    } catch (err) {
+      setAddError(err instanceof Error ? err.message : 'Failed to add member. Please try again.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Leden</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Members who signed up via the “Lid worden” form, grouped by club year.
+            Members signed up via the “Lid worden” form or added manually, grouped by club year.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -152,6 +198,11 @@ export function LedenPage() {
           >
             <Download className="size-4" /> Export CSV
           </Button>
+          {can('write') && (
+            <Button size="sm" className="gap-1.5" onClick={openAdd}>
+              <Plus className="size-4" /> Add lid
+            </Button>
+          )}
         </div>
       </div>
 
@@ -165,6 +216,11 @@ export function LedenPage() {
           <p className="text-sm">
             No members for {selectedYear ? yearLabel(selectedYear) : 'this year'} yet.
           </p>
+          {can('write') && (
+            <Button size="sm" className="gap-1.5" onClick={openAdd}>
+              <Plus className="size-4" /> Add lid
+            </Button>
+          )}
         </div>
       ) : (
         <>
@@ -230,6 +286,59 @@ export function LedenPage() {
           </div>
         </>
       )}
+
+      {/* Add member dialog — only the name is required; all other fields
+          stay empty (unlike form-derived rows). */}
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add lid</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAdd} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="lid-name">Name</Label>
+              <Input
+                id="lid-name"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="Jan Peeters"
+                required
+                autoFocus
+              />
+              <p className="text-xs text-muted-foreground">
+                Only the name is required — other fields can be added later.
+              </p>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>Club year</Label>
+              <Select
+                value={addYearId}
+                onValueChange={setAddYearId}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select year" />
+                </SelectTrigger>
+                <SelectContent>
+                  {years.map((y) => (
+                    <SelectItem key={y.id} value={y.id}>
+                      {yearLabel(y)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {addError && <p className="text-xs text-destructive">{addError}</p>}
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setAddOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={saving}>
+                {saving ? 'Adding…' : 'Add lid'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
         <AlertDialogContent>
