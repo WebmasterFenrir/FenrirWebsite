@@ -52,3 +52,26 @@ export async function deleteLid(id: string): Promise<void> {
 export async function createLid(data: { name: string; year: string }): Promise<Lid> {
   return pb.collection('leden').create<Lid>(data)
 }
+
+/** Editable fields of a member (everything except id/year/source/created). */
+export type LidUpdate = Partial<
+  Pick<
+    Lid,
+    | 'name'
+    | 'email'
+    | 'phone'
+    | 'birthdate'
+    | 'language'
+    | 'kdg_student'
+    | 'student_number'
+    | 'richting'
+    | 'sport_event'
+    | 'student_doop'
+    | 'payment_method'
+  >
+>
+
+/** Update a member's fields from the dashboard (e.g. fill in more info later). */
+export async function updateLid(id: string, data: LidUpdate): Promise<Lid> {
+  return pb.collection('leden').update<Lid>(id, data)
+}

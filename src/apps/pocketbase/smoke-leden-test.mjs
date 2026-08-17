@@ -277,6 +277,42 @@ try {
   const manualNames = (afterManual.body.items || []).map((r) => r.name);
   check("manual rows listed", manualNames.includes("Handmatig Lid") && manualNames.includes("Media Lid"), JSON.stringify(manualNames));
 
+  // 7c. Manual edit: fill in more fields later (the point of the review
+  //     comment). Admin AND media may update; viewer/formmanager may not.
+  const handmatig = (afterManual.body.items || []).find((r) => r.name === "Handmatig Lid");
+  const editAdmin = await api("/api/collections/leden/records/" + handmatig.id, {
+    method: "PATCH",
+    headers: suHeaders,
+    body: JSON.stringify({ email: "handmatig@example.com", phone: "0470 00 00 00", richting: "Toegepaste Informatica" }),
+  });
+  check("edit as admin → 200", editAdmin.status === 200, editAdmin.status + " " + JSON.stringify(editAdmin.body));
+  check("email saved", editAdmin.body && editAdmin.body.email === "handmatig@example.com", JSON.stringify(editAdmin.body && editAdmin.body.email));
+  check("richting saved", editAdmin.body && editAdmin.body.richting === "Toegepaste Informatica", JSON.stringify(editAdmin.body && editAdmin.body.richting));
+
+  const editMedia = await api("/api/collections/leden/records/" + handmatig.id, {
+    method: "PATCH",
+    headers: mediaH,
+    body: JSON.stringify({ phone: "0471 11 11 11" }),
+  });
+  check("edit as media → 200", editMedia.status === 200, editMedia.status + " " + JSON.stringify(editMedia.body));
+  check("phone saved via media", editMedia.body && editMedia.body.phone === "0471 11 11 11", JSON.stringify(editMedia.body && editMedia.body.phone));
+
+  const editViewer = await api("/api/collections/leden/records/" + handmatig.id, {
+    method: "PATCH",
+    headers: viewerH,
+    body: JSON.stringify({ email: "hacked@example.com" }),
+  });
+  // 404 = PocketBase hides records the user can't even read; 403/400 = rule
+  // denied the write. All three mean "not allowed".
+  check("edit as viewer forbidden", [403, 400, 404].includes(editViewer.status), editViewer.status + " " + JSON.stringify(editViewer.body));
+
+  const editFm = await api("/api/collections/leden/records/" + handmatig.id, {
+    method: "PATCH",
+    headers: fmH,
+    body: JSON.stringify({ email: "hacked2@example.com" }),
+  });
+  check("edit as formmanager forbidden", [403, 400, 404].includes(editFm.status), editFm.status + " " + JSON.stringify(editFm.body));
+
   // 8. A hook failure never loses the submission — delete the leden collection
   //    so the hook's save throws, then submit: it must still be persisted.
   const delCol = await api("/api/collections/leden", { method: "DELETE", headers: suHeaders });
