@@ -1,7 +1,16 @@
 import { useEffect, useState } from 'react'
-import { Users, Trash2, Download } from 'lucide-react'
+import { Users, Trash2, Download, Plus, Pencil } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import {
   Table,
   TableBody,
@@ -27,9 +36,53 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
-import { getLeden, deleteLid, type Lid } from '@/lib/db/leden'
+import { getLeden, createLid, updateLid, deleteLid, type Lid } from '@/lib/db/leden'
 import { getYears, type Year } from '@/lib/db/years'
 import { useRole } from '@/lib/RoleContext'
+
+interface LidEditForm {
+  name: string
+  email: string
+  phone: string
+  birthdate: string
+  language: string
+  kdg_student: string
+  student_number: string
+  richting: string
+  sport_event: string
+  student_doop: string
+  payment_method: string
+}
+
+const emptyEditForm: LidEditForm = {
+  name: '',
+  email: '',
+  phone: '',
+  birthdate: '',
+  language: '',
+  kdg_student: '',
+  student_number: '',
+  richting: '',
+  sport_event: '',
+  student_doop: '',
+  payment_method: '',
+}
+
+function lidToForm(lid: Lid): LidEditForm {
+  return {
+    name: lid.name ?? '',
+    email: lid.email ?? '',
+    phone: lid.phone ?? '',
+    birthdate: lid.birthdate ?? '',
+    language: lid.language ?? '',
+    kdg_student: lid.kdg_student ?? '',
+    student_number: lid.student_number ?? '',
+    richting: lid.richting ?? '',
+    sport_event: lid.sport_event ?? '',
+    student_doop: lid.student_doop ?? '',
+    payment_method: lid.payment_method ?? '',
+  }
+}
 
 function yearLabel(y: Year): string {
   const start = /^\d{4}$/.test(y.startDate) ? y.startDate : String(y.yearId)
@@ -76,6 +129,15 @@ export function LedenPage() {
   const [leden, setLeden] = useState<Lid[]>([])
   const [loading, setLoading] = useState(true)
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [addOpen, setAddOpen] = useState(false)
+  const [newName, setNewName] = useState('')
+  const [addYearId, setAddYearId] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [addError, setAddError] = useState('')
+  const [editLid, setEditLid] = useState<Lid | null>(null)
+  const [editForm, setEditForm] = useState<LidEditForm>(emptyEditForm)
+  const [editSaving, setEditSaving] = useState(false)
+  const [editError, setEditError] = useState('')
 
   const load = async (yearId?: string) => {
     setLoading(true)
@@ -109,13 +171,84 @@ export function LedenPage() {
     }
   }
 
+  const openEdit = (lid: Lid) => {
+    setEditLid(lid)
+    setEditForm(lidToForm(lid))
+    setEditError('')
+  }
+
+  const handleEditSave = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editLid) return
+    const name = editForm.name.trim()
+    if (!name) {
+      setEditError('Name is required.')
+      return
+    }
+    setEditSaving(true)
+    setEditError('')
+    try {
+      await updateLid(editLid.id, {
+        name,
+        email: editForm.email.trim(),
+        phone: editForm.phone.trim(),
+        birthdate: editForm.birthdate.trim(),
+        language: editForm.language.trim(),
+        kdg_student: editForm.kdg_student.trim(),
+        student_number: editForm.student_number.trim(),
+        richting: editForm.richting.trim(),
+        sport_event: editForm.sport_event.trim(),
+        student_doop: editForm.student_doop.trim(),
+        payment_method: editForm.payment_method.trim(),
+      })
+      setEditLid(null)
+      load(selectedYearId || undefined)
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : 'Failed to save changes. Please try again.')
+    } finally {
+      setEditSaving(false)
+    }
+  }
+
+  const openAdd = () => {
+    // Default to the club year currently shown in the table.
+    setNewName('')
+    setAddYearId(selectedYearId || years[0]?.id || '')
+    setAddError('')
+    setAddOpen(true)
+  }
+
+  const handleAdd = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const name = newName.trim()
+    if (!name) {
+      setAddError('Name is required.')
+      return
+    }
+    if (!addYearId) {
+      setAddError('Pick a club year.')
+      return
+    }
+    setSaving(true)
+    setAddError('')
+    try {
+      await createLid({ name, year: addYearId })
+      setAddOpen(false)
+      load(addYearId)
+    } catch (err) {
+      setAddError(err instanceof Error ? err.message : 'Failed to add member. Please try again.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Leden</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Members who signed up via the “Lid worden” form, grouped by club year.
+            Members signed up via the “Lid worden” form or added manually, grouped by club year.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -152,6 +285,11 @@ export function LedenPage() {
           >
             <Download className="size-4" /> Export CSV
           </Button>
+          {can('write') && (
+            <Button size="sm" className="gap-1.5" onClick={openAdd}>
+              <Plus className="size-4" /> Add lid
+            </Button>
+          )}
         </div>
       </div>
 
@@ -165,6 +303,11 @@ export function LedenPage() {
           <p className="text-sm">
             No members for {selectedYear ? yearLabel(selectedYear) : 'this year'} yet.
           </p>
+          {can('write') && (
+            <Button size="sm" className="gap-1.5" onClick={openAdd}>
+              <Plus className="size-4" /> Add lid
+            </Button>
+          )}
         </div>
       ) : (
         <>
@@ -193,7 +336,7 @@ export function LedenPage() {
                   <TableHead>Doop</TableHead>
                   <TableHead>Payment</TableHead>
                   <TableHead>E-mail</TableHead>
-                  {can('delete') && <TableHead className="text-right">Actions</TableHead>}
+                  {(can('write') || can('delete')) && <TableHead className="text-right">Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -210,17 +353,31 @@ export function LedenPage() {
                     <TableCell>{cell(lid.student_doop)}</TableCell>
                     <TableCell>{cell(lid.payment_method)}</TableCell>
                     <TableCell className="text-muted-foreground">{cell(lid.email)}</TableCell>
-                    {can('delete') && (
+                    {(can('write') || can('delete')) && (
                       <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          className="text-destructive hover:text-destructive"
-                          title="Delete member"
-                          onClick={() => setDeleteId(lid.id)}
-                        >
-                          <Trash2 className="size-3.5" />
-                        </Button>
+                        <div className="flex items-center justify-end gap-1">
+                          {can('write') && (
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              title="Edit member"
+                              onClick={() => openEdit(lid)}
+                            >
+                              <Pencil className="size-3.5" />
+                            </Button>
+                          )}
+                          {can('delete') && (
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              className="text-destructive hover:text-destructive"
+                              title="Delete member"
+                              onClick={() => setDeleteId(lid.id)}
+                            >
+                              <Trash2 className="size-3.5" />
+                            </Button>
+                          )}
+                        </div>
                       </TableCell>
                     )}
                   </TableRow>
@@ -230,6 +387,175 @@ export function LedenPage() {
           </div>
         </>
       )}
+
+      {/* Add member dialog — only the name is required; all other fields
+          stay empty (unlike form-derived rows). */}
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add lid</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAdd} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="lid-name">Name</Label>
+              <Input
+                id="lid-name"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="Jan Peeters"
+                required
+                autoFocus
+              />
+              <p className="text-xs text-muted-foreground">
+                Only the name is required — other fields can be added later.
+              </p>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>Club year</Label>
+              <Select
+                value={addYearId}
+                onValueChange={setAddYearId}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select year" />
+                </SelectTrigger>
+                <SelectContent>
+                  {years.map((y) => (
+                    <SelectItem key={y.id} value={y.id}>
+                      {yearLabel(y)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {addError && <p className="text-xs text-destructive">{addError}</p>}
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setAddOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={saving}>
+                {saving ? 'Adding…' : 'Add lid'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit member dialog — fill in or correct any field later */}
+      <Dialog open={!!editLid} onOpenChange={(o) => !o && setEditLid(null)}>
+        <DialogContent className="max-w-2xl sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit lid</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleEditSave} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="edit-name">Name</Label>
+              <Input
+                id="edit-name"
+                value={editForm.name}
+                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                placeholder="Jan Peeters"
+                required
+              />
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="edit-email">E-mail</Label>
+                <Input
+                  id="edit-email"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="edit-phone">Phone</Label>
+                <Input
+                  id="edit-phone"
+                  value={editForm.phone}
+                  onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="edit-birthdate">Birthdate</Label>
+                <Input
+                  id="edit-birthdate"
+                  value={editForm.birthdate}
+                  onChange={(e) => setEditForm({ ...editForm, birthdate: e.target.value })}
+                  placeholder="12/03/2003"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="edit-language">Language</Label>
+                <Input
+                  id="edit-language"
+                  value={editForm.language}
+                  onChange={(e) => setEditForm({ ...editForm, language: e.target.value })}
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="edit-kdg">KdG-student</Label>
+                <Input
+                  id="edit-kdg"
+                  value={editForm.kdg_student}
+                  onChange={(e) => setEditForm({ ...editForm, kdg_student: e.target.value })}
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="edit-studentnr">Student nr</Label>
+                <Input
+                  id="edit-studentnr"
+                  value={editForm.student_number}
+                  onChange={(e) => setEditForm({ ...editForm, student_number: e.target.value })}
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="edit-richting">Richting</Label>
+                <Input
+                  id="edit-richting"
+                  value={editForm.richting}
+                  onChange={(e) => setEditForm({ ...editForm, richting: e.target.value })}
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="edit-sport">Sport event</Label>
+                <Input
+                  id="edit-sport"
+                  value={editForm.sport_event}
+                  onChange={(e) => setEditForm({ ...editForm, sport_event: e.target.value })}
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="edit-doop">Doop</Label>
+                <Input
+                  id="edit-doop"
+                  value={editForm.student_doop}
+                  onChange={(e) => setEditForm({ ...editForm, student_doop: e.target.value })}
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="edit-payment">Payment</Label>
+                <Input
+                  id="edit-payment"
+                  value={editForm.payment_method}
+                  onChange={(e) => setEditForm({ ...editForm, payment_method: e.target.value })}
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              All fields are optional except the name — fill in only what you know.
+            </p>
+            {editError && <p className="text-xs text-destructive">{editError}</p>}
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setEditLid(null)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={editSaving}>
+                {editSaving ? 'Saving…' : 'Save changes'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
         <AlertDialogContent>
