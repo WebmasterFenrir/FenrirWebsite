@@ -9,9 +9,8 @@ interface PreasidiumLidPrevieuwinterface {
 }
 
 export default function PreasidiumLidPrevieuw({ data, noDescriptionText = "No description provided.", detailedInfoTemplate = "Detailed information about {name}" }: PreasidiumLidPrevieuwinterface) {
-  const primaryRole = data.preasidiumRols[0];
-  const roleLabel = primaryRole.role;
-  const roleYear = primaryRole.year;
+  const roleLabels = data.preasidiumRols.map(r => r.role);
+  const roleYear = data.preasidiumRols[0]?.year;
   // Images are served from PocketBase (full URL) or fall back to a placeholder avatar
   const imageSrc = data.imageUrl && data.imageUrl.startsWith('http')
     ? data.imageUrl
@@ -30,9 +29,13 @@ export default function PreasidiumLidPrevieuw({ data, noDescriptionText = "No de
         />
       </div>
       <CardContent className="relative space-y-5 pb-[2rem] md:pb-[2rem]">
-        <p className="text-yellow-400 text-[10px] md:text-xs font-black uppercase tracking-[0.4em]">
-          {roleLabel}
-        </p>
+        <div className="space-y-1">
+          {roleLabels.map((label, i) => (
+            <p key={i} className="text-yellow-400 text-[10px] md:text-xs font-black uppercase tracking-[0.4em]">
+              {label}
+            </p>
+          ))}
+        </div>
         <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
           {data.firstName} <span className="text-purple-400">{data.lastName}</span>
         </h2>
@@ -60,10 +63,14 @@ export default function PreasidiumLidPrevieuw({ data, noDescriptionText = "No de
     {/* RIGHT SECTION: Content */}
     <div className="flex-1 p-[2rem] md:p-[3rem] flex flex-col justify-center">
       <DialogHeader className="text-left">
-        {/* Role Label with Yellow Accent */}
-        <p className="text-yellow-400 text-[10px] md:text-xs font-black uppercase tracking-[0.4em] mb-4">
-          {roleLabel}
-        </p>
+        {/* Role Labels with Yellow Accent — show every function the member holds */}
+        <div className="space-y-1 mb-4">
+          {roleLabels.map((label, i) => (
+            <p key={i} className="text-yellow-400 text-[10px] md:text-xs font-black uppercase tracking-[0.4em]">
+              {label}
+            </p>
+          ))}
+        </div>
         
         {/* Name with Purple Split */}
         <DialogTitle className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">
