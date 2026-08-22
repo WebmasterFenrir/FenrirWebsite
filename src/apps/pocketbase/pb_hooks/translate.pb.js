@@ -126,7 +126,7 @@ function translateHook(e) {
   try {
     const col = e.collection && e.collection.name;
 
-    if (col === "sponsors") {
+    if (col === "sponsors" || col === "openingsweek_sponsors") {
       const dutch = readSlice(e.record, "content");
       const existing = readSlice(e.record, "content_en");
 
@@ -186,5 +186,5 @@ function translateHook(e) {
   e.next();
 }
 
-onRecordCreateRequest(translateHook, "sponsors", "preasidium_leden", "event_categories");
-onRecordUpdateRequest(translateHook, "sponsors", "preasidium_leden", "event_categories");
+onRecordCreateRequest(translateHook, "sponsors", "openingsweek_sponsors", "preasidium_leden", "event_categories");
+onRecordUpdateRequest(translateHook, "sponsors", "openingsweek_sponsors", "preasidium_leden", "event_categories");

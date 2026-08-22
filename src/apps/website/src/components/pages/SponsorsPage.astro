@@ -5,14 +5,16 @@ import SectionHeader from "@/components/ui/sectionHeader";
 import Spacer from "@/components/ui/spacer";
 import Sponsordata from "@/components/SponsorPositivedata";
 import SponsorList from "@/components/SponsorList";
+import OpeningWeekSponsor from "@/components/OpeningWeekSponsor";
 import { Button } from "@/components/ui/button";
-import { getSponsors } from "@/lib/pocketbase";
+import { getSponsors, getOpeningWeekSponsors } from "@/lib/pocketbase";
 import { defaultLang, useTranslations, partnerAdjectives, type Locale } from "@/i18n/ui";
 
 const lang: Locale = (Astro.currentLocale as Locale) ?? defaultLang;
 const t = useTranslations(lang);
 
 const sponsors = await getSponsors(lang);
+const openingWeekSponsors = await getOpeningWeekSponsors(lang);
 
 const sponsorValueCards = [
   { a: t("sponsors.value1Title"), w: t("sponsors.value1What"), i: t("sponsors.value1Impact") },
@@ -118,6 +120,20 @@ const steps = [
     </div>
     <ContextLayout>
         <div class="mx-auto px-6 sm:px-8 py-12 w-full">
+            <SectionHeader
+                title={t("sponsors.openingWeekTitle")}
+                description={t("sponsors.openingWeekDescription")}
+            />
+            <div class="w-full">
+                <OpeningWeekSponsor
+                    data={openingWeekSponsors}
+                    label={t("sponsors.openingWeekLabel")}
+                    client:load
+                />
+            </div>
+
+            <Spacer />
+
             <SectionHeader
                 title={t("sponsors.partnersTitle")}
                 description={t("sponsors.partnersDescription")}

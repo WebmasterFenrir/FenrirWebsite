@@ -41,6 +41,13 @@ export interface Sponsors {
     endYear : number
 }
 
+export interface OpeningWeekSponsor {
+    name: string
+    content: string[]
+    image: string
+    url: string
+}
+
 type YearId = number;
 type PersonId = number;
 

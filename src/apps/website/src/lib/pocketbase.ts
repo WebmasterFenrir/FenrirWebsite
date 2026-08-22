@@ -1,5 +1,5 @@
 import PocketBase, { type RecordModel } from 'pocketbase'
-import type { PreasidiumLid, PreasidiumYear, Sponsors, Activiteit, EventCategory } from '../../../types'
+import type { PreasidiumLid, PreasidiumYear, Sponsors, OpeningWeekSponsor, Activiteit, EventCategory } from '../../../types'
 import { translateRole, type Locale } from '@/i18n/ui'
 
 const PB_URL = import.meta.env.PB_URL ?? process.env.PB_URL ?? 'http://127.0.0.1:8090'
@@ -52,6 +52,36 @@ export async function getSponsors(locale: Locale = 'nl'): Promise<Sponsors[]> {
         return [...map.values()]
     } catch (err) {
         console.error('getSponsors failed:', err)
+        return []
+    }
+}
+
+export async function getOpeningWeekSponsors(locale: Locale = 'nl'): Promise<OpeningWeekSponsor[]> {
+    try {
+        const pb = await createClient()
+        const records = await pb.collection('openingsweek_sponsors').getFullList({ sort: 'activationDate' })
+
+        const now = new Date()
+        const result: OpeningWeekSponsor[] = []
+        for (const r of records) {
+            // Only show sponsors whose window is currently active. `active`
+            // (when false) hard-hides a sponsor regardless of the dates; dates
+            // are inclusive on both ends.
+            if (r.active === false) continue
+            const start = r.activationDate ? new Date(r.activationDate).getTime() : NaN
+            const end = r.endDate ? new Date(r.endDate).getTime() : NaN
+            if (!Number.isNaN(start) && start > now.getTime()) continue
+            if (!Number.isNaN(end) && end < now.getTime()) continue
+
+            const image = getFileUrl(r, r.imageFile) ?? ''
+            const content = (locale === 'en' && Array.isArray(r.content_en) && r.content_en.length > 0)
+                ? r.content_en
+                : r.content
+            result.push({ name: r.name, content, image, url: r.url })
+        }
+        return result
+    } catch (err) {
+        console.error('getOpeningWeekSponsors failed:', err)
         return []
     }
 }
