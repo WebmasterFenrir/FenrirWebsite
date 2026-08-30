@@ -1,5 +1,5 @@
 import PocketBase, { type RecordModel } from 'pocketbase'
-import type { PreasidiumLid, PreasidiumYear, Sponsors, Activiteit, EventCategory } from '../../../types'
+import type { PreasidiumLid, PreasidiumYear, Sponsors, OpeningWeekSponsor, Activiteit, EventCategory } from '../../../types'
 import { translateRole, type Locale } from '@/i18n/ui'
 
 const PB_URL = import.meta.env.PB_URL ?? process.env.PB_URL ?? 'http://127.0.0.1:8090'
@@ -52,6 +52,60 @@ export async function getSponsors(locale: Locale = 'nl'): Promise<Sponsors[]> {
         return [...map.values()]
     } catch (err) {
         console.error('getSponsors failed:', err)
+        return []
+    }
+}
+
+/**
+ * The opening week sponsors section: one week per preasidium year, and only
+ * the latest year's week is shown (same source of truth as the leden tab: the
+ * newest `-yearId`). Returns a single-year `Sponsors` entry so the section can
+ * reuse the same display as the year-round sponsors (SponsorList).
+ */
+export async function getOpeningWeekSponsors(locale: Locale = 'nl'): Promise<Sponsors[]> {
+    try {
+        const pb = await createClient()
+        const [years, weeks] = await Promise.all([
+            pb.collection('preasidium_years').getFullList({ sort: '-yearId' }),
+            pb.collection('openingsweek_weken').getFullList(),
+        ])
+        if (years.length === 0 || weeks.length === 0) return []
+
+        const latestYear = years[0]
+        const week = weeks.find((w) => w.preasidium === latestYear.id)
+        if (!week) return []
+
+        // The week's start/end dates define when the section is active;
+        // outside that window nothing is shown (dates are inclusive).
+        const now = new Date()
+        const start = week.startDate ? new Date(week.startDate).getTime() : NaN
+        const end = week.endDate ? new Date(week.endDate).getTime() : NaN
+        if (!Number.isNaN(start) && start > now.getTime()) return []
+        if (!Number.isNaN(end) && end < now.getTime()) return []
+
+        const records = await pb.collection('openingsweek_sponsors').getFullList({
+            filter: `week = "${week.id}"`,
+            sort: 'created',
+        })
+
+        const list: OpeningWeekSponsor[] = []
+        for (const r of records) {
+            // `active` (when false) hard-hides a sponsor regardless of the week window.
+            if (r.active === false) continue
+            const image = getFileUrl(r, r.imageFile) ?? ''
+            const content = (locale === 'en' && Array.isArray(r.content_en) && r.content_en.length > 0)
+                ? r.content_en
+                : r.content
+            list.push({ name: r.name, content, image, url: r.url })
+        }
+
+        return [{
+            startYear: latestYear.yearId,
+            endYear:   latestYear.yearId + 1,
+            list,
+        }]
+    } catch (err) {
+        console.error('getOpeningWeekSponsors failed:', err)
         return []
     }
 }

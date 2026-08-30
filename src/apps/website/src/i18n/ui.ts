@@ -231,6 +231,9 @@ const nl = {
   "sponsors.value6Title": "Content & storytelling",
   "sponsors.value6What": "Gezamenlijke posts en cases",
   "sponsors.value6Impact": "Relevante brand stories",
+  "sponsors.openingWeekTitle": "Onze sponsors van de openingsweek",
+  "sponsors.openingWeekDescription": "Onze partners in de kijker tijdens de openingsweek — een extra woordje van dank.",
+  "sponsors.openingWeekLabel": "Sponsor van de openingsweek",
 
   // 404
   "notFound.title": "404 – Pagina niet gevonden",
@@ -468,6 +471,9 @@ const en: Ui = {
   "sponsors.value6Title": "Content & storytelling",
   "sponsors.value6What": "Joint posts and case studies",
   "sponsors.value6Impact": "Relevant brand stories",
+  "sponsors.openingWeekTitle": "Our opening week sponsors",
+  "sponsors.openingWeekDescription": "Our partners in the spotlight during the opening week — a special thank you.",
+  "sponsors.openingWeekLabel": "Sponsor of the opening week",
 
   // 404
   "notFound.title": "404 – Page not found",

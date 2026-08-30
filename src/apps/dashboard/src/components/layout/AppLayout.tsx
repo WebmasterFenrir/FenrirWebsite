@@ -23,6 +23,7 @@ import {
   LayoutDashboard,
   CalendarRange,
   Building2,
+  CalendarClock,
   Users,
   UserPlus,
   CalendarDays,
@@ -45,6 +46,7 @@ const mainNav: NavItem[] = [
   { label: 'Overview', to: '/', icon: LayoutDashboard },
   { label: 'Years', to: '/years', icon: CalendarRange },
   { label: 'Sponsors', to: '/sponsors', icon: Building2 },
+  { label: 'Opening Week', to: '/opening-week', icon: CalendarClock },
   { label: 'Activiteiten', to: '/activiteiten', icon: CalendarDays },
   { label: 'Categories', to: '/categories', icon: Tag },
   // Every role sees Forms — viewers get a read-only list, the page gates
@@ -219,6 +221,7 @@ function BreadcrumbTitle() {
     '/': 'Overview',
     '/years': 'Years',
     '/sponsors': 'Sponsors',
+    '/opening-week': 'Opening Week',
     '/activiteiten': 'Activiteiten',
     '/categories': 'Categories',
     '/forms': 'Forms',
