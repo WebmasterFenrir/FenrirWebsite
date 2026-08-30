@@ -18,6 +18,25 @@ const ROLE_LABELS: Record<string, string> = {
   formmanager: 'Formmanager',
 };
 
+const ROLE_PERMISSIONS: Record<string, { can: string[]; cannot: string[] }> = {
+  admin: {
+    can: ['view all dashboard data', 'create and edit years, sponsors, activities, categories and people', 'manage forms and form responses', 'add, change and remove dashboard users'],
+    cannot: [],
+  },
+  media: {
+    can: ['view all dashboard data', 'create and edit years, sponsors, activities, categories and people', 'manage forms and form responses'],
+    cannot: ['delete records or manage dashboard users'],
+  },
+  viewer: {
+    can: ['view dashboard data and form responses'],
+    cannot: ['edit or delete content', 'manage forms or dashboard users'],
+  },
+  formmanager: {
+    can: ['view dashboard data and form responses', 'create and edit forms'],
+    cannot: ['edit or delete general site content or manage dashboard users'],
+  },
+};
+
 const ProfileForm: React.FC<ProfileFormProps> = ({ user, onDone, variant = 'profile' }) => {
   const isSetup = variant === 'setup';
 
@@ -226,10 +245,29 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ user, onDone, variant = 'prof
       </div>
 
       {isSetup && user?.role && (
-        <p className="-mt-2 text-xs text-muted-foreground">
-          You're signed in as a{' '}
-          <span className="font-medium text-foreground">{ROLE_LABELS[user.role] ?? user.role}</span>.
-        </p>
+        <div className="-mt-2 rounded-lg border border-border bg-muted/30 p-4 text-xs text-muted-foreground">
+          <p>
+            You're signed in as a{' '}
+            <span className="font-medium text-foreground">{ROLE_LABELS[user.role] ?? user.role}</span>.
+            Here's what you can do on the site:
+          </p>
+          <div className="mt-3 grid gap-2">
+            <div>
+              <p className="font-medium text-foreground">You can</p>
+              <ul className="mt-1 list-disc space-y-1 pl-4">
+                {(ROLE_PERMISSIONS[user.role]?.can ?? []).map(item => <li key={item}>{item}.</li>)}
+              </ul>
+            </div>
+            {(ROLE_PERMISSIONS[user.role]?.cannot ?? []).length > 0 && (
+              <div>
+                <p className="font-medium text-foreground">You cannot</p>
+                <ul className="mt-1 list-disc space-y-1 pl-4">
+                  {ROLE_PERMISSIONS[user.role].cannot.map(item => <li key={item}>{item}.</li>)}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       {error && <p className="text-sm text-destructive">{error}</p>}

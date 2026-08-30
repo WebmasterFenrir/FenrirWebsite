@@ -379,7 +379,7 @@ export function YearsPage() {
 
       {/* ── Edit / Create dialog ──────────────────────────────────────────────── */}
       <Dialog open={editOpen} onOpenChange={(open) => { if (!open) setEditOpen(false) }}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-2xl sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingYear ? `Edit Year ${editingYear.yearId}` : 'Add Year'}</DialogTitle>
           </DialogHeader>
