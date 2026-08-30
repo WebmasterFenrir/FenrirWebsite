@@ -5,7 +5,6 @@ import SectionHeader from "@/components/ui/sectionHeader";
 import Spacer from "@/components/ui/spacer";
 import Sponsordata from "@/components/SponsorPositivedata";
 import SponsorList from "@/components/SponsorList";
-import OpeningWeekSponsor from "@/components/OpeningWeekSponsor";
 import { Button } from "@/components/ui/button";
 import { getSponsors, getOpeningWeekSponsors } from "@/lib/pocketbase";
 import { defaultLang, useTranslations, partnerAdjectives, type Locale } from "@/i18n/ui";
@@ -120,19 +119,26 @@ const steps = [
     </div>
     <ContextLayout>
         <div class="mx-auto px-6 sm:px-8 py-12 w-full">
-            <SectionHeader
-                title={t("sponsors.openingWeekTitle")}
-                description={t("sponsors.openingWeekDescription")}
-            />
-            <div class="w-full">
-                <OpeningWeekSponsor
-                    data={openingWeekSponsors}
-                    label={t("sponsors.openingWeekLabel")}
-                    client:load
-                />
-            </div>
+            {
+                openingWeekSponsors.length > 0 && (
+                    <>
+                        <SectionHeader
+                            title={t("sponsors.openingWeekTitle")}
+                            description={t("sponsors.openingWeekDescription")}
+                        />
+                        <div class="w-full">
+                            <SponsorList
+                                data={openingWeekSponsors}
+                                partnerLabel={t("sponsors.openingWeekLabel")}
+                                partnerAdjectives={partnerAdjectives[lang]}
+                                client:load
+                            />
+                        </div>
 
-            <Spacer />
+                        <Spacer />
+                    </>
+                )
+            }
 
             <SectionHeader
                 title={t("sponsors.partnersTitle")}

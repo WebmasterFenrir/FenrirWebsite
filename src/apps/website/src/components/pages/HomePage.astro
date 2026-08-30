@@ -7,7 +7,7 @@ import SectionHeader from '@/components/ui/sectionHeader';
 import PreasidiumPrevieuwHomePage from '@/components/PreasidiumPrevieuwHomePage';
 import Spacer from '@/components/ui/spacer';
 import { IconCard } from '@/components/IconCard';
-import { getSponsors, getPreasidiumYears, getActiviteiten } from '@/lib/pocketbase';
+import { getSponsors, getOpeningWeekSponsors, getPreasidiumYears, getActiviteiten } from '@/lib/pocketbase';
 import { Users, Calendar, MapPin, HeartHandshake, ArrowRight } from 'lucide-react';
 import EventGrid from '@/components/EventGrid.astro';
 import { defaultLang, useTranslations, partnerAdjectives, type Locale } from '@/i18n/ui';
@@ -17,7 +17,12 @@ const lang: Locale = (Astro.currentLocale as Locale) ?? defaultLang;
 const translatedPath = useTranslatedPath(lang);
 const t = useTranslations(lang);
 
-const [sponsors, years, events] = await Promise.all([getSponsors(lang), getPreasidiumYears(lang), getActiviteiten(lang)]);
+const [sponsors, openingWeekSponsors, years, events] = await Promise.all([
+    getSponsors(lang),
+    getOpeningWeekSponsors(lang),
+    getPreasidiumYears(lang),
+    getActiviteiten(lang),
+]);
 const previewLeden = years[0]?.PreasidiumLeden.slice(0, 2) ?? [];
 const previewEvents = events.slice(0, 3);
 ---
@@ -184,6 +189,19 @@ const previewEvents = events.slice(0, 3);
 		/>
 	</div>
 	<Spacer/>
+
+	{
+		openingWeekSponsors.length > 0 && (
+			<>
+				<SectionHeader title={t('sponsors.openingWeekTitle')} description={t('sponsors.openingWeekDescription')}/>
+				<div class="w-full">
+					<SponsorList data={openingWeekSponsors} partnerLabel={t('sponsors.openingWeekLabel')} partnerAdjectives={partnerAdjectives[lang]} client:load/>
+				</div>
+				<Spacer/>
+			</>
+		)
+	}
+
     <SectionHeader title={t('home.sponsorsTitle')} description={t('home.sponsorsDescription')}/>
     <div class="w-full">
         <SponsorList data={sponsors} partnerLabel={t('sponsors.partnerLabel')} partnerAdjectives={partnerAdjectives[lang]} client:load/>
