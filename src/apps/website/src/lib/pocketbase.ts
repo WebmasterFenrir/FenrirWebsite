@@ -16,7 +16,15 @@ async function createClient() {
     }
 
     const pb = new PocketBase(PB_URL)
-    await pb.collection('_superusers').authWithPassword(email, password)
+    try {
+        await pb.collection('_superusers').authWithPassword(email, password)
+    } catch (err) {
+        // Log the exact URL so connectivity failures (e.g. the `pocketbase`
+        // hostname resolving to 0.0.0.0 instead of the container IP) are
+        // diagnosable straight from the container logs.
+        console.error(`[pocketbase] createClient failed (URL: ${PB_URL}):`, err)
+        throw err
+    }
     return pb
 }
 

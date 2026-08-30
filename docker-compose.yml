@@ -42,7 +42,10 @@ services:
       - VIRTUAL_PORT=4321
       - LETSENCRYPT_HOST=fenrirclub.be,www.fenrirclub.be
       - LETSENCRYPT_EMAIL=webmaster@fenrirclub.be
-      - PB_URL=http://pocketbase:3000
+      # Reach PocketBase through the public reverse proxy (pb.fenrirclub.be)
+      # instead of the internal `pocketbase` host, which resolves to 0.0.0.0
+      # from inside the site container and makes every data fetch fail.
+      - PB_URL=https://pb.fenrirclub.be
       - PUBLIC_PB_URL=https://pb.fenrirclub.be
       - PB_EMAIL=${PB_ADMIN_EMAIL}
       - PB_PASSWORD=${PB_ADMIN_PASSWORD}
