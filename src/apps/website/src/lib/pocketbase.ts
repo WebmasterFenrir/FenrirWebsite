@@ -2,7 +2,11 @@ import PocketBase, { type RecordModel } from 'pocketbase'
 import type { PreasidiumLid, PreasidiumYear, Sponsors, OpeningWeekSponsor, Activiteit, EventCategory } from '../../../types'
 import { translateRole, type Locale } from '@/i18n/ui'
 
-const PB_URL = import.meta.env.PB_URL ?? process.env.PB_URL ?? 'http://127.0.0.1:8090'
+// Runtime env (process.env, injected by docker-compose at container start) takes
+// precedence over the build-time value. The repo's `.env` is copied into the
+// Docker image and baked into import.meta.env at build time, pointing at
+// 127.0.0.1:8090 — that must NOT win over the compose `PB_URL` in production.
+const PB_URL = process.env.PB_URL ?? import.meta.env.PB_URL ?? 'http://127.0.0.1:8090'
 const PUBLIC_PB_URL = import.meta.env.PUBLIC_PB_URL ?? process.env.PUBLIC_PB_URL ?? PB_URL
 
 const publicPb = new PocketBase(PUBLIC_PB_URL)
