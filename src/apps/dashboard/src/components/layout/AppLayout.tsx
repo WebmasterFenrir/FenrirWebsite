@@ -29,6 +29,7 @@ import {
   Tag,
   ClipboardList,
   Contact,
+  Settings,
   LogOut,
 } from 'lucide-react'
 import type { Action } from '@/lib/roles'
@@ -53,6 +54,7 @@ const mainNav: NavItem[] = [
   // Personal data (phone, email, student number) — board only.
   { label: 'Leden', to: '/leden', icon: Contact, requires: 'write' },
   { label: 'People', to: '/people', icon: Users },
+  { label: 'Settings', to: '/settings', icon: Settings, requires: 'write' },
 ]
 
 const adminNav: NavItem[] = [
@@ -224,6 +226,7 @@ function BreadcrumbTitle() {
     '/forms': 'Forms',
     '/leden': 'Leden',
     '/people': 'People',
+    '/settings': 'Settings',
     '/admin/users': 'Add User',
   }
   return (

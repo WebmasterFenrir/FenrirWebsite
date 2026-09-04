@@ -13,6 +13,10 @@ export interface YearFunctie {
   personName: string
   roleId: string
   roleName: string
+  /** Per-year picture file name, when one is set for this year↔member link. */
+  imageFile?: string
+  /** Resolved public URL for the per-year picture. */
+  imageUrl?: string
 }
 
 export type YearCreate = Omit<Year, 'id'>
@@ -49,12 +53,21 @@ export async function getYearFuncties(yearId: string): Promise<YearFunctie[]> {
       personName: `${r.expand!.lid.firstName} ${r.expand!.lid.lastName}`,
       roleId: r.role,
       roleName: r.expand!.role.name,
+      imageFile: r.imageFile || undefined,
+      imageUrl: r.imageFile ? pb.files.getUrl(r, r.imageFile) : undefined,
     }))
     .sort((a, b) => a.roleName.localeCompare(b.roleName) || a.personName.localeCompare(b.personName))
 }
 
 export async function addYearFunctie(yearId: string, personId: string, roleId: string): Promise<void> {
   await pb.collection('preasidium_jaar_functies').create({ year: yearId, lid: personId, role: roleId })
+}
+
+export async function updateYearFunctie(
+  functieId: string,
+  data: FormData | { imageFile?: string },
+): Promise<void> {
+  await pb.collection('preasidium_jaar_functies').update(functieId, data)
 }
 
 export async function removeYearFunctie(functieId: string): Promise<void> {

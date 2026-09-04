@@ -75,6 +75,19 @@ export async function getEventCategories(locale: Locale = 'nl'): Promise<EventCa
     }
 }
 
+export async function getHeroImage(): Promise<string | null> {
+    try {
+        const pb = await createClient()
+        const records = await pb.collection('site_settings').getFullList({ filter: `key = 'site'` })
+        const record = records[0]
+        if (!record) return null
+        return getFileUrl(record, record.heroImage) ?? null
+    } catch (err) {
+        console.error('getHeroImage failed:', err)
+        return null
+    }
+}
+
 export async function getActiviteiten(locale: Locale = 'nl'): Promise<Activiteit[]> {
     try {
         const pb = await createClient()
@@ -132,25 +145,35 @@ export async function getPreasidiumYears(locale: Locale = 'nl'): Promise<Preasid
             const ledenMap = new Map<string, PreasidiumLid>()
             for (const f of yearFuncties) {
                 const lid = f.expand!.lid
-                if (!ledenMap.has(lid.id)) {
-                    const imageUrl = getFileUrl(lid, lid.imageFile) ?? ''
-                    // English description is stored in description_en (auto-translated
-                    // by a PocketBase hook); fall back to the Dutch source of truth.
-                    const description = locale === 'en' && lid.description_en
-                        ? lid.description_en
-                        : lid.description
-                    ledenMap.set(lid.id, {
+                // English description is stored in description_en (auto-translated
+                // by a PocketBase hook); fall back to the Dutch source of truth.
+                const description = locale === 'en' && lid.description_en
+                    ? lid.description_en
+                    : lid.description
+
+                let lidEntry = ledenMap.get(lid.id)
+                if (!lidEntry) {
+                    lidEntry = {
                         id:            lid.externalId,
                         firstName:     lid.firstName,
                         lastName:      lid.lastName,
                         birthdate:     '',
                         description,
-                        imageUrl,
+                        imageUrl:      '',
                         yearIds:       [y.yearId],
                         preasidiumRols: [],
-                    })
+                    }
+                    ledenMap.set(lid.id, lidEntry)
                 }
-                ledenMap.get(lid.id)!.preasidiumRols.push({
+
+                // Fallback chain for the photo: per-year picture on the functie
+                // → the person's own picture → placeholder avatar (component).
+                const personImage = getFileUrl(lid, lid.imageFile) ?? ''
+                const perYearImage = getFileUrl(f, f.imageFile) ?? ''
+                if (perYearImage) lidEntry.imageUrl = perYearImage
+                else if (!lidEntry.imageUrl) lidEntry.imageUrl = personImage
+
+                lidEntry.preasidiumRols.push({
                     role: translateRole(f.expand!.role.name, locale),
                     year: `${y.startDate} - ${y.endDate}`,
                 })

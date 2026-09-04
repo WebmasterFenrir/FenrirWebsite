@@ -15,6 +15,7 @@ import { CategoriesPage } from './components/pages/CategoriesPage'
 import { FormsPage } from './components/pages/FormsPage'
 import { LedenPage } from './components/pages/LedenPage'
 import { InvitePage } from './components/pages/InvitePage'
+import { SettingsPage } from './components/pages/SettingsPage'
 import { RoleContext } from './lib/RoleContext'
 import { can, type Role } from './lib/roles'
 
@@ -83,6 +84,7 @@ export function App() {
               }
             />
             <Route path="people" element={<PeoplePage />} />
+            <Route path="settings" element={<SettingsPage />} />
             <Route
               path="admin/users"
               element={
