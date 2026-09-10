@@ -1,6 +1,6 @@
 interface SectionHeaderProps {
   title: string;       // e.g., "Onze Sponsors"
-  description: string; // The supporting text
+  description?: string; // The supporting text
 }
 
 export default function SectionHeader({ title, description }: SectionHeaderProps) {
@@ -29,11 +29,13 @@ export default function SectionHeader({ title, description }: SectionHeaderProps
         </div>
         
         {/* Description - Removed the border on mobile to save horizontal space */}
+        {description && (
         <div className=" md:w-1/2">
           <p className="text-zinc-400 text-sm md:text-lg leading-relaxed border-l-2 md:border-zinc-800 pl-4 md:pl-6 py-1">
             {description}
           </p>
         </div>
+        )}
       </div>
       
       {/* Bottom Separator Line - Faded on mobile so it's not too harsh */}

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import MainLayout from '@/layouts/main.astro';
 import ContextLayout from '@/layouts/context.astro'
 import SponsorList from '@/components/SponsorList';
+import SponsorImageGrid from '@/components/SponsorImageGrid';
 import SectionHeader from '@/components/ui/sectionHeader';
 import PreasidiumPrevieuwHomePage from '@/components/PreasidiumPrevieuwHomePage';
 import Spacer from '@/components/ui/spacer';
@@ -194,9 +195,9 @@ const previewEvents = events.slice(0, 3);
 	{
 		openingWeekSponsors.length > 0 && (
 			<>
-				<SectionHeader title={t('sponsors.openingWeekTitle')} description={t('sponsors.openingWeekDescription')}/>
+				<SectionHeader title={t('sponsors.openingWeekTitle')}/>
 				<div class="w-full">
-					<SponsorList data={openingWeekSponsors} partnerLabel={t('sponsors.openingWeekLabel')} partnerAdjectives={partnerAdjectives[lang]} client:load/>
+					<SponsorImageGrid data={openingWeekSponsors} client:load/>
 				</div>
 				<Spacer/>
 			</>
