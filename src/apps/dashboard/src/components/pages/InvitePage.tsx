@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import pb from '@/lib/pocketbase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 
 export function InvitePage() {
@@ -14,6 +15,8 @@ export function InvitePage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [accepted, setAccepted] = useState(false);
+  const [acceptedRole, setAcceptedRole] = useState('');
 
   // Already logged in? No invite needed.
   useEffect(() => {
@@ -50,8 +53,9 @@ export function InvitePage() {
         }),
       });
       // The accept route returns the account email — log straight in.
-      await pb.collection('users').authWithPassword(res.email, password);
-      navigate('/', { replace: true });
+      const authData = await pb.collection('users').authWithPassword(res.email, password);
+      setAcceptedRole(authData.record?.role ?? 'viewer');
+      setAccepted(true);
     } catch (err: any) {
       setError(err?.message ?? 'This invite link is invalid or has already been used.');
     } finally {
@@ -62,6 +66,37 @@ export function InvitePage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md rounded-xl border border-border bg-card p-8 shadow-md">
+        {accepted ? (
+          <div className="flex flex-col gap-5">
+            <div>
+              <h1 className="mb-1 text-2xl font-bold text-card-foreground">Welcome to the Fenrir dashboard!</h1>
+              <p className="text-sm text-muted-foreground">
+                Your account is ready. You have been given the <span className="font-medium text-foreground">{acceptedRole}</span> role.
+              </p>
+            </div>
+            <Card className="gap-3 p-4">
+              <h2 className="font-semibold text-card-foreground">What you can do</h2>
+              <ul className="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
+                {acceptedRole === 'admin' && <li>View and manage all dashboard content, forms, responses and users.</li>}
+                {acceptedRole === 'media' && <li>Edit years, sponsors, activities, categories and people, and manage forms and responses.</li>}
+                {acceptedRole === 'formmanager' && <li>Create and edit forms and view form responses.</li>}
+                {(acceptedRole === 'viewer' || !['admin', 'media', 'formmanager'].includes(acceptedRole)) && <li>View dashboard content, forms and form responses.</li>}
+              </ul>
+              {acceptedRole !== 'admin' && (
+                <>
+                  <h2 className="mt-2 font-semibold text-card-foreground">What you cannot do</h2>
+                  <ul className="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
+                    {acceptedRole === 'media' && <li>Delete records or manage dashboard users.</li>}
+                    {acceptedRole === 'formmanager' && <li>Edit general site content, delete records or manage dashboard users.</li>}
+                    {acceptedRole === 'viewer' && <li>Edit or delete content, manage forms or manage dashboard users.</li>}
+                  </ul>
+                </>
+              )}
+            </Card>
+            <Button onClick={() => navigate('/', { replace: true })} className="w-full">Go to dashboard</Button>
+          </div>
+        ) : (
+          <>
         <h1 className="mb-1 text-2xl font-bold text-card-foreground">You're invited!</h1>
         <p className="mb-6 text-sm text-muted-foreground">
           Set up your account — choose a display name and a password to access the dashboard.
@@ -113,6 +148,8 @@ export function InvitePage() {
               {loading ? 'Setting up…' : 'Create account & log in'}
             </Button>
           </form>
+        )}
+          </>
         )}
       </div>
     </div>

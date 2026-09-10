@@ -7,7 +7,7 @@ import SectionHeader from '@/components/ui/sectionHeader';
 import PreasidiumPrevieuwHomePage from '@/components/PreasidiumPrevieuwHomePage';
 import Spacer from '@/components/ui/spacer';
 import { IconCard } from '@/components/IconCard';
-import { getSponsors, getOpeningWeekSponsors, getPreasidiumYears, getActiviteiten } from '@/lib/pocketbase';
+import { getSponsors, getOpeningWeekSponsors, getPreasidiumYears, getActiviteiten, getHeroImage } from '@/lib/pocketbase';
 import { Users, Calendar, MapPin, HeartHandshake, ArrowRight } from 'lucide-react';
 import EventGrid from '@/components/EventGrid.astro';
 import { defaultLang, useTranslations, partnerAdjectives, type Locale } from '@/i18n/ui';
@@ -17,11 +17,12 @@ const lang: Locale = (Astro.currentLocale as Locale) ?? defaultLang;
 const translatedPath = useTranslatedPath(lang);
 const t = useTranslations(lang);
 
-const [sponsors, openingWeekSponsors, years, events] = await Promise.all([
+const [sponsors, openingWeekSponsors, years, events, heroImage] = await Promise.all([
     getSponsors(lang),
     getOpeningWeekSponsors(lang),
     getPreasidiumYears(lang),
     getActiviteiten(lang),
+    getHeroImage(),
 ]);
 const previewLeden = years[0]?.PreasidiumLeden.slice(0, 2) ?? [];
 const previewEvents = events.slice(0, 3);
@@ -86,11 +87,11 @@ const previewEvents = events.slice(0, 3);
 	}
 </style>
 <MainLayout title={`Fenrir Antwerpen`}>
-		<div class="grid place-items-center h-screen content-center hero">
+		<div class="grid place-items-center h-screen content-center hero" style={heroImage ? `background-image: linear-gradient(rgba(93,63,211,0.6), rgb(12, 10, 9)), url('${heroImage}')` : undefined}>
 			<h1 class="hero-title text-4xl sm:text-6xl lg:text-8xl text-white font-bold">Fenrir Antwerpen</h1>
 			<h2 class="hero-subtitle text-lg sm:text-2xl lg:text-4xl mt-5 text-white font-medium">{t('home.heroSubtitle')}</h2>
 			<span class="hero-cta flex flex-col sm:flex-row w-3/6 sm:w-max gap-3 sm:gap-4 mt-4">
-				<a href="https://docs.google.com/forms/d/e/1FAIpQLSdaEL-QgBllK1SMC0Ckwrr98dDxFbch5TijesD71YsS8t5g4g/viewform?usp=sharing&ouid=100528290258116040611"><Button variant="default" className='hero-btn w-full sm:w-auto p-6 sm:p-6 lg:p-8 text-2xl lg:text-4xl'>{t('home.joinCta')}</Button></a>
+				<a href="https://form.fenrirclub.be/lidworden"><Button variant="default" className='hero-btn w-full sm:w-auto p-6 sm:p-6 lg:p-8 text-2xl lg:text-4xl'>{t('home.joinCta')}</Button></a>
 				<a href={translatedPath('activiteiten')}><Button variant="secondary" className='w-full sm:w-auto p-6 sm:p-6 lg:p-8 text-2xl lg:text-4xl'>{t('home.activitiesCta')}</Button></a>
 			</span>
 		</div>

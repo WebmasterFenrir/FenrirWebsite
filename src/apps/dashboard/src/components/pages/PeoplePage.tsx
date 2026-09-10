@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { Plus, Pencil, Trash2, Users, X } from 'lucide-react'
+import React, { useEffect, useMemo, useState } from 'react'
+import { Plus, Pencil, Trash2, Users, X, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -72,6 +72,7 @@ export function PeoplePage() {
   const [addingFunctie, setAddingFunctie] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [removeImage, setRemoveImage] = useState(false)
+  const [search, setSearch] = useState('')
 
   const load = () => {
     setLoading(true)
@@ -173,6 +174,15 @@ export function PeoplePage() {
     setFuncties(f => f.filter(x => x.id !== functieId))
   }
 
+  const filteredPeople = useMemo(() => {
+    const query = search.trim().toLowerCase()
+    if (!query) return people
+    return people.filter(person =>
+      `${person.firstName} ${person.lastName}`.toLowerCase().includes(query) ||
+      (person.description ?? '').toLowerCase().includes(query)
+    )
+  }, [people, search])
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -185,6 +195,17 @@ export function PeoplePage() {
             <Plus className="size-4" /> Add Person
           </Button>
         )}
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Search className="size-4 text-muted-foreground" />
+        <Input
+          aria-label="Search presidium members"
+          placeholder="Search by name or description…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="max-w-sm"
+        />
       </div>
 
       <div className="rounded-lg overflow-hidden">
@@ -208,7 +229,7 @@ export function PeoplePage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {people.map((person) => (
+              {filteredPeople.map((person) => (
                 <TableRow key={person.id}>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2.5">
@@ -245,6 +266,13 @@ export function PeoplePage() {
                   </TableCell>
                 </TableRow>
               ))}
+              {filteredPeople.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={4} className="py-8 text-center text-sm text-muted-foreground">
+                    No members match “{search}”.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         )}
