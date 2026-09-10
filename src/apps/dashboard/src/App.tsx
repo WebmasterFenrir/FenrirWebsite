@@ -8,6 +8,7 @@ import { AppLayout } from './components/layout/AppLayout'
 import { OverviewPage } from './components/pages/OverviewPage'
 import { YearsPage } from './components/pages/YearsPage'
 import { SponsorsPage } from './components/pages/SponsorsPage'
+import { OpeningWeekSponsorsPage } from './components/pages/OpeningWeekSponsorsPage'
 import { PeoplePage } from './components/pages/PeoplePage'
 import { AdminUsersPage } from './components/pages/AdminUsersPage'
 import { ActiviteitenPage } from './components/pages/ActiviteitenPage'
@@ -15,6 +16,7 @@ import { CategoriesPage } from './components/pages/CategoriesPage'
 import { FormsPage } from './components/pages/FormsPage'
 import { LedenPage } from './components/pages/LedenPage'
 import { InvitePage } from './components/pages/InvitePage'
+import { SettingsPage } from './components/pages/SettingsPage'
 import { RoleContext } from './lib/RoleContext'
 import { can, type Role } from './lib/roles'
 
@@ -71,6 +73,7 @@ export function App() {
             <Route index element={<OverviewPage />} />
             <Route path="years" element={<YearsPage />} />
             <Route path="sponsors" element={<SponsorsPage />} />
+            <Route path="opening-week" element={<OpeningWeekSponsorsPage />} />
             <Route path="activiteiten" element={<ActiviteitenPage />} />
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="forms" element={<FormsPage />} />
@@ -83,6 +86,7 @@ export function App() {
               }
             />
             <Route path="people" element={<PeoplePage />} />
+            <Route path="settings" element={<SettingsPage />} />
             <Route
               path="admin/users"
               element={

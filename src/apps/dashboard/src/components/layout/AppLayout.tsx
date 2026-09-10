@@ -23,12 +23,14 @@ import {
   LayoutDashboard,
   CalendarRange,
   Building2,
+  CalendarClock,
   Users,
   UserPlus,
   CalendarDays,
   Tag,
   ClipboardList,
   Contact,
+  Settings,
   LogOut,
 } from 'lucide-react'
 import type { Action } from '@/lib/roles'
@@ -45,6 +47,7 @@ const mainNav: NavItem[] = [
   { label: 'Overview', to: '/', icon: LayoutDashboard },
   { label: 'Years', to: '/years', icon: CalendarRange },
   { label: 'Sponsors', to: '/sponsors', icon: Building2 },
+  { label: 'Opening Week', to: '/opening-week', icon: CalendarClock },
   { label: 'Activiteiten', to: '/activiteiten', icon: CalendarDays },
   { label: 'Categories', to: '/categories', icon: Tag },
   // Every role sees Forms — viewers get a read-only list, the page gates
@@ -53,6 +56,7 @@ const mainNav: NavItem[] = [
   // Personal data (phone, email, student number) — board only.
   { label: 'Leden', to: '/leden', icon: Contact, requires: 'write' },
   { label: 'People', to: '/people', icon: Users },
+  { label: 'Settings', to: '/settings', icon: Settings, requires: 'write' },
 ]
 
 const adminNav: NavItem[] = [
@@ -219,11 +223,13 @@ function BreadcrumbTitle() {
     '/': 'Overview',
     '/years': 'Years',
     '/sponsors': 'Sponsors',
+    '/opening-week': 'Opening Week',
     '/activiteiten': 'Activiteiten',
     '/categories': 'Categories',
     '/forms': 'Forms',
     '/leden': 'Leden',
     '/people': 'People',
+    '/settings': 'Settings',
     '/admin/users': 'Add User',
   }
   return (

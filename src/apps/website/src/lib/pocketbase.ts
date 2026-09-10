@@ -2,7 +2,11 @@ import PocketBase, { type RecordModel } from 'pocketbase'
 import type { PreasidiumLid, PreasidiumYear, Sponsors, OpeningWeekSponsor, Activiteit, EventCategory } from '../../../types'
 import { translateRole, type Locale } from '@/i18n/ui'
 
-const PB_URL = import.meta.env.PB_URL ?? process.env.PB_URL ?? 'http://127.0.0.1:8090'
+// Runtime env (process.env, injected by docker-compose at container start) takes
+// precedence over the build-time value. The repo's `.env` is copied into the
+// Docker image and baked into import.meta.env at build time, pointing at
+// 127.0.0.1:8090 — that must NOT win over the compose `PB_URL` in production.
+const PB_URL = process.env.PB_URL ?? import.meta.env.PB_URL ?? 'http://127.0.0.1:8090'
 const PUBLIC_PB_URL = import.meta.env.PUBLIC_PB_URL ?? process.env.PUBLIC_PB_URL ?? PB_URL
 
 const publicPb = new PocketBase(PUBLIC_PB_URL)
@@ -16,7 +20,15 @@ async function createClient() {
     }
 
     const pb = new PocketBase(PB_URL)
-    await pb.collection('_superusers').authWithPassword(email, password)
+    try {
+        await pb.collection('_superusers').authWithPassword(email, password)
+    } catch (err) {
+        // Log the exact URL so connectivity failures (e.g. the `pocketbase`
+        // hostname resolving to 0.0.0.0 instead of the container IP) are
+        // diagnosable straight from the container logs.
+        console.error(`[pocketbase] createClient failed (URL: ${PB_URL}):`, err)
+        throw err
+    }
     return pb
 }
 
@@ -56,30 +68,54 @@ export async function getSponsors(locale: Locale = 'nl'): Promise<Sponsors[]> {
     }
 }
 
-export async function getOpeningWeekSponsors(locale: Locale = 'nl'): Promise<OpeningWeekSponsor[]> {
+/**
+ * The opening week sponsors section: one week per preasidium year, and only
+ * the latest year's week is shown (same source of truth as the leden tab: the
+ * newest `-yearId`). Returns a single-year `Sponsors` entry so the section can
+ * reuse the same display as the year-round sponsors (SponsorList).
+ */
+export async function getOpeningWeekSponsors(locale: Locale = 'nl'): Promise<Sponsors[]> {
     try {
         const pb = await createClient()
-        const records = await pb.collection('openingsweek_sponsors').getFullList({ sort: 'activationDate' })
+        const [years, weeks] = await Promise.all([
+            pb.collection('preasidium_years').getFullList({ sort: '-yearId' }),
+            pb.collection('openingsweek_weken').getFullList(),
+        ])
+        if (years.length === 0 || weeks.length === 0) return []
 
+        const latestYear = years[0]
+        const week = weeks.find((w) => w.preasidium === latestYear.id)
+        if (!week) return []
+
+        // The week's start/end dates define when the section is active;
+        // outside that window nothing is shown (dates are inclusive).
         const now = new Date()
-        const result: OpeningWeekSponsor[] = []
-        for (const r of records) {
-            // Only show sponsors whose window is currently active. `active`
-            // (when false) hard-hides a sponsor regardless of the dates; dates
-            // are inclusive on both ends.
-            if (r.active === false) continue
-            const start = r.activationDate ? new Date(r.activationDate).getTime() : NaN
-            const end = r.endDate ? new Date(r.endDate).getTime() : NaN
-            if (!Number.isNaN(start) && start > now.getTime()) continue
-            if (!Number.isNaN(end) && end < now.getTime()) continue
+        const start = week.startDate ? new Date(week.startDate).getTime() : NaN
+        const end = week.endDate ? new Date(week.endDate).getTime() : NaN
+        if (!Number.isNaN(start) && start > now.getTime()) return []
+        if (!Number.isNaN(end) && end < now.getTime()) return []
 
+        const records = await pb.collection('openingsweek_sponsors').getFullList({
+            filter: `week = "${week.id}"`,
+            sort: 'created',
+        })
+
+        const list: OpeningWeekSponsor[] = []
+        for (const r of records) {
+            // `active` (when false) hard-hides a sponsor regardless of the week window.
+            if (r.active === false) continue
             const image = getFileUrl(r, r.imageFile) ?? ''
             const content = (locale === 'en' && Array.isArray(r.content_en) && r.content_en.length > 0)
                 ? r.content_en
                 : r.content
-            result.push({ name: r.name, content, image, url: r.url })
+            list.push({ name: r.name, content, image, url: r.url })
         }
-        return result
+
+        return [{
+            startYear: latestYear.yearId,
+            endYear:   latestYear.yearId + 1,
+            list,
+        }]
     } catch (err) {
         console.error('getOpeningWeekSponsors failed:', err)
         return []
@@ -102,6 +138,19 @@ export async function getEventCategories(locale: Locale = 'nl'): Promise<EventCa
     } catch (err) {
         console.error('getEventCategories failed:', err)
         return []
+    }
+}
+
+export async function getHeroImage(): Promise<string | null> {
+    try {
+        const pb = await createClient()
+        const records = await pb.collection('site_settings').getFullList({ filter: `key = 'site'` })
+        const record = records[0]
+        if (!record) return null
+        return getFileUrl(record, record.heroImage) ?? null
+    } catch (err) {
+        console.error('getHeroImage failed:', err)
+        return null
     }
 }
 
@@ -162,25 +211,35 @@ export async function getPreasidiumYears(locale: Locale = 'nl'): Promise<Preasid
             const ledenMap = new Map<string, PreasidiumLid>()
             for (const f of yearFuncties) {
                 const lid = f.expand!.lid
-                if (!ledenMap.has(lid.id)) {
-                    const imageUrl = getFileUrl(lid, lid.imageFile) ?? ''
-                    // English description is stored in description_en (auto-translated
-                    // by a PocketBase hook); fall back to the Dutch source of truth.
-                    const description = locale === 'en' && lid.description_en
-                        ? lid.description_en
-                        : lid.description
-                    ledenMap.set(lid.id, {
+                // English description is stored in description_en (auto-translated
+                // by a PocketBase hook); fall back to the Dutch source of truth.
+                const description = locale === 'en' && lid.description_en
+                    ? lid.description_en
+                    : lid.description
+
+                let lidEntry = ledenMap.get(lid.id)
+                if (!lidEntry) {
+                    lidEntry = {
                         id:            lid.externalId,
                         firstName:     lid.firstName,
                         lastName:      lid.lastName,
                         birthdate:     '',
                         description,
-                        imageUrl,
+                        imageUrl:      '',
                         yearIds:       [y.yearId],
                         preasidiumRols: [],
-                    })
+                    }
+                    ledenMap.set(lid.id, lidEntry)
                 }
-                ledenMap.get(lid.id)!.preasidiumRols.push({
+
+                // Fallback chain for the photo: per-year picture on the functie
+                // → the person's own picture → placeholder avatar (component).
+                const personImage = getFileUrl(lid, lid.imageFile) ?? ''
+                const perYearImage = getFileUrl(f, f.imageFile) ?? ''
+                if (perYearImage) lidEntry.imageUrl = perYearImage
+                else if (!lidEntry.imageUrl) lidEntry.imageUrl = personImage
+
+                lidEntry.preasidiumRols.push({
                     role: translateRole(f.expand!.role.name, locale),
                     year: `${y.startDate} - ${y.endDate}`,
                 })
