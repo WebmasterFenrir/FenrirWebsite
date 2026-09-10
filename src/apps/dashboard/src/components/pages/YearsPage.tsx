@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Plus, Pencil, Trash2, CalendarRange, Users, X, Check } from 'lucide-react'
+import { Plus, Pencil, Trash2, CalendarRange, Users, X, Check, Camera } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -30,6 +30,7 @@ import {
   deleteYear,
   getYearFuncties,
   addYearFunctie,
+  updateYearFunctie,
   removeYearFunctie,
   getYearMemberCounts,
   type Year,
@@ -183,6 +184,34 @@ export function YearsPage() {
     setMemberCounts(c => ({ ...c, [yearId]: Math.max(0, (c[yearId] ?? 1) - 1) }))
   }
 
+  const handleUploadYearPicture = async (f: YearFunctie, file: File) => {
+    if (!membersYear) return
+    try {
+      const formData = new FormData()
+      formData.append('imageFile', file)
+      await updateYearFunctie(f.id, formData)
+      const updated = await getYearFuncties(membersYear.id)
+      setFuncties(updated)
+      setMembersError('')
+    } catch {
+      setMembersError('Failed to update the year picture.')
+    }
+  }
+
+  const handleRemoveYearPicture = async (functieId: string) => {
+    if (!membersYear) return
+    try {
+      const formData = new FormData()
+      formData.append('imageFile', '')
+      await updateYearFunctie(functieId, formData)
+      const updated = await getYearFuncties(membersYear.id)
+      setFuncties(updated)
+      setMembersError('')
+    } catch {
+      setMembersError('Failed to remove the year picture.')
+    }
+  }
+
   const visibleFuncties = functies.filter(f =>
     f.personName.toLowerCase().includes(memberSearch.toLowerCase()) ||
     f.roleName.toLowerCase().includes(memberSearch.toLowerCase())
@@ -329,20 +358,59 @@ export function YearsPage() {
                 visibleFuncties.map(f => (
                   <div key={f.id} className="flex items-center justify-between gap-3 rounded-md px-2 py-1.5 hover:bg-muted/40 transition-colors">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary">
-                        {f.personName[0]}
-                      </div>
+                      {f.imageUrl ? (
+                        <img
+                          src={f.imageUrl}
+                          alt={f.personName}
+                          className="size-8 shrink-0 rounded-full border border-border object-cover"
+                        />
+                      ) : (
+                        <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary">
+                          {f.personName[0]}
+                        </div>
+                      )}
                       <div className="min-w-0">
                         <p className="text-sm font-medium truncate leading-tight">{f.personName}</p>
                         <p className="text-xs text-muted-foreground truncate">{f.roleName}</p>
                       </div>
                     </div>
                     {can('write') && (
-                      <button type="button"
-                        onClick={() => handleRemoveFunctie(f.id, membersYear!.id)}
-                        className="shrink-0 text-muted-foreground hover:text-destructive transition-colors">
-                        <X className="size-4" />
-                      </button>
+                      <div className="flex shrink-0 items-center gap-1.5">
+                        <label
+                          className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+                          title={f.imageUrl ? 'Change year picture' : 'Set year picture'}
+                        >
+                          <Camera className="size-4" />
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0]
+                              if (file) handleUploadYearPicture(f, file)
+                              e.target.value = ''
+                            }}
+                          />
+                        </label>
+                        {f.imageUrl && (
+                          <button
+                            type="button"
+                            title="Remove year picture"
+                            onClick={() => handleRemoveYearPicture(f.id)}
+                            className="text-muted-foreground hover:text-destructive transition-colors"
+                          >
+                            <Trash2 className="size-4" />
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          title="Remove from year"
+                          onClick={() => handleRemoveFunctie(f.id, membersYear!.id)}
+                          className="text-muted-foreground hover:text-destructive transition-colors"
+                        >
+                          <X className="size-4" />
+                        </button>
+                      </div>
                     )}
                   </div>
                 ))
