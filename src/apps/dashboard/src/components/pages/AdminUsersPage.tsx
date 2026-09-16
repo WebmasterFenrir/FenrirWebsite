@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, Trash2, Shield, Eye, Pencil, Check, ClipboardList, FileText, Copy, Link2 } from 'lucide-react'
+import { Plus, Trash2, Shield, Eye, Pencil, Check, ClipboardList, FileText, Copy, Link2, KeyRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -23,7 +23,7 @@ import {
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { getUsers, updateUserRole, createUser, deleteUser, inviteUrl, type DashboardUser } from '@/lib/db/users'
+import { getUsers, updateUserRole, createUser, deleteUser, resetUserPassword, inviteUrl, type DashboardUser } from '@/lib/db/users'
 import type { Role } from '@/lib/roles'
 import pb from '@/lib/pocketbase'
 
@@ -77,6 +77,9 @@ export function AdminUsersPage() {
   const [addError, setAddError] = useState('')
   const [inviteUser, setInviteUser] = useState<DashboardUser | null>(null)
   const [inviteCopied, setInviteCopied] = useState(false)
+  const [resetUser, setResetUser] = useState<DashboardUser | null>(null)
+  const [resetSaving, setResetSaving] = useState(false)
+  const [resetError, setResetError] = useState('')
 
   useEffect(() => {
     getUsers()
@@ -104,6 +107,22 @@ export function AdminUsersPage() {
       setDeleteId(null)
     } catch (err) {
       setDeleteError(`Could not delete user: ${err instanceof Error ? err.message : String(err)}`)
+    }
+  }
+
+  const handleResetPassword = async () => {
+    if (!resetUser) return
+    setResetSaving(true)
+    setResetError('')
+    try {
+      const { inviteToken, email } = await resetUserPassword(resetUser.id)
+      setUsers(u => u.map(x => x.id === resetUser.id ? { ...x, inviteToken } : x))
+      setInviteUser({ ...resetUser, inviteToken, email })
+      setResetUser(null)
+    } catch (err) {
+      setResetError(`Could not reset password: ${err instanceof Error ? err.message : String(err)}`)
+    } finally {
+      setResetSaving(false)
     }
   }
 
@@ -170,7 +189,7 @@ export function AdminUsersPage() {
                   <TableHead>User</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Joined</TableHead>
-                  <TableHead className="w-24 text-right">Actions</TableHead>
+                  <TableHead className="w-28 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -227,6 +246,17 @@ export function AdminUsersPage() {
                             onClick={() => setInviteUser(user)}
                           >
                             <Link2 className="size-3.5" />
+                          </Button>
+                        )}
+                        {!isMe && (
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            title="Reset password"
+                            className="text-muted-foreground hover:text-foreground"
+                            onClick={() => { setResetError(''); setResetUser(user) }}
+                          >
+                            <KeyRound className="size-3.5" />
                           </Button>
                         )}
                         {!isMe && (
@@ -354,7 +384,7 @@ export function AdminUsersPage() {
           <div className="flex flex-col gap-4">
             <p className="text-sm text-muted-foreground">
               Send this link to <span className="font-medium text-foreground">{inviteUser?.email}</span>{' '}
-              — they'll pick their own display name and password. The link only works once.
+              — they'll set a new password (and pick a display name if they haven't yet). The link only works once.
             </p>
             <div className="flex items-center gap-2">
               <Input
@@ -393,6 +423,26 @@ export function AdminUsersPage() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Reset password confirmation */}
+      <AlertDialog open={!!resetUser} onOpenChange={o => !o && setResetUser(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset password for {resetUser ? displayName(resetUser) : ''}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Their current password will be invalidated and a new single-use invite link will be
+              generated for them to set a new password. You can still cancel below.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {resetError && <p className="text-xs text-destructive">{resetError}</p>}
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={resetSaving}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleResetPassword} disabled={resetSaving}>
+              {resetSaving ? 'Resetting…' : 'Reset password'}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
