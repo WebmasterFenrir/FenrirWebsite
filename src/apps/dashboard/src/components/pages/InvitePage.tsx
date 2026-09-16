@@ -18,6 +18,10 @@ export function InvitePage() {
   const [accepted, setAccepted] = useState(false);
   const [acceptedRole, setAcceptedRole] = useState('');
 
+  // Reset links (issued by an admin) skip the name step — the account already
+  // has a display name; the link is only about setting a new password.
+  const isReset = token.startsWith('r_');
+
   // Already logged in? No invite needed.
   useEffect(() => {
     if (pb.authStore.isValid) navigate('/', { replace: true });
@@ -27,7 +31,7 @@ export function InvitePage() {
     e.preventDefault();
     setError('');
 
-    if (!name.trim()) {
+    if (!isReset && !name.trim()) {
       setError('Name is required.');
       return;
     }
@@ -47,7 +51,7 @@ export function InvitePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           token,
-          name: name.trim(),
+          name: isReset ? '' : name.trim(),
           password,
           passwordConfirm: confirmPassword,
         }),
@@ -97,15 +101,18 @@ export function InvitePage() {
           </div>
         ) : (
           <>
-        <h1 className="mb-1 text-2xl font-bold text-card-foreground">You're invited!</h1>
+        <h1 className="mb-1 text-2xl font-bold text-card-foreground">{isReset ? "Reset your password" : "You're invited!"}</h1>
         <p className="mb-6 text-sm text-muted-foreground">
-          Set up your account — choose a display name and a password to access the dashboard.
+          {isReset
+            ? 'Choose a new password to regain access to the dashboard.'
+            : 'Set up your account — choose a display name and a password to access the dashboard.'}
         </p>
 
         {!token ? (
           <p className="text-sm text-destructive">This invite link is missing its token.</p>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            {!isReset && (
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="invite-name">Display name</Label>
               <Input
@@ -118,6 +125,7 @@ export function InvitePage() {
                 required
               />
             </div>
+            )}
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="invite-password">Password</Label>
               <Input

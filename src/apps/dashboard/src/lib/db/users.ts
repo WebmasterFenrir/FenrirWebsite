@@ -39,6 +39,16 @@ export function inviteUrl(user: Pick<DashboardUser, 'inviteToken'>): string {
   return `${window.location.origin}/invite?token=${encodeURIComponent(user.inviteToken ?? '')}`
 }
 
+// Admin-only: invalidate the user's current password and get a fresh single-use
+// invite link so the user can set a new password themselves.
+export async function resetUserPassword(id: string): Promise<{ inviteToken: string; email: string }> {
+  return pb.send('/api/invites/reset', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId: id }),
+  })
+}
+
 export async function deleteUser(id: string): Promise<void> {
   await pb.collection('users').delete(id)
 }
