@@ -185,16 +185,18 @@ export function parseStartTime(text: string, now: Date): { iso?: string; past: b
 }
 
 /**
- * Stable key for matching/grouping events: lowercase title + start date (YYYY-MM-DD) + fbEventId.
- * Used to find an existing event with the same date, title, and Facebook event ID before inserting,
- * and to remove duplicates. Including fbEventId prevents old events from being overwritten
- * when Facebook reuses titles across different years.
+ * Identity key for an event.
+ *  - With an fbEventId, the id IS the identity (`id:<fbEventId>`): Facebook
+ *    reuses titles across years, so two events that share a title (or even a
+ *    date) are still different events when their ids differ (#97).
+ *  - Without an fbEventId (manual, admin-created events), fall back to
+ *    lowercase title + start date (YYYY-MM-DD).
  */
-function eventKey(name: string, startTime?: string, fbEventId?: string): string {
+export function eventKey(name: string, startTime?: string, fbEventId?: string): string {
+  if (fbEventId) return `id:${fbEventId}`
   const title = name.trim().toLowerCase().replace(/\s+/g, " ")
   const date = startTime ? startTime.slice(0, 10) : ""
-  const idPart = fbEventId ? `|${fbEventId}` : ""
-  return `${date}|${title}${idPart}`
+  return `t:${date}|${title}`
 }
 
 /** Pick the "better" of two duplicate records: the one with an FB id, then the one with a date. */
@@ -466,8 +468,9 @@ export async function runSync(opts: SyncOptions): Promise<SyncResult> {
       })
       .filter((e) => e.name.length > 0)
 
-    // De-duplicate the scraped list by (date + title + fbEventId) — the same event can
-    // appear more than once on the page under different FB event ids.
+    // De-duplicate the scraped list by fbEventId — the same card can be
+    // collected more than once while scrolling. Events that merely share a
+    // title are different events (Facebook reuses titles across years, #97).
     const seenKeys = new Set<string>()
     const uniqueEvents: ScrapedEvent[] = []
     for (const e of events) {
@@ -482,9 +485,13 @@ export async function runSync(opts: SyncOptions): Promise<SyncResult> {
     }
 
     // ── Upsert into PocketBase ──────────────────────────────────────────────
-    // Match an existing event by FB id first, then by (date + title): Facebook
-    // sometimes re-issues event ids, which used to create duplicates. Old events
-    // are kept but marked as `past` — never deleted by a sync.
+    // Match an existing event by FB id first (the id is the event's identity),
+    // then — only when no record with the scraped id exists — by title + date
+    // against records whose id is NOT in this scrape: that covers Facebook
+    // re-issuing an event id without letting a same-titled event from another
+    // year steal the record (#97). Old events are kept but marked as `past` —
+    // never deleted by a sync.
+    const scrapedIds = new Set(events.map((e) => e.fbEventId))
     const existing = await pb.collection("activiteiten").getFullList<{
       id: string
       fbEventId: string
@@ -495,13 +502,19 @@ export async function runSync(opts: SyncOptions): Promise<SyncResult> {
     const byId = new Map<string, { id: string; fbEventId: string }>(
       existing.map((r) => [r.fbEventId, { id: r.id, fbEventId: r.fbEventId }]),
     )
-    const byKey = new Map<string, { id: string; fbEventId: string }>()
+    // Title+date fallback index for id adoption: stored FB events whose id is
+    // NOT in this scrape. If Facebook re-issues an event id (same event, new
+    // id), the scraped event finds its old record here instead of creating a
+    // duplicate. Records whose id IS scraped are already covered by byId —
+    // excluding them also stops a same-titled event from a different year
+    // (present in the scrape under its own id) from stealing the record (#97).
+    const byTitleDate = new Map<string, { id: string; fbEventId: string }>()
     for (const r of existing) {
       // Manual events (no FB id) are never matched/adopted by the sync — an
       // admin-created event must not be converted into a synced one.
-      if (!r.fbEventId) continue
-      const k = eventKey(r.name, r.startTime, r.fbEventId)
-      if (!byKey.has(k)) byKey.set(k, { id: r.id, fbEventId: r.fbEventId })
+      if (!r.fbEventId || scrapedIds.has(r.fbEventId)) continue
+      const k = eventKey(r.name, r.startTime)
+      if (!byTitleDate.has(k)) byTitleDate.set(k, { id: r.id, fbEventId: r.fbEventId })
     }
 
     for (const ev of events) {
@@ -518,25 +531,29 @@ export async function runSync(opts: SyncOptions): Promise<SyncResult> {
       }
       // 1) exact FB id match
       let rec = byId.get(ev.fbEventId)
-      // 2) same date + title + fbEventId already in the DB → update it and adopt its id
+      // 2) no id match → same title + date stored under an id this scrape
+      //    doesn't contain → Facebook re-issued the id: update the old record
+      //    and adopt the new id instead of creating a duplicate.
       if (!rec && ev.startTime) {
-        rec = byKey.get(eventKey(ev.name, ev.startTime, ev.fbEventId))
+        rec = byTitleDate.get(eventKey(ev.name, ev.startTime))
       }
       if (rec) {
         await pb.collection("activiteiten").update(rec.id, data)
-        // Re-index so a later event with the same title/date or a changed id matches too.
+        // Re-index: the record now answers to the scraped id; release its old
+        // id and title+date entries so a later event can't adopt it twice.
+        if (rec.fbEventId !== ev.fbEventId) byId.delete(rec.fbEventId)
         byId.set(ev.fbEventId, { id: rec.id, fbEventId: ev.fbEventId })
-        byKey.set(eventKey(ev.name, ev.startTime, ev.fbEventId), { id: rec.id, fbEventId: ev.fbEventId })
+        byTitleDate.delete(eventKey(ev.name, ev.startTime))
       } else {
         const created = await pb.collection("activiteiten").create<{ id: string }>(data)
         byId.set(ev.fbEventId, { id: created.id, fbEventId: ev.fbEventId })
-        byKey.set(eventKey(ev.name, ev.startTime, ev.fbEventId), { id: created.id, fbEventId: ev.fbEventId })
       }
     }
 
     // ── Dedupe loop ─────────────────────────────────────────────────────────
-    // Remove duplicate records (same date + title) until none remain. Facebook
-    // may have stored the same event twice under different ids in the past.
+    // Remove duplicate records that share one fbEventId (e.g. legacy double
+    // stores) until none remain. Records with DIFFERENT ids are different
+    // events, even when title and date coincide (#97) — never merge them.
     for (let pass = 0; pass < 5; pass++) {
       const all = await pb.collection("activiteiten").getFullList<{
         id: string
@@ -579,12 +596,13 @@ export async function runSync(opts: SyncOptions): Promise<SyncResult> {
         startTime?: string
         past?: boolean
       }>()
-      const scrapedIds = new Set(events.map((e) => e.fbEventId))
-      const scrapedKeys = new Set(events.map((e) => eventKey(e.name, e.startTime, e.fbEventId)))
       for (const rec of fresh) {
         // Manual events have no FB id and are never touched by the sync.
         if (!rec.fbEventId || rec.past) continue
-        if (!scrapedIds.has(rec.fbEventId) && !scrapedKeys.has(eventKey(rec.name, rec.startTime, rec.fbEventId))) {
+        // Identity is the FB id: keep the record only if this scrape contains
+        // it. Re-issued ids were already adopted onto their old record in the
+        // upsert loop above, so an id-based check is enough here.
+        if (!scrapedIds.has(rec.fbEventId)) {
           await pb.collection("activiteiten").delete(rec.id)
         }
       }

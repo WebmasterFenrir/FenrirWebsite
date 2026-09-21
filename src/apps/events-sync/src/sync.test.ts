@@ -1,7 +1,36 @@
 import { describe, test, expect } from "bun:test"
-import { parseStartTime } from "./sync"
+import { parseStartTime, eventKey } from "./sync"
 
 const NOW = new Date("2026-08-10T12:00:00Z")
+
+describe("eventKey — event identity (#97)", () => {
+  test("an fbEventId IS the identity, regardless of title or date", () => {
+    // Same title, different years/ids → different events, never merged.
+    expect(eventKey("Cantus", "2024-11-14T20:00:00.000Z", "111")).not.toBe(
+      eventKey("Cantus", "2026-11-14T20:00:00.000Z", "222"),
+    )
+    // Same id → same event, even if the stored title/date drifted.
+    expect(eventKey("Cantus", "2026-11-14T20:00:00.000Z", "111")).toBe(
+      eventKey("cantus  ", "2025-01-01T00:00:00.000Z", "111"),
+    )
+  })
+
+  test("key form is prefixed: id:… for FB events, t:… for manual ones", () => {
+    expect(eventKey("Cantus", "2026-11-14T20:00:00.000Z", "111")).toBe("id:111")
+    expect(eventKey("Cantus", "2026-11-14T20:00:00.000Z")).toBe("t:2026-11-14|cantus")
+  })
+
+  test("manual events without a date fall back to title only", () => {
+    expect(eventKey("Cantus")).toBe(eventKey("  cantus ", undefined))
+    expect(eventKey("Cantus")).not.toBe(eventKey("Cantus", "2026-11-14T20:00:00.000Z"))
+  })
+
+  test("titles are normalized (case + whitespace) for manual events", () => {
+    expect(eventKey("Thé  Cantus", "2026-11-14T20:00:00.000Z")).toBe(
+      eventKey("thé cantus", "2026-11-14T20:00:00.000Z"),
+    )
+  })
+})
 
 describe("parseStartTime — explicit years", () => {
   test("keeps an explicit past year as past (regression: Nov 2020 must stay 2020)", () => {
