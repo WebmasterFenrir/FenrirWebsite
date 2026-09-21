@@ -1,6 +1,5 @@
 ---
 import { getRelativeLocaleUrl } from "astro:i18n";
-import { Button } from "../ui/button";
 import HamburgerMenu from "./HamburgerMenu";
 import LanguageSwitcher from "../LanguageSwitcher.astro";
 import { defaultLang, useTranslations, type Locale, type UiKey } from "@/i18n/ui";
@@ -10,7 +9,7 @@ const lang: Locale = (Astro.currentLocale as Locale) ?? defaultLang;
 const t = useTranslations(lang);
 const currentPath = Astro.url.pathname;
 
-const navItems: { url: string; label: string }[] = [
+const navItems: { url: string; label: string; active: boolean }[] = [
   { slug: "", labelKey: "nav.home" },
   { slug: "activiteiten", labelKey: "nav.activiteiten" },
   { slug: "over-ons", labelKey: "nav.over-ons" },
@@ -19,6 +18,12 @@ const navItems: { url: string; label: string }[] = [
 ].map((item) => ({
   url: getRelativeLocaleUrl(lang, item.slug),
   label: t(item.labelKey as UiKey),
+  // The localized home URL is "/" (or "/en/"), so exact-match it; every other
+  // page matches by prefix so /praesidium/2024-style subpaths stay lit too.
+  active:
+    item.slug === ""
+      ? currentPath === getRelativeLocaleUrl(lang, "")
+      : currentPath.startsWith(getRelativeLocaleUrl(lang, item.slug)),
 }));
 
 // Language options for the mobile menu (plain data, serializable to the island)
@@ -31,16 +36,28 @@ const languageLinks = (["nl", "en"] as const).map((locale) => ({
 ---
 
 <nav aria-label="Hoofdnavigatie" class="fixed top-0 inset-x-0 z-50 flex flex-row-reverse sm:flex-row">
-  <div class="hidden sm:flex p-2 rounded-br-2xl gap-2 bg-card w-max">
+  <!-- Glass bar: translucent card surface + blur so it stays readable over the
+       hero and content, with a hairline bottom edge. The pill around the active
+       page gives a persistent 'where am I' cue the old corner blob lacked. -->
+  <div class="hidden sm:flex items-center gap-1 px-3 py-2 rounded-br-2xl border-b border-border/60 bg-card/70 backdrop-blur-md shadow-sm w-max">
     {navItems.map((page) => (
-      <a href={page.url}>
-        <Button variant="link">{page.label}</Button>
+      <a
+        href={page.url}
+        aria-current={page.active ? "page" : undefined}
+        class:list={[
+          "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-200",
+          page.active
+            ? "bg-primary/15 text-primary-foreground"
+            : "text-muted-foreground hover:bg-white/5 hover:text-foreground",
+        ]}
+      >
+        {page.label}
       </a>
     ))}
     <LanguageSwitcher lang={lang} />
   </div>
 
-  <div class="sm:hidden p-2 rounded-bl-2xl sm:rounded-br-2xl gap-2 bg-card w-max">
+  <div class="sm:hidden px-3 py-2 rounded-bl-2xl sm:rounded-br-2xl border-b border-border/60 bg-card/70 backdrop-blur-md shadow-sm w-max">
     <HamburgerMenu
       links={navItems}
       menuTitle={t("nav.menuTitle")}

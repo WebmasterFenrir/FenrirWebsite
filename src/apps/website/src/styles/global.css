@@ -65,7 +65,9 @@
   --destructive-foreground: oklch(0.9850 0 0);
   --border: oklch(0.2750 0 0);
   --input: oklch(0.3250 0 0);
-  --ring: oklch(0.5560 0 0);
+  /* Brand-tinted focus ring — a flat gray ring is invisible on the dark zinc
+     background, so keyboard focus states effectively disappeared. */
+  --ring: oklch(0.6270 0.2650 303.9000 / 0.55);
   --chart-1: oklch(0.8100 0.1000 252);
   --chart-2: oklch(0.6200 0.1900 260);
   --chart-3: oklch(0.5500 0.2200 263);
@@ -139,5 +141,18 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Respect users who opt out of motion: kill decorative animations and
+     transitions site-wide (fade-ins, shakes, parallax-style lifts). */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }

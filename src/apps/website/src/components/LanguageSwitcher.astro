@@ -28,8 +28,8 @@ const currentPath = Astro.url.pathname;
         class:list={[
           "rounded-lg px-2.5 py-1.5 transition-colors duration-200",
           active
-            ? "bg-purple-500/80 text-white shadow"
-            : "text-zinc-400 hover:bg-white/10 hover:text-white",
+            ? "bg-primary/80 text-primary-foreground shadow"
+            : "text-muted-foreground hover:bg-white/10 hover:text-foreground",
         ]}
       >
         {locale === defaultLang ? "NL" : locale.toUpperCase()}

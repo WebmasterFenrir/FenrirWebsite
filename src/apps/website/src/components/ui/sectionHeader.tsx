@@ -18,7 +18,7 @@ export default function SectionHeader({ title, description }: SectionHeaderProps
         <div className="flex-1">
           
           {/* Dynamic Title - Scaled down for mobile (text-3xl) vs desktop (text-7xl) */}
-          <h2 className="text-3xl sm:text-4xl md:text-6xl font-bold text-white tracking-tight md:tracking-tighter leading-tight ">
+          <h2 className="text-3xl sm:text-4xl md:text-6xl font-bold text-foreground tracking-tight md:tracking-tighter leading-tight ">
             {mainTitle}{" "}
             {hasMultipleWords && (
               <span className="text-accent-foreground">
@@ -31,7 +31,7 @@ export default function SectionHeader({ title, description }: SectionHeaderProps
         {/* Description - Removed the border on mobile to save horizontal space */}
         {description && (
         <div className=" md:w-1/2">
-          <p className="text-zinc-400 text-sm md:text-lg leading-relaxed border-l-2 md:border-zinc-800 pl-4 md:pl-6 py-1">
+          <p className="text-muted-foreground text-sm md:text-lg leading-relaxed border-l-2 md:border-border pl-4 md:pl-6 py-1">
             {description}
           </p>
         </div>
@@ -39,7 +39,7 @@ export default function SectionHeader({ title, description }: SectionHeaderProps
       </div>
       
       {/* Bottom Separator Line - Faded on mobile so it's not too harsh */}
-      <div className="h-px w-full from-zinc-800/60 via-zinc-800/20 to-transparent md:bg-zinc-800/40 mt-10 md:mt-16"></div>
+      <div className="h-px w-full from-border/60 via-border/20 to-transparent md:bg-border/40 mt-10 md:mt-16"></div>
     </header>
   );
 }

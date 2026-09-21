@@ -29,8 +29,12 @@ const previewLeden = years[0]?.PreasidiumLeden.slice(0, 2) ?? [];
 const previewEvents = events.slice(0, 3);
 ---
 <style>
+	/* Brand-consistent overlay: primary-tinted vignette into the page
+	   background (the old hard-coded rgba/oklch values bypassed the tokens). */
 	.hero {
-		background: linear-gradient(rgba(93,63,211,0.6), rgb(12, 10, 9)), url('../../images/hero.jpg') center/cover no-repeat;
+		background:
+			linear-gradient(rgba(93, 63, 211, 0.55), oklch(from var(--background) l a h / 0.92) 85%),
+			url('../../images/hero.jpg') center/cover no-repeat;
 	}
 
 	@keyframes fadeInUp {
@@ -86,15 +90,48 @@ const previewEvents = events.slice(0, 3);
 		transform: translateY(0) scale(0.97);
 		box-shadow: 0 2px 8px oklch(0.627 0.265 303.9 / 0.3);
 	}
+
+	/* Scroll cue: gentle bounce invites the scroll; reduced-motion users get a
+	   static chevron (the global reduce rule also handles transitions). */
+	@keyframes scrollCue {
+		0%, 100% { transform: translateY(0); opacity: 0.7; }
+		50%      { transform: translateY(6px); opacity: 1; }
+	}
+
+	.hero-scroll {
+		animation: scrollCue 1.8s ease-in-out infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.hero-title,
+		.hero-subtitle,
+		.hero-cta {
+			opacity: 1; /* don't leave content invisible when animations are killed */
+			animation: none;
+		}
+		.hero-btn {
+			animation: none;
+		}
+		.hero-scroll {
+			animation: none;
+		}
+	}
 </style>
 <MainLayout title={`Fenrir Antwerpen`}>
-		<div class="grid place-items-center h-screen content-center hero" style={heroImage ? `background-image: linear-gradient(rgba(93,63,211,0.6), rgb(12, 10, 9)), url('${heroImage}')` : undefined}>
-			<h1 class="hero-title text-4xl sm:text-6xl lg:text-8xl text-white font-bold">Fenrir Antwerpen</h1>
-			<h2 class="hero-subtitle text-lg sm:text-2xl lg:text-4xl mt-5 text-white font-medium">{t('home.heroSubtitle')}</h2>
-			<span class="hero-cta flex flex-col sm:flex-row w-3/6 sm:w-max gap-3 sm:gap-4 mt-4">
-				<a href="https://form.fenrirclub.be/lidworden"><Button variant="default" className='hero-btn w-full sm:w-auto p-6 sm:p-6 lg:p-8 text-2xl lg:text-4xl'>{t('home.joinCta')}</Button></a>
-				<a href={translatedPath('activiteiten')}><Button variant="secondary" className='w-full sm:w-auto p-6 sm:p-6 lg:p-8 text-2xl lg:text-4xl'>{t('home.activitiesCta')}</Button></a>
+		<div class="relative grid place-items-center h-svh content-center hero" style={heroImage ? `background-image: linear-gradient(rgba(93,63,211,0.55), oklch(from var(--background) l a h / 0.92) 85%), url('${heroImage}')` : undefined}>
+			<h1 class="hero-title text-5xl sm:text-6xl lg:text-7xl text-white font-bold tracking-tight">Fenrir Antwerpen</h1>
+			<h2 class="hero-subtitle text-lg sm:text-2xl lg:text-3xl mt-5 max-w-2xl text-balance text-white/90 font-medium">{t('home.heroSubtitle')}</h2>
+			<span class="hero-cta flex flex-col sm:flex-row w-3/6 sm:w-max gap-3 sm:gap-4 mt-6">
+				<a href="https://form.fenrirclub.be/lidworden"><Button variant="default" className='hero-btn w-full sm:w-auto px-8 py-5 text-lg lg:text-xl'>{t('home.joinCta')}</Button></a>
+				<a href={translatedPath('activiteiten')}><Button variant="secondary" className='w-full sm:w-auto px-8 py-5 text-lg lg:text-xl'>{t('home.activitiesCta')}</Button></a>
 			</span>
+			<a
+				href="#welcomesection"
+				aria-label={t('home.welcomeTitle')}
+				class="hero-scroll absolute bottom-8 grid size-10 place-items-center rounded-full border border-white/15 bg-white/5 text-white/80 backdrop-blur-sm transition-colors hover:bg-white/10 hover:text-white"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+			</a>
 		</div>
 		<ContextLayout>
 <div class="mx-auto px-6 sm:px-8 py-10">
@@ -116,9 +153,11 @@ const previewEvents = events.slice(0, 3);
       			<div class="text-center md:text-left">
 				<h1 class="font-bold text-4xl mb-4 text-accent">{t('home.welcomeTitle')}</h1>
 				<h2 class="font-medium text-2xl mb-4">{t('home.welcomeSubtitle')}</h2>
-				<p class="mb-4">{t('home.welcomeP1')}</p>
-				<p class="mb-4">{t('home.welcomeP2')}</p>
-					<p class="mb-4">{t('home.welcomeP3')}</p>
+				<!-- Measure cap: the container spans ~1150px, so uncapped paragraphs
+				     produced 100+ char lines on desktop. -->
+				<p class="mb-4 max-w-prose mx-auto md:mx-0 text-muted-foreground leading-relaxed">{t('home.welcomeP1')}</p>
+				<p class="mb-4 max-w-prose mx-auto md:mx-0 text-muted-foreground leading-relaxed">{t('home.welcomeP2')}</p>
+					<p class="mb-4 max-w-prose mx-auto md:mx-0 text-muted-foreground leading-relaxed">{t('home.welcomeP3')}</p>
 				</div>
 			</div>
 			</div>
@@ -165,7 +204,7 @@ const previewEvents = events.slice(0, 3);
 
 				<div class="mt-10 flex justify-center">
 					<a href={translatedPath('activiteiten')}>
-						<Button variant="outline" className="border-zinc-700 text-white hover:bg-zinc-800 hover:text-white">
+						<Button variant="outline" className="border-border text-foreground hover:bg-accent/10 hover:text-foreground">
 							{t('home.activitiesViewAll')}
 							<ArrowRight class="size-4" />
 						</Button>

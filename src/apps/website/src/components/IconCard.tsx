@@ -18,10 +18,10 @@ export function IconCard({
   return (
     <Card
       className={cn(
-        "group relative h-full overflow-hidden border-zinc-800 text-white transition-all duration-300 hover:border-purple-500/30",
+        "group relative h-full overflow-hidden border-border text-foreground transition-all duration-300 hover:border-primary/30",
         variant === "subtle"
-          ? "bg-zinc-900/50 hover:bg-zinc-900/80"
-          : "bg-card hover:shadow-lg hover:shadow-purple-500/10"
+          ? "bg-card/50 hover:bg-card/80"
+          : "bg-card hover:shadow-lg hover:shadow-primary/10"
       )}
     >
       <div
@@ -31,11 +31,11 @@ export function IconCard({
         )}
       />
       <CardContent className="relative flex h-full flex-col gap-4 p-6 md:p-8">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400 transition-colors group-hover:bg-purple-500/20 group-hover:text-purple-300">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary/20 group-hover:text-primary/80">
           <Icon className="h-6 w-6" />
         </div>
         <h3 className="text-xl font-bold tracking-tight">{title}</h3>
-        <p className="text-sm leading-relaxed text-zinc-400 md:text-base">
+        <p className="text-sm leading-relaxed text-muted-foreground md:text-base">
           {description}
         </p>
       </CardContent>

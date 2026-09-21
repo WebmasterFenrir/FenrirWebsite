@@ -31,7 +31,7 @@ const fmtDate = (iso: string, locale: Locale) => {
   }
   .event-card:hover {
     transform: translateY(-4px);
-    border-color: oklch(0.627 0.265 303.9 / 0.45);
+    border-color: oklch(0.627 0.265 303.9 / 0.45); /* primary */
     box-shadow: 0 12px 40px oklch(0 0 0 / 0.45);
   }
   .event-card:hover .event-cover img {
@@ -47,9 +47,9 @@ const fmtDate = (iso: string, locale: Locale) => {
 
 {
   events.length === 0 ? (
-    <div class="flex flex-col items-center justify-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/40 py-16 text-center">
-      <CalendarDays class="size-10 text-purple-400/50" />
-      <p class="max-w-md text-sm text-zinc-400">{t('activities.noEvents')}</p>
+    <div class="flex flex-col items-center justify-center gap-3 rounded-2xl border border-border bg-card/40 py-16 text-center">
+      <CalendarDays class="size-10 text-primary/50" />
+      <p class="max-w-md text-sm text-muted-foreground">{t('activities.noEvents')}</p>
     </div>
   ) : (
     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -59,9 +59,9 @@ const fmtDate = (iso: string, locale: Locale) => {
             href={event.fbUrl ?? '#'}
             target={event.fbUrl ? '_blank' : undefined}
             rel={event.fbUrl ? 'noopener noreferrer' : undefined}
-            class="event-card group flex flex-col overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/40"
+            class="event-card group flex flex-col overflow-hidden rounded-2xl border border-border bg-card/40"
           >
-            <div class="event-cover aspect-[16/9] overflow-hidden bg-zinc-800/60">
+            <div class="event-cover aspect-[16/9] overflow-hidden bg-card">
               {(event.coverUrl || event.image) ? (
                 <img
                   src={event.coverUrl || event.image}
@@ -71,25 +71,25 @@ const fmtDate = (iso: string, locale: Locale) => {
                 />
               ) : (
                 <div class="grid size-full place-items-center">
-                  <CalendarDays class="size-10 text-purple-400/40" />
+                  <CalendarDays class="size-10 text-primary/40" />
                 </div>
               )}
             </div>
             <div class="flex flex-1 flex-col gap-2 p-5">
               {event.category && (
-                <span class="inline-flex w-fit items-center rounded-full border border-purple-400/30 bg-purple-400/10 px-2.5 py-0.5 text-[11px] font-medium text-purple-300">
+                <span class="inline-flex w-fit items-center rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[11px] font-medium text-primary">
                   {event.category}
                 </span>
               )}
-              <p class="event-date text-xs font-semibold uppercase text-purple-400">
+              <p class="event-date text-xs font-semibold uppercase text-primary">
                 {fmtDate(event.startTime, lang)}
               </p>
-              <h3 class="text-lg font-bold text-white leading-snug">{event.name}</h3>
+              <h3 class="text-lg font-bold text-foreground leading-snug">{event.name}</h3>
               {event.placeName && (
-                <p class="text-sm text-zinc-400">{event.placeName}</p>
+                <p class="text-sm text-muted-foreground">{event.placeName}</p>
               )}
               <div class="mt-auto pt-3">
-                <span class="inline-flex items-center gap-1.5 text-sm font-medium text-purple-400 transition-colors group-hover:text-purple-300">
+                <span class="inline-flex items-center gap-1.5 text-sm font-medium text-primary transition-colors group-hover:text-primary/80">
                   {t('activities.viewOnFacebook')}
                   <ArrowRight class="size-4 transition-transform group-hover:translate-x-0.5" />
                 </span>
