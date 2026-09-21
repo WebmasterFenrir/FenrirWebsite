@@ -185,14 +185,16 @@ export function parseStartTime(text: string, now: Date): { iso?: string; past: b
 }
 
 /**
- * Stable key for matching/grouping events: lowercase title + start date (YYYY-MM-DD).
- * Used to find an existing event with the same date and title before inserting,
- * and to remove duplicates.
+ * Stable key for matching/grouping events: lowercase title + start date (YYYY-MM-DD) + fbEventId.
+ * Used to find an existing event with the same date, title, and Facebook event ID before inserting,
+ * and to remove duplicates. Including fbEventId prevents old events from being overwritten
+ * when Facebook reuses titles across different years.
  */
-function eventKey(name: string, startTime?: string): string {
+function eventKey(name: string, startTime?: string, fbEventId?: string): string {
   const title = name.trim().toLowerCase().replace(/\s+/g, " ")
   const date = startTime ? startTime.slice(0, 10) : ""
-  return `${date}|${title}`
+  const idPart = fbEventId ? `|${fbEventId}` : ""
+  return `${date}|${title}${idPart}`
 }
 
 /** Pick the "better" of two duplicate records: the one with an FB id, then the one with a date. */
@@ -464,12 +466,12 @@ export async function runSync(opts: SyncOptions): Promise<SyncResult> {
       })
       .filter((e) => e.name.length > 0)
 
-    // De-duplicate the scraped list by (date + title) — the same event can
+    // De-duplicate the scraped list by (date + title + fbEventId) — the same event can
     // appear more than once on the page under different FB event ids.
     const seenKeys = new Set<string>()
     const uniqueEvents: ScrapedEvent[] = []
     for (const e of events) {
-      const key = eventKey(e.name, e.startTime)
+      const key = eventKey(e.name, e.startTime, e.fbEventId)
       if (seenKeys.has(key)) continue
       seenKeys.add(key)
       uniqueEvents.push(e)
@@ -498,7 +500,7 @@ export async function runSync(opts: SyncOptions): Promise<SyncResult> {
       // Manual events (no FB id) are never matched/adopted by the sync — an
       // admin-created event must not be converted into a synced one.
       if (!r.fbEventId) continue
-      const k = eventKey(r.name, r.startTime)
+      const k = eventKey(r.name, r.startTime, r.fbEventId)
       if (!byKey.has(k)) byKey.set(k, { id: r.id, fbEventId: r.fbEventId })
     }
 
@@ -516,19 +518,19 @@ export async function runSync(opts: SyncOptions): Promise<SyncResult> {
       }
       // 1) exact FB id match
       let rec = byId.get(ev.fbEventId)
-      // 2) same date + title already in the DB → update it and adopt its id
+      // 2) same date + title + fbEventId already in the DB → update it and adopt its id
       if (!rec && ev.startTime) {
-        rec = byKey.get(eventKey(ev.name, ev.startTime))
+        rec = byKey.get(eventKey(ev.name, ev.startTime, ev.fbEventId))
       }
       if (rec) {
         await pb.collection("activiteiten").update(rec.id, data)
         // Re-index so a later event with the same title/date or a changed id matches too.
         byId.set(ev.fbEventId, { id: rec.id, fbEventId: ev.fbEventId })
-        byKey.set(eventKey(ev.name, ev.startTime), { id: rec.id, fbEventId: ev.fbEventId })
+        byKey.set(eventKey(ev.name, ev.startTime, ev.fbEventId), { id: rec.id, fbEventId: ev.fbEventId })
       } else {
         const created = await pb.collection("activiteiten").create<{ id: string }>(data)
         byId.set(ev.fbEventId, { id: created.id, fbEventId: ev.fbEventId })
-        byKey.set(eventKey(ev.name, ev.startTime), { id: created.id, fbEventId: ev.fbEventId })
+        byKey.set(eventKey(ev.name, ev.startTime, ev.fbEventId), { id: created.id, fbEventId: ev.fbEventId })
       }
     }
 
@@ -549,7 +551,7 @@ export async function runSync(opts: SyncOptions): Promise<SyncResult> {
         // Never touch manual events (no FB id) — they are admin-created and
         // must not be removed because they happen to share a date + title.
         if (!rec.fbEventId) continue
-        const k = eventKey(rec.name, rec.startTime)
+        const k = eventKey(rec.name, rec.startTime, rec.fbEventId)
         const prev = seen.get(k)
         if (!prev) {
           seen.set(k, rec)
@@ -578,11 +580,11 @@ export async function runSync(opts: SyncOptions): Promise<SyncResult> {
         past?: boolean
       }>()
       const scrapedIds = new Set(events.map((e) => e.fbEventId))
-      const scrapedKeys = new Set(events.map((e) => eventKey(e.name, e.startTime)))
+      const scrapedKeys = new Set(events.map((e) => eventKey(e.name, e.startTime, e.fbEventId)))
       for (const rec of fresh) {
         // Manual events have no FB id and are never touched by the sync.
         if (!rec.fbEventId || rec.past) continue
-        if (!scrapedIds.has(rec.fbEventId) && !scrapedKeys.has(eventKey(rec.name, rec.startTime))) {
+        if (!scrapedIds.has(rec.fbEventId) && !scrapedKeys.has(eventKey(rec.name, rec.startTime, rec.fbEventId))) {
           await pb.collection("activiteiten").delete(rec.id)
         }
       }
