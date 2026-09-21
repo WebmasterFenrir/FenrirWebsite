@@ -104,6 +104,7 @@ import {
   type FormSubmission,
   type FormFieldType,
   type FormField,
+  DEFAULT_FORM_RATE_LIMIT,
 } from '@/lib/db/forms'
 import { useRole } from '@/lib/RoleContext'
 
@@ -134,6 +135,8 @@ interface FormDraft {
   description_en: string
   multiLanguage: boolean
   active: boolean
+  /** Text mirror of the form's rateLimit — kept as string for a natural empty input. */
+  rateLimit: string
   hook: string
   fields: FieldDraft[]
 }
@@ -174,6 +177,7 @@ const emptyForm: FormDraft = {
   description_en: '',
   multiLanguage: false,
   active: true,
+  rateLimit: String(DEFAULT_FORM_RATE_LIMIT),
   hook: 'none',
   fields: [],
 }
@@ -235,9 +239,7 @@ let fieldCounter = 0
 function newFieldId(): string {
   fieldCounter += 1
   return `fld_${Date.now().toString(36)}_${fieldCounter}`
-}
-
-function draftFromForm(form: Form): FormDraft {
+}function draftFromForm(form: Form): FormDraft {
   return {
     title: form.title,
     title_en: form.title_en ?? '',
@@ -245,6 +247,8 @@ function draftFromForm(form: Form): FormDraft {
     description_en: form.description_en ?? '',
     multiLanguage: form.multiLanguage,
     active: form.active,
+    // Pre-fill the server default for legacy forms that never stored a value.
+    rateLimit: String(form.rateLimit && form.rateLimit > 0 ? form.rateLimit : DEFAULT_FORM_RATE_LIMIT),
     hook: form.hook || 'none',
     fields: form.fields.map((f) => ({
       id: f.id,
@@ -479,6 +483,7 @@ export function FormsPage() {
       description: draft.description.trim() || undefined,
       multiLanguage: draft.multiLanguage,
       active: draft.active,
+      rateLimit: Math.max(0, Math.min(1000, Math.floor(Number(draft.rateLimit) || 0))),
       hook: draft.hook,
       fields,
       ...(draft.multiLanguage
@@ -1081,6 +1086,27 @@ export function FormsPage() {
                   Accept responses (uncheck to close the form)
                 </Label>
               </div>
+            </div>
+
+            {/* Per-form anti-spam budget (#99): schools share one egress IP, so
+                the default can be too tight for big groups filling one form. */}
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="form-rateLimit">
+                Submissions per IP per hour
+              </Label>
+              <Input
+                id="form-rateLimit"
+                type="number"
+                min={1}
+                max={1000}
+                value={draft.rateLimit}
+                onChange={(e) => setDraft({ ...draft, rateLimit: e.target.value })}
+                className="max-w-40"
+              />
+              <p className="text-xs text-muted-foreground">
+                Anti-spam limit — how often one internet connection can submit this form in an
+                hour. Raise it for school networks where many students share one IP. Max 1000.
+              </p>
             </div>
 
             {/* Fields editor */}

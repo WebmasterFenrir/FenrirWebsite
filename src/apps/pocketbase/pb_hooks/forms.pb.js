@@ -389,11 +389,14 @@ function formsHook(e) {
         }
       }
 
-      // 5. Per-IP rate limit (collection-backed): max 10 submissions per form
-      //    per IP per hour. Best-effort anti-spam — rows expire after 1h and
-      //    cascade-delete with the form; a limiter failure never rejects.
+      // 5. Per-IP rate limit (collection-backed): max `rateLimit` submissions
+      //    per form per IP per hour. Best-effort anti-spam — rows expire after
+      //    1h and cascade-delete with the form; a limiter failure never rejects.
+      //    The limit is a per-form setting (#99): schools share one egress IP,
+      //    so a small hard-coded budget starved whole campuses on one form
+      //    while others were untouched.
       const WINDOW_MS = 60 * 60 * 1000; // 1 hour
-      const MAX_PER_WINDOW = 10;
+      const DEFAULT_MAX_PER_WINDOW = 50;
       try {
         const ip = getClientIp();
         const filter = "form = '" + formId + "' && ip = '" + ip + "'";
@@ -426,7 +429,14 @@ function formsHook(e) {
         }
 
         // 5b. Enforce the limit for this form+IP.
-        if (count >= MAX_PER_WINDOW) {
+        let maxPerWindow = DEFAULT_MAX_PER_WINDOW;
+        try {
+          const configured = form.getInt("rateLimit");
+          if (configured > 0) maxPerWindow = configured;
+        } catch (err) {
+          // Field missing on old data — fall through to the default.
+        }
+        if (count >= maxPerWindow) {
           return abort(429, "Too many submissions from this IP address. Please try again later.");
         }
 

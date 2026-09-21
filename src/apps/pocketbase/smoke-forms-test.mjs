@@ -174,18 +174,33 @@ try {
   })
   check("closed form rejects → 400", closedSub.status === 400, closedSub.status + " " + JSON.stringify(closedSub.body))
 
-  // 9. Rate limit — max 10 submissions/form/IP/hour. The first form already got
-  //    1 valid submission, so fire 10 more: the 11th attempt must be blocked.
+  // 9. Rate limit — per-form `rateLimit` (submissions/form/IP/hour), default
+  //    50 (#99). The first form already got 1 valid submission, so fire 50
+  //    more: the 51st attempt must be blocked.
   let blocked = false
   let blockedBody = ""
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 50; i++) {
     const r = await api("/api/collections/form_submissions/records", {
       method: "POST",
       body: JSON.stringify({ form: form.id, answers: { fld_1: "x" + i, fld_2: "x" + i + "@e.com", fld_4: "blauw" } }),
     })
     if (r.status === 429) { blocked = true; blockedBody = JSON.stringify(r.body); break }
   }
-  check("rate limit blocks the 11th submission (429)", blocked, blockedBody)
+  check("rate limit blocks the 51st submission (429)", blocked, blockedBody)
+
+  // 9b. The limit is configurable per form — raising it lets submissions
+  //     through again without waiting for the window to reset.
+  const raised = await api("/api/collections/forms/records/" + form.id, {
+    method: "PATCH",
+    headers: suHeaders,
+    body: JSON.stringify({ rateLimit: 100 }),
+  })
+  check("raise rateLimit → 200", raised.status === 200, raised.status + " " + JSON.stringify(raised.body))
+  const afterRaise = await api("/api/collections/form_submissions/records", {
+    method: "POST",
+    body: JSON.stringify({ form: form.id, answers: { fld_1: "raised", fld_2: "raised@e.com", fld_4: "blauw" } }),
+  })
+  check("submission succeeds after raising rateLimit", afterRaise.status === 200 || afterRaise.status === 201, afterRaise.status + " " + JSON.stringify(afterRaise.body))
 
   // 10. Roles — formmanager can manage forms + read submissions, viewer cannot
   await api("/api/collections/users/records", {

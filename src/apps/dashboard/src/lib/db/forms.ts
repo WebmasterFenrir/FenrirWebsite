@@ -45,6 +45,8 @@ export interface Form {
   description_en?: string
   multiLanguage: boolean
   active: boolean
+  /** Max submissions one IP may send to this form per hour (anti-spam). 0 = server default. */
+  rateLimit?: number
   fields: FormField[]
   /** Processing hook key — picked from FORM_HOOKS in the builder. */
   hook?: string
@@ -77,6 +79,13 @@ export function formUrl(code: string): string {
 // Code alphabet — must match pb_hooks/forms.pb.js (no 0/O/1/l/I).
 export const FORM_CODE_ALPHABET = 'abcdefghjkmnpqrstuvwxyz23456789'
 export const FORM_CODE_LENGTH = 10
+
+/**
+ * Server-side default for a form's per-IP hourly submission budget — must
+ * match DEFAULT_MAX_PER_WINDOW in pb_hooks/forms.pb.js. Kept here only for
+ * the builder UI; the hook is the authority.
+ */
+export const DEFAULT_FORM_RATE_LIMIT = 50
 
 export function generateFormCode(): string {
   let out = ''
