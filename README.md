@@ -1,83 +1,171 @@
 # FenrirWebsite
 
-FenrirWebsite is maintained by the Fenrir Presidium and contributors. Fenrir is a student group based in Antwerp, at KDG Groenplaats, serving all students on that campus. The site is a public-facing hub that tells who we are, who sits on the presidium, information about sponsors, events, and more.
+FenrirWebsite is maintained by the Fenrir Presidium and contributors. Fenrir is a
+student group based in Antwerp, at KDG Groenplaats, serving all students on that
+campus. This repository powers everything the club runs online:
 
-## Live sites
-- Production: https://fenrirclub.be
-- Staging/testing: https://fenrir.nilsmertens.dev
-  (Note: the testing URL may change if the staging environment is rebuilt or the host is updated.)
+- **[fenrirclub.be](https://fenrirclub.be)** — the public website (events, sponsors, praesidium, …)
+- **[dashboard.fenrirclub.be](https://dashboard.fenrirclub.be)** — the admin dashboard for the presidium
+- **[form.fenrirclub.be](https://form.fenrirclub.be)** — public forms (e.g. `/lidworden` for memberships)
+- **[pb.fenrirclub.be](https://pb.fenrirclub.be)** — the PocketBase backend behind it all
 
-## How it's set up
-- The repository hosts static assets and a lightweight frontend scaffold. The development workflow relies on Node.js tooling.
-- Branches commonly used: main (production) and a development branch if applicable. Deploys are typically triggered via CI/CD.
-- Project structure is kept lean; static assets live under public/assets and HTML/JS/CSS under appropriate folders.
+## Repository layout
 
-## Setup
-- Prerequisites: Node.js (LTS recommended, v16+), npm (or yarn/pnpm).
-- Install dependencies: `npm install` (or `bun install` if you use Bun as your package manager).
-- Run the development server: `npm run dev` (Astro dev); or navigate to `src/apps/website` and run `bun run dev` if you prefer Bun.
-- Build for production: `npm run build`
-- Preview production: `npm run preview` (or serve the contents of the build output with a static server)
+This is a Bun + Turbo monorepo. All app code lives under `src/`; the workspace
+root for tooling is `src/package.json` (Turbo workspaces), not the repo root.
 
-## Tech Stack
-- Frontend: Astro, React
-- Styling: Tailwind CSS
-- MDX support: `@astrojs/mdx` and optional `@astrojs/react`
-- Builder: Astro (uses Vite under the hood)
-- Libraries: lucide-react, radix-ui, canvas-confetti
-- State/backend: pocketbase
-- Type safety: JavaScript with optional TypeScript (monorepo provides TS tooling)
-- Monorepo tooling: Turbo (workspaces), Bun as package manager (as configured in the repo)
+```
+src/
+├── apps/
+│   ├── website/       # Public site — Astro + React + Tailwind (fenrirclub.be)
+│   ├── dashboard/     # Admin dashboard — React + Vite (dashboard.fenrirclub.be)
+│   ├── form-site/     # Public forms — Astro + React (form.fenrirclub.be/{code})
+│   ├── events-sync/   # Facebook events scraper — Bun service (puppeteer)
+│   └── pocketbase/    # PocketBase server config: migrations, hooks, smoke tests
+├── packages/          # Shared packages (@repo/ui, eslint-config, typescript-config)
+├── turbo.json         # Turbo task pipeline (build / dev / lint / test / check-types)
+└── package.json       # Workspace root — all bun commands run from here
+```
 
-## Tech Deep Dive
-- Monorepo layout:
-  - Apps: `src/apps/website` (website), plus future apps
-  - Packages: `src/packages/*` (shared configs, tooling)
-- Frontend tech:
-  - Astro with React; MDX for docs; Tailwind CSS for styling
-  - File structure: UI components under `src/apps/website/src/components`, pages under `src/apps/website/src/pages` (or `.astro` routes)
-- Build and dev workflow:
-  - Root uses Turbo for orchestrating tasks; workspace tooling: Bun as package manager
-  - Website app scripts (in `src/apps/website/package.json`): `dev` (astro dev), `build` (astro build), `preview` (astro preview)
-  - To run locally: `bun install` at repo root, then `cd src/apps/website` and `bun run dev` (or `npm run dev` if using npm)
-- Dependency and linting:
-  - Lint/format: Prettier and ESLint via workspace scripts; format: `bun run format` (or `npm run format`), lint: `bun run lint`
-- Backend and data:
-  - PocketBase is included for lightweight backend needs; refer to its docs for setup and data modeling
-- Testing:
-  - Testing setup is available via Turbo; run `bun run check-types` or `bun run test` if configured; adjust per actual test setup
-- Environment:
-  - Use `.env` or `.env.local` as needed; avoid committing secrets
-- Deployment:
-  - Production hosting: fenrirclub.be; CI/CD triggers deployments on main; staging URL updates via CI
+## Tech stack
+
+- **Apps:** Astro (website, form-site), React + Vite (dashboard), Bun + TypeScript (events-sync)
+- **Backend:** PocketBase — SQLite, auth, realtime; hooks and migrations in `src/apps/pocketbase/`
+- **Styling:** Tailwind CSS v4, shadcn-style components from `@repo/ui`
+- **Tooling:** Bun as package manager, Turbo for task orchestration, Playwright for E2E tests
+- **Hosting:** Docker Compose behind an nginx-proxy with automatic Let's Encrypt certs
+
+## Getting started
+
+Prerequisites: **Bun** (>= 1.1) and Node.js >= 18. Docker is only needed for a
+full-stack local run.
+
+```bash
+# from the repository root
+cd src
+bun install
+
+# start everything that has a dev server (website, dashboard, events-sync)
+bun run dev
+```
+
+Individual apps can also be run on their own:
+
+```bash
+bun run --cwd src/apps/website dev        # public site
+bun run --cwd src/apps/dashboard dev      # admin dashboard
+bun run --cwd src/apps/form-site dev      # public forms
+bun run --cwd src/apps/events-sync start  # events sync service
+```
+
+PocketBase is not part of `bun run dev` (it is a standalone binary/container):
+
+```bash
+docker compose up pocketbase
+```
+
+### Environment variables
+
+Copy `.env.example` to `.env` and fill in the values. `.env` is gitignored —
+never commit real secrets.
+
+| Variable | Used by | Purpose |
+| --- | --- | --- |
+| `PB_URL` | all apps | PocketBase base URL (`http://pocketbase:3000` inside Docker) |
+| `PB_EMAIL` / `PB_PASSWORD` | server-side apps | PocketBase superuser credentials |
+| `PB_ADMIN_EMAIL` / `PB_ADMIN_PASSWORD` | docker compose | Same credentials, interpolated into the containers |
+| `PUBLIC_PB_URL` | website, form-site, dashboard | PocketBase URL seen by the browser (`https://pb.fenrirclub.be`) |
+| `DEEPL_API_KEY` | PocketBase hook | DeepL auto-translation for multi-language forms |
+| `GITHUB_TOKEN` / `GITHUB_REPO` | PocketBase hook | "bugticket" forms hook — creates GitHub issues |
+| `EVENTS_SYNC_URL` | PocketBase hook | Where the PocketBase cron finds the events-sync service |
+
+## Apps in detail
+
+### website (`src/apps/website`)
+
+The public Astro site. Reads all content from PocketBase at build/runtime:
+pages, sponsors, praesidium, and the activities synced from Facebook. Commands
+run inside `src/apps/website`:
+
+```bash
+bun run dev      # dev server
+bun run build    # production build
+bun run preview  # preview the build
+bun run test     # bun tests
+```
+
+### dashboard (`src/apps/dashboard`)
+
+The presidium's admin panel (React + Vite): manage people, forms, activities,
+sponsors, roles and settings. Commands run inside `src/apps/dashboard`:
+
+```bash
+bun run dev         # dev server
+bun run build       # typecheck + production build
+bun run check-types # tsc --noEmit
+bun run lint        # eslint
+```
+
+### form-site (`src/apps/form-site`)
+
+Standalone public form renderer served at `form.fenrirclub.be/{code}`. Forms
+are built in the dashboard; submissions are validated and stored by PocketBase
+hooks (`src/apps/pocketbase/pb_hooks/forms.pb.js`), including a per-IP
+rate limit configurable per form. Commands run inside `src/apps/form-site`.
+
+### events-sync (`src/apps/events-sync`)
+
+A Bun service that scrapes the club's Facebook page events (via session
+cookies + puppeteer — there is no public Events API) and upserts them into the
+`activiteiten` collection. A PocketBase cron triggers it every 6 hours; the
+dashboard has a "Sync now" button. See
+[`src/apps/events-sync/README.md`](src/apps/events-sync/README.md) for setup
+(cookie export, dashboard upload, troubleshooting).
+
+### pocketbase (`src/apps/pocketbase`)
+
+The backend: collection migrations (`pb_migrations/`) and server-side hooks
+(`pb_hooks/`) for forms validation + rate limiting, auto-translation, GitHub
+issue creation, member registrations and the events-sync scheduler. Ships with
+self-contained smoke tests that spawn a throwaway PocketBase instance, e.g.:
+
+```bash
+cd src/apps/pocketbase
+bun smoke-forms-test.mjs
+```
+
+## Common tasks
+
+| Task | Command (from `src/`) |
+| --- | --- |
+| Install dependencies | `bun install` |
+| Dev servers (all apps) | `bun run dev` |
+| Build all apps | `bun run build` |
+| Lint | `bun run lint` |
+| Format | `bun run format` |
+| Typecheck | `bun run check-types` |
+| Unit tests | `bun run test` |
+| E2E tests (Playwright) | `bun run test:e2e` |
 
 ## Deployment
-- Production site is hosted at fenrirclub.be.
-- Deployments are typically triggered by pushes to the main branch; the staging URL is updated from the staging environment.
-- For manual deployment, follow the project’s CI/CD workflow or run the build script locally and deploy the output to the hosting provider.
 
-## Badges
-- CI status and license badges can be added here once the repository is linked to a CI service and a license is chosen.
+- **CI** (`.github/workflows/test.yml`) runs on every PR to `main`: install,
+  build, unit tests and Playwright E2E tests.
+- **Production deploy** (`.github/workflows/deploy.yml`): on every push to
+  `main`, an SSH action pulls the repo on the server and runs
+  `docker compose up -d --build`. The compose stack (see `docker-compose.yml`)
+  runs nginx-proxy + Let's Encrypt companion, the website, dashboard,
+  form-site, events-sync and PocketBase.
+- A staging/test environment is deployed from `.github/workflows/deploytestenv.yml`
+  via `docker-compose.dev.yml` (URL: https://fenrir.nilsmertens.dev — may change
+  if the staging host is rebuilt).
 
 ## Contributing
-- If you'd like to contribute, open a GitHub issue to discuss collaboration. Propose what you want to work on, your approach, and the expected impact. This helps us coordinate and avoid duplicating effort.
-- If we agree to collaborate, we may create a pull request for your changes. For smaller fixes, an issue to discuss your idea is enough; we'll decide if a PR is appropriate.
-- Issue types: bug report, feature request, documentation improvement, design feedback, or collaboration proposal.
-- When filing issues, please include:
-  - Clear title and summary
-  - For bugs: steps to reproduce, expected vs actual behavior
-  - For features: problem, proposed solution, scope, and impact
-  - Environment details (Node version, OS)
-  - Links to relevant files or branches (if any)
-- If you want to contribute code, let us know in the issue; after discussion, create a branch and submit a PR with a concise description of the change and the motivation.
 
-## Local Development (quick start)
-- Prerequisites: Node.js >= 18 and Bun as the package manager (per repo config).
-- From repo root:
-- 1) Install workspace dependencies: `bun install`.
-- 2) Navigate to the website app: `cd src/apps/website`.
-- 3) Install app-specific dependencies (if any): `bun install`.
-- 4) Run the dev server: `bun run dev`.
-- 5) Build for production: `bun run build`.
-- 6) Preview the production build: `bun run preview`.
-- Note: The website app uses Astro with React and Tailwind; commands assume the project structure described above.
+If you'd like to contribute, open a GitHub issue to discuss your idea — bugs,
+features, docs or design feedback. For bugs include steps to reproduce,
+expected vs actual behavior and your environment; for features, the problem,
+proposed solution and impact.
+
+After agreeing on an approach, create a branch and submit a PR with a concise
+description of the change and the motivation. CI must pass before merge.
