@@ -133,8 +133,7 @@ const previewEvents = events.slice(0, 3);
 				<svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
 			</a>
 		</div>
-		<ContextLayout>
-<div class="mx-auto px-6 sm:px-8 py-10">
+		<ContextLayout wide>
     <div class="flex flex-col md:flex-row md:items-stretch gap-6" id="welcomesection">
 
         <img
@@ -247,6 +246,5 @@ const previewEvents = events.slice(0, 3);
     <div class="w-full">
         <SponsorList data={sponsors} partnerLabel={t('sponsors.partnerLabel')} partnerAdjectives={partnerAdjectives[lang]} client:load/>
     </div>
-
 		</ContextLayout>
 </MainLayout>

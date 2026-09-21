@@ -12,7 +12,7 @@ export default function SectionHeader({ title, description }: SectionHeaderProps
   const highlightWord = hasMultipleWords ? words[words.length - 1] : "";
 
   return (
-    <header className="mb-10 md:mb-20 px-4 md:px-0">
+    <header className="mb-10 md:mb-16">
       
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 md:gap-12">
         <div className="flex-1">

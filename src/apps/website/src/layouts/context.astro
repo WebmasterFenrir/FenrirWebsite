@@ -1,3 +1,25 @@
-<div class="max-w-6xl px-6 sm:px-5 py-10 flex mx-auto content-center">
-    <slot />
+---
+/**
+ * Global content wrapper — the single source of truth for horizontal rhythm.
+ *
+ * One container, one padding: pages must NOT add their own mx-auto/px wrapper
+ * inside this (that used to double-box everything and waste ~150px on wide
+ * screens). The viewport defines the ceiling — on 4K the content is allowed
+ * to breathe nearly edge-to-edge, only small screens get a real gutter.
+ */
+interface Props {
+  /** Relax the width cap for full-bleed sections (grids, sponsor walls). */
+  wide?: boolean;
+}
+
+const { wide = false } = Astro.props;
+---
+
+<div
+  class:list={[
+    "mx-auto w-full px-4 sm:px-6 lg:px-10 py-12",
+    wide ? "max-w-[110rem]" : "max-w-7xl",
+  ]}
+>
+  <slot />
 </div>

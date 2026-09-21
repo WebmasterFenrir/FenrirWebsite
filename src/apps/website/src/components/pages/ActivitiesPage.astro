@@ -88,8 +88,7 @@ const getCategoryIcon = (name?: string): LucideIcon =>
     </div>
   </div>
 
-  <ContextLayout>
-    <div class="mx-auto px-6 sm:px-8 py-12 w-full">
+  <ContextLayout wide>
       <SectionHeader
         title={t('activities.whatTitle')}
         description={t('activities.whatDescription')}
@@ -147,13 +146,13 @@ const getCategoryIcon = (name?: string): LucideIcon =>
         </div>
       </div>
 
-      <Spacer variant="dubble" />
+      <Spacer variant="double" />
 
-      <div class="membership-glow rounded-3xl border border-zinc-800 bg-zinc-900/50 p-8 md:p-16 text-center">
-        <h2 class="text-3xl md:text-5xl font-bold text-white tracking-tight mb-4">
+      <div class="membership-glow rounded-3xl border border-border bg-card/50 p-8 md:p-16 text-center">
+        <h2 class="text-3xl md:text-5xl font-bold text-foreground tracking-tight mb-4">
           {t('activities.readyTitle')}
         </h2>
-        <p class="text-zinc-400 max-w-2xl mx-auto mb-8 text-base md:text-lg">
+        <p class="text-muted-foreground max-w-2xl mx-auto mb-8 text-base md:text-lg">
           {t('activities.readyDesc')}
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
@@ -161,12 +160,11 @@ const getCategoryIcon = (name?: string): LucideIcon =>
             <Button variant="default" className="w-full sm:w-auto p-6 text-xl">{t('activities.joinCta')}</Button>
           </a>
           <a href="https://www.facebook.com/fenrir.antwerpen" target="_blank" rel="noopener">
-            <Button variant="outline" className="w-full sm:w-auto p-6 text-xl border-zinc-700 text-white hover:bg-zinc-800 hover:text-white">
+            <Button variant="outline" className="w-full sm:w-auto p-6 text-xl border-border text-foreground hover:bg-accent/10 hover:text-foreground">
               {t('activities.facebookCta')}
             </Button>
           </a>
         </div>
       </div>
-    </div>
   </ContextLayout>
 </MainLayout>
